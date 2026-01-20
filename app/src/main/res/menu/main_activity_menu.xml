@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_notifications"
+        android:icon="@drawable/notification"
+        android:title="@string/notifications_title"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_events"
+        android:icon="@drawable/group_event"
+        android:title="@string/events_title"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/profile_title"
+        app:showAsAction="never" />
+</menu>

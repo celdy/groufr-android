@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.GroufrNative" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary_600</item>
+        <item name="colorPrimaryVariant">@color/primary_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/primary_400</item>
+        <item name="colorSecondaryVariant">@color/primary_300</item>
+        <item name="colorOnSecondary">@color/primary_950</item>
+        <item name="android:colorBackground">@color/neutral_50</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/neutral_900</item>
+        <item name="colorError">@color/error_500</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

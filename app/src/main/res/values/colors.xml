@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_50">#f0f9ff</color>
+    <color name="primary_100">#e0f2fe</color>
+    <color name="primary_200">#bae6fd</color>
+    <color name="primary_300">#7dd3fc</color>
+    <color name="primary_400">#38bdf8</color>
+    <color name="primary_500">#0ea5e9</color>
+    <color name="primary_600">#0284c7</color>
+    <color name="primary_700">#0369a1</color>
+    <color name="primary_800">#075985</color>
+    <color name="primary_900">#0c4a6e</color>
+    <color name="primary_950">#082f49</color>
+
+    <color name="neutral_50">#f8fafc</color>
+    <color name="neutral_100">#f1f5f9</color>
+    <color name="neutral_900">#111827</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="error_500">#ef4444</color>
+
+    <color name="message_self_bg">#0ea5e9</color>
+    <color name="message_self_text">#e0f2fe</color>
+    <color name="message_join_bg">#f0fdf4</color>
+    <color name="message_join_text">#166534</color>
+    <color name="message_event_bg">#eff6ff</color>
+    <color name="message_event_text">#1440af</color>
+    <color name="message_poll_bg">#faf5ff</color>
+    <color name="message_poll_text">#6b21a8</color>
+
+    <color name="notification_unread_bg">#eff6ff</color>
+    <color name="notification_read_bg">#f9fafb</color>
+    <color name="notification_divider">#e5e7eb</color>
+    <color name="notification_meta_text">#6b7280</color>
+
+    <color name="event_status_joined">#166534</color>
+    <color name="event_status_maybe">#a16207</color>
+    <color name="event_status_declined">#b91c1c</color>
+    <color name="event_status_invited">#1d4ed8</color>
+
+    <color name="event_state_offered_bg">#FEF9C6</color>
+    <color name="event_state_offered_text">#894D0E</color>
+    <color name="event_state_preparing_bg">#DCFCE7</color>
+    <color name="event_state_preparing_text">#166534</color>
+    <color name="event_state_closed_bg">#EAEAEA</color>
+    <color name="event_state_closed_text">#0E0E0E</color>
+    <color name="event_state_cancelled_bg">#FEE2E2</color>
+    <color name="event_state_cancelled_text">#991B1B</color>
+</resources>

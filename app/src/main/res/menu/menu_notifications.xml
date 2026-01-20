@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_unread_only"
+        android:title="@string/notifications_unread_only"
+        android:checkable="true"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_mark_all_read"
+        android:title="@string/notifications_mark_all_read"
+        android:showAsAction="never" />
+</menu>
