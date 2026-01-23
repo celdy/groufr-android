@@ -6,12 +6,28 @@ import javax.inject.Inject
 class EventsRepository @Inject constructor(
     private val apiService: ApiService
 ) {
-    suspend fun loadEvents(groupId: Long, filter: String = "upcoming"): List<EventDto> {
-        return apiService.getGroupEvents(groupId, filter = filter).events
+    suspend fun loadEvents(
+        groupId: Long,
+        filter: String = "upcoming",
+        participation: String? = null
+    ): List<EventDto> {
+        return apiService.getGroupEvents(
+            groupId = groupId,
+            filter = filter,
+            participation = participation
+        ).events
     }
 
-    suspend fun loadAllEvents(time: String = "upcoming", state: String? = null): List<EventDto> {
-        return apiService.getAllEvents(time = time, state = state).events
+    suspend fun loadAllEvents(
+        time: String = "upcoming",
+        participation: String? = null,
+        state: String? = null
+    ): List<EventDto> {
+        return apiService.getAllEvents(
+            time = time,
+            participation = participation,
+            state = state
+        ).events
     }
 
     suspend fun loadEventDetail(eventId: Long): EventDetailDto {

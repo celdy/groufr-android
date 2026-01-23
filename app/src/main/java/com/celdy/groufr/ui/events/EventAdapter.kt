@@ -42,6 +42,7 @@ class EventAdapter(
             binding.eventState.text = formatEventState(event.state)
             styleStateBadge(event.state)
             binding.eventStatus.text = formatParticipantStatus(event.yourStatus)
+            styleUserStatusBadge(event.yourStatus)
             binding.eventTime.text = formatEventDate(event.startAt, event.endAt)
             bindParticipantSummary(event.participants)
             binding.root.setOnClickListener { onClick(event) }
@@ -88,8 +89,21 @@ class EventAdapter(
                 "maybe" -> context.getString(R.string.event_participant_maybe)
                 "declined" -> context.getString(R.string.event_participant_declined)
                 "invited" -> context.getString(R.string.event_participant_invited)
+                "not_invited" -> context.getString(R.string.event_participant_not_invited)
                 else -> status
             }
+        }
+
+        private fun styleUserStatusBadge(status: String) {
+            val bgRes = when (status) {
+                "joined" -> R.drawable.bg_status_joined
+                "maybe" -> R.drawable.bg_status_maybe
+                "declined" -> R.drawable.bg_status_declined
+                "invited" -> R.drawable.bg_status_invited
+                "not_invited" -> R.drawable.bg_status_not_invited
+                else -> R.drawable.bg_status_not_invited
+            }
+            binding.eventStatus.setBackgroundResource(bgRes)
         }
 
         private fun formatEventDate(startAt: String?, endAt: String?): String {

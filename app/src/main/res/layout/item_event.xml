@@ -85,7 +85,7 @@
             android:id="@+id/event_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="25dp"
             android:background="@drawable/bg_event_user_status_badge"
             android:paddingStart="10dp"
             android:paddingTop="4dp"
@@ -96,6 +96,19 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/event_state" />
+
+        <TextView
+            android:id="@+id/event_status_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="2dp"
+            android:text="@string/event_your_status_label"
+            android:textColor="@color/notification_meta_text"
+            android:textSize="11sp"
+            app:layout_constraintBottom_toTopOf="@id/event_status"
+            app:layout_constraintEnd_toEndOf="@id/event_status"
+            app:layout_constraintStart_toStartOf="@id/event_status" />
 
         <LinearLayout
             android:id="@+id/event_participants_row"

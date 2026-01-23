@@ -100,6 +100,7 @@ class EventDetailActivity : AppCompatActivity() {
                     binding.eventState.text = formatEventStatus(event.state)
                     styleStateBadge(event.state)
                     binding.eventUserStatus.text = formatParticipantStatus(event.yourStatus)
+                    styleUserStatusBadge(event.yourStatus)
                     val deadline = formatTime(event.deadlineJoinAt, getString(com.celdy.groufr.R.string.event_deadline_prefix))
                     binding.eventDeadline.text = deadline
                     binding.eventDeadline.isVisible = deadline.isNotBlank()
@@ -385,8 +386,21 @@ class EventDetailActivity : AppCompatActivity() {
             "maybe" -> getString(com.celdy.groufr.R.string.event_participant_maybe)
             "declined" -> getString(com.celdy.groufr.R.string.event_participant_declined)
             "invited" -> getString(com.celdy.groufr.R.string.event_participant_invited)
+            "not_invited" -> getString(com.celdy.groufr.R.string.event_participant_not_invited)
             else -> status
         }
+    }
+
+    private fun styleUserStatusBadge(status: String) {
+        val bgRes = when (status) {
+            "joined" -> com.celdy.groufr.R.drawable.bg_status_joined
+            "maybe" -> com.celdy.groufr.R.drawable.bg_status_maybe
+            "declined" -> com.celdy.groufr.R.drawable.bg_status_declined
+            "invited" -> com.celdy.groufr.R.drawable.bg_status_invited
+            "not_invited" -> com.celdy.groufr.R.drawable.bg_status_not_invited
+            else -> com.celdy.groufr.R.drawable.bg_status_not_invited
+        }
+        binding.eventUserStatus.setBackgroundResource(bgRes)
     }
 
     private fun formatEventDate(startAt: String?, endAt: String?, locale: Locale): String {

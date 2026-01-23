@@ -27,10 +27,17 @@ class AuthRepository @Inject constructor(
         )
     }
 
+    /**
+     * Ensures a valid session exists, proactively refreshing tokens before they expire.
+     * @return true if session is valid (or was successfully refreshed), false otherwise
+     */
     suspend fun ensureValidSession(): Boolean {
-        if (tokenStore.hasValidAccessToken()) {
+        // If token is valid and not about to expire, we're good
+        if (tokenStore.hasValidAccessToken() && !tokenStore.needsRefresh()) {
             return true
         }
+
+        // Token expired or about to expire - try to refresh
         val refreshToken = tokenStore.getRefreshToken() ?: return false
         return try {
             val response = apiService.refresh(RefreshRequest(refreshToken))
@@ -43,8 +50,14 @@ class AuthRepository @Inject constructor(
             )
             true
         } catch (exception: Exception) {
-            tokenStore.clearTokens()
-            false
+            // Refresh failed - if we still have a valid token, keep it
+            // The AuthAuthenticator will handle the 401 if needed
+            if (tokenStore.hasValidAccessToken()) {
+                true
+            } else {
+                tokenStore.clearTokens()
+                false
+            }
         }
     }
 

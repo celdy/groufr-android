@@ -14,6 +14,7 @@
 
     <color name="neutral_50">#f8fafc</color>
     <color name="neutral_100">#f1f5f9</color>
+    <color name="neutral_200">#e2e8f0</color>
     <color name="neutral_900">#111827</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
@@ -37,6 +38,13 @@
     <color name="event_status_maybe">#a16207</color>
     <color name="event_status_declined">#b91c1c</color>
     <color name="event_status_invited">#1d4ed8</color>
+    <color name="event_status_not_invited">#6b7280</color>
+
+    <color name="event_status_joined_bg">#22c55e</color>
+    <color name="event_status_maybe_bg">#eab308</color>
+    <color name="event_status_declined_bg">#ef4444</color>
+    <color name="event_status_invited_bg">#3b82f6</color>
+    <color name="event_status_not_invited_bg">#9ca3af</color>
 
     <color name="event_state_offered_bg">#FEF9C6</color>
     <color name="event_state_offered_text">#894D0E</color>

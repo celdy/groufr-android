@@ -99,6 +99,7 @@ interface ApiService {
     suspend fun getGroupEvents(
         @Path("groupId") groupId: Long,
         @Query("filter") filter: String = "upcoming",
+        @Query("participation") participation: String? = null,
         @Query("limit") limit: Int = 20,
         @Query("offset") offset: Int = 0
     ): EventsResponse
@@ -106,6 +107,7 @@ interface ApiService {
     @GET("events")
     suspend fun getAllEvents(
         @Query("time") time: String = "upcoming",
+        @Query("participation") participation: String? = null,
         @Query("state") state: String? = null,
         @Query("limit") limit: Int = 20,
         @Query("offset") offset: Int = 0

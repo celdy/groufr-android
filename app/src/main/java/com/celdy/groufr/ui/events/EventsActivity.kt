@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.celdy.groufr.R
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.databinding.ActivityEventsBinding
 import com.celdy.groufr.ui.eventcreate.EventCreateActivity
@@ -43,13 +44,15 @@ class EventsActivity : AppCompatActivity() {
 
         groupId = intent.getLongExtra(GroupDetailActivity.EXTRA_GROUP_ID, -1L)
         groupName = intent.getStringExtra(GroupDetailActivity.EXTRA_GROUP_NAME).orEmpty()
-        binding.eventsToolbar.title = getString(com.celdy.groufr.R.string.events_title)
+        binding.eventsToolbar.title = getString(R.string.events_title)
         binding.eventsToolbar.setNavigationOnClickListener { finish() }
         binding.eventsGroupBadge.text = groupName
         binding.eventsGroupBadge.isVisible = groupName.isNotBlank()
 
         binding.eventsList.layoutManager = LinearLayoutManager(this)
         binding.eventsList.adapter = adapter
+
+        setupFilters()
 
         val listPadding = binding.eventsList.paddingBottom
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
@@ -74,7 +77,7 @@ class EventsActivity : AppCompatActivity() {
                 EventsState.Error -> {
                     binding.eventsLoading.isVisible = false
                     binding.eventsEmpty.isVisible = true
-                    binding.eventsEmpty.text = getString(com.celdy.groufr.R.string.events_error)
+                    binding.eventsEmpty.text = getString(R.string.events_error)
                     if (!authRepository.isLoggedIn()) {
                         startActivity(Intent(this, LoginActivity::class.java))
                         finish()
@@ -86,18 +89,58 @@ class EventsActivity : AppCompatActivity() {
         if (groupId > 0) {
             viewModel.loadEvents(groupId)
         } else {
-            viewModel.loadAllFutureEvents()
+            viewModel.loadAllEvents()
+        }
+    }
+
+    private fun setupFilters() {
+        // Time filter chips
+        binding.chipTimeUpcoming.setOnClickListener {
+            viewModel.setTimeFilter(TimeFilter.UPCOMING)
+        }
+        binding.chipTimePast.setOnClickListener {
+            viewModel.setTimeFilter(TimeFilter.PAST)
+        }
+        binding.chipTimeAll.setOnClickListener {
+            viewModel.setTimeFilter(TimeFilter.ALL)
+        }
+
+        // Participation filter chips
+        binding.chipParticipationAll.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.ALL)
+        }
+        binding.chipParticipationJoined.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.JOINED)
+        }
+        binding.chipParticipationMaybe.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.MAYBE)
+        }
+        binding.chipParticipationDeclined.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.DECLINED)
+        }
+
+        viewModel.timeFilter.observe(this) { filter ->
+            binding.chipTimeUpcoming.isChecked = filter == TimeFilter.UPCOMING
+            binding.chipTimePast.isChecked = filter == TimeFilter.PAST
+            binding.chipTimeAll.isChecked = filter == TimeFilter.ALL
+        }
+
+        viewModel.participationFilter.observe(this) { filter ->
+            binding.chipParticipationAll.isChecked = filter == ParticipationFilter.ALL
+            binding.chipParticipationJoined.isChecked = filter == ParticipationFilter.JOINED
+            binding.chipParticipationMaybe.isChecked = filter == ParticipationFilter.MAYBE
+            binding.chipParticipationDeclined.isChecked = filter == ParticipationFilter.DECLINED
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(com.celdy.groufr.R.menu.menu_events, menu)
+        menuInflater.inflate(R.menu.menu_events, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            com.celdy.groufr.R.id.action_create_event -> {
+            R.id.action_create_event -> {
                 if (groupId > 0) {
                     val intent = Intent(this, EventCreateActivity::class.java)
                         .putExtra(EventCreateActivity.EXTRA_GROUP_ID, groupId)

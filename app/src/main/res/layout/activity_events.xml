@@ -37,6 +37,106 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/events_toolbar" />
 
+    <HorizontalScrollView
+        android:id="@+id/events_filters_scroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:background="@color/white"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/events_group_badge">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/events_time_filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_time_upcoming"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/events_filter_upcoming" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_time_past"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/events_filter_past" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_time_all"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/events_filter_all" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@color/neutral_200" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/events_participation_filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_participation_all"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/events_filter_participation_all" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_participation_joined"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/events_filter_participation_joined" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_participation_maybe"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/events_filter_participation_maybe" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_participation_declined"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/events_filter_participation_declined" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/events_list"
         android:layout_width="0dp"
@@ -46,7 +146,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/events_group_badge" />
+        app:layout_constraintTop_toBottomOf="@id/events_filters_scroll" />
 
     <TextView
         android:id="@+id/events_empty"

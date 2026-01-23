@@ -40,6 +40,7 @@
     <string name="events_title">Události</string>
     <string name="events_empty">Zatím žádné události</string>
     <string name="events_error">Nemohu nahrát události</string>
+    <string name="events_filter_participation_declined">Nezúčastním se</string>
     <string name="event_detail_title">Událost</string>
     <string name="event_detail_error">Nemohu nahrát událost</string>
     <string name="event_join_button">Přidej se</string>
@@ -87,7 +88,14 @@
     <string name="event_role_owner">Vlastník</string>
     <string name="event_role_admin">Administrátor</string>
     <string name="event_role_participant">Účastník</string>
+    <string name="event_participant_not_invited">Nesděleno</string>
     <string name="event_summary_joined">Zúčastní se %1$d</string>
     <string name="event_summary_maybe">Možná %1$d</string>
     <string name="event_summary_declined">Odmítli %1$d</string>
+    <string name="events_filter_upcoming">Nadcházející</string>
+    <string name="events_filter_past">Proběhlé</string>
+    <string name="events_filter_all">Všechny</string>
+    <string name="events_filter_participation_all">Všechny</string>
+    <string name="events_filter_participation_joined">Zúčastním se</string>
+    <string name="events_filter_participation_maybe">Možná</string>
 </resources>

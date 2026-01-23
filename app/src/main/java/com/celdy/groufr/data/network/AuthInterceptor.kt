@@ -5,6 +5,10 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
 
+/**
+ * Interceptor that adds the Authorization header to all requests.
+ * Token refresh on 401 is handled by AuthAuthenticator.
+ */
 class AuthInterceptor @Inject constructor(
     private val tokenStore: TokenStore
 ) : Interceptor {
@@ -19,10 +23,6 @@ class AuthInterceptor @Inject constructor(
             original
         }
 
-        val response = chain.proceed(request)
-        if (response.code == 401) {
-            tokenStore.clearTokens()
-        }
-        return response
+        return chain.proceed(request)
     }
 }

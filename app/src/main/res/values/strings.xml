@@ -33,6 +33,13 @@
     <string name="events_title">Events</string>
     <string name="events_empty">No events yet.</string>
     <string name="events_error">Unable to load events.</string>
+    <string name="events_filter_upcoming">Upcoming</string>
+    <string name="events_filter_past">Past</string>
+    <string name="events_filter_all">All</string>
+    <string name="events_filter_participation_all">All</string>
+    <string name="events_filter_participation_joined">I will attend</string>
+    <string name="events_filter_participation_maybe">Maybe</string>
+    <string name="events_filter_participation_declined">Declined</string>
     <string name="event_detail_title">Event</string>
     <string name="event_detail_error">Unable to load event.</string>
     <string name="event_join_button">Join</string>
@@ -60,6 +67,7 @@
     <string name="event_participant_maybe">Maybe</string>
     <string name="event_participant_declined">Declined</string>
     <string name="event_participant_invited">Invited</string>
+    <string name="event_participant_not_invited">Not responded</string>
     <string name="event_summary_joined">Joined %1$d</string>
     <string name="event_summary_maybe">Maybe %1$d</string>
     <string name="event_summary_declined">Declined %1$d</string>

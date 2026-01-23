@@ -9,9 +9,20 @@ import com.celdy.groufr.data.events.EventsRepository
 import com.celdy.groufr.data.groups.GroupsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.time.OffsetDateTime
-import java.time.format.DateTimeParseException
 import javax.inject.Inject
+
+enum class TimeFilter(val apiValue: String) {
+    UPCOMING("upcoming"),
+    PAST("past"),
+    ALL("all")
+}
+
+enum class ParticipationFilter(val apiValue: String?) {
+    ALL(null),
+    JOINED("joined"),
+    MAYBE("maybe"),
+    DECLINED("declined")
+}
 
 @HiltViewModel
 class EventsViewModel @Inject constructor(
@@ -21,23 +32,57 @@ class EventsViewModel @Inject constructor(
     private val _state = MutableLiveData<EventsState>(EventsState.Loading)
     val state: LiveData<EventsState> = _state
 
+    private val _timeFilter = MutableLiveData(TimeFilter.UPCOMING)
+    val timeFilter: LiveData<TimeFilter> = _timeFilter
+
+    private val _participationFilter = MutableLiveData(ParticipationFilter.ALL)
+    val participationFilter: LiveData<ParticipationFilter> = _participationFilter
+
+    private var currentGroupId: Long = -1L
+
     fun loadEvents(groupId: Long) {
-        _state.value = EventsState.Loading
-        viewModelScope.launch {
-            try {
-                val events = eventsRepository.loadEvents(groupId, filter = "all")
-                _state.value = EventsState.Content(filterFutureEvents(events))
-            } catch (exception: Exception) {
-                _state.value = EventsState.Error
-            }
+        currentGroupId = groupId
+        reload()
+    }
+
+    fun loadAllEvents() {
+        currentGroupId = -1L
+        reload()
+    }
+
+    fun setTimeFilter(filter: TimeFilter) {
+        if (_timeFilter.value != filter) {
+            _timeFilter.value = filter
+            reload()
         }
     }
 
-    fun loadAllFutureEvents() {
+    fun setParticipationFilter(filter: ParticipationFilter) {
+        if (_participationFilter.value != filter) {
+            _participationFilter.value = filter
+            reload()
+        }
+    }
+
+    private fun reload() {
         _state.value = EventsState.Loading
         viewModelScope.launch {
             try {
-                val events = eventsRepository.loadAllEvents(time = "upcoming")
+                val time = _timeFilter.value ?: TimeFilter.UPCOMING
+                val participation = _participationFilter.value ?: ParticipationFilter.ALL
+
+                val events = if (currentGroupId > 0) {
+                    eventsRepository.loadEvents(
+                        groupId = currentGroupId,
+                        filter = time.apiValue,
+                        participation = participation.apiValue
+                    )
+                } else {
+                    eventsRepository.loadAllEvents(
+                        time = time.apiValue,
+                        participation = participation.apiValue
+                    )
+                }
                 _state.value = EventsState.Content(events)
             } catch (exception: Exception) {
                 _state.value = EventsState.Error
@@ -45,25 +90,8 @@ class EventsViewModel @Inject constructor(
         }
     }
 
-    private fun filterFutureEvents(events: List<EventDto>): List<EventDto> {
-        val now = OffsetDateTime.now()
-        return events.filter { isFutureEvent(it, now) }
-    }
-
-    private fun isFutureEvent(event: EventDto, now: OffsetDateTime): Boolean {
-        if (event.state != "offered" && event.state != "preparing") {
-            return false
-        }
-        return try {
-            if (event.startAt.isBlank()) {
-                true
-            } else {
-                OffsetDateTime.parse(event.startAt).isAfter(now)
-            }
-        } catch (exception: DateTimeParseException) {
-            true
-        }
-    }
+    @Deprecated("Use loadAllEvents() instead", ReplaceWith("loadAllEvents()"))
+    fun loadAllFutureEvents() = loadAllEvents()
 }
 
 sealed class EventsState {

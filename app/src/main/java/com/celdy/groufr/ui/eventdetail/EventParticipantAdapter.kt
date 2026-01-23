@@ -35,6 +35,7 @@ class EventParticipantAdapter :
                 "maybe" -> context.getString(com.celdy.groufr.R.string.event_participant_maybe)
                 "declined" -> context.getString(com.celdy.groufr.R.string.event_participant_declined)
                 "invited" -> context.getString(com.celdy.groufr.R.string.event_participant_invited)
+                "not_invited" -> context.getString(com.celdy.groufr.R.string.event_participant_not_invited)
                 else -> participant.status
             }
             binding.participantRole.text = when (participant.role) {

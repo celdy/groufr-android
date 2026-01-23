@@ -80,6 +80,18 @@ class TokenStore @Inject constructor(
         return newId
     }
 
+    /**
+     * Check if access token needs refresh (will expire within threshold).
+     * Used for proactive token refresh before expiration.
+     */
+    fun needsRefresh(): Boolean {
+        val token = getAccessToken()
+        val expiresAt = getExpiresAtEpochSeconds()
+        val now = System.currentTimeMillis() / 1000
+        // Refresh if token is missing or will expire within the threshold
+        return token.isNullOrBlank() || (expiresAt - now) <= REFRESH_THRESHOLD_SECONDS
+    }
+
     companion object {
         private const val PREFS_NAME = "groufr_secure_prefs"
         private const val KEY_ACCESS_TOKEN = "access_token"
@@ -88,5 +100,8 @@ class TokenStore @Inject constructor(
         private const val KEY_DEVICE_ID = "device_id"
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_USER_ID = "user_id"
+
+        /** Refresh tokens 60 seconds before expiration */
+        private const val REFRESH_THRESHOLD_SECONDS = 60L
     }
 }
