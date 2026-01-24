@@ -2,6 +2,14 @@ package com.celdy.groufr.ui.eventdetail
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.LeadingMarginSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
+import android.text.style.URLSpan
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -27,6 +35,7 @@ import java.time.format.DateTimeParseException
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
+import android.graphics.Typeface
 
 @AndroidEntryPoint
 class EventDetailActivity : AppCompatActivity() {
@@ -95,7 +104,8 @@ class EventDetailActivity : AppCompatActivity() {
                     binding.eventGroupName.text = resolvedGroupName
                     binding.eventGroupName.isVisible = resolvedGroupName.isNotBlank()
                     binding.eventDate.text = formatEventDate(event.startAt, event.endAt, locale)
-                    binding.eventDescription.text = event.description.orEmpty()
+                    binding.eventDescription.text = renderBasicMarkdown(event.description.orEmpty())
+                    binding.eventDescription.movementMethod = LinkMovementMethod.getInstance()
                     currentStatus = event.state
                     binding.eventState.text = formatEventStatus(event.state)
                     styleStateBadge(event.state)
@@ -435,6 +445,107 @@ class EventDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun renderBasicMarkdown(source: String): CharSequence {
+        if (source.isBlank()) return ""
+        val builder = SpannableStringBuilder(source)
+        applyLineFormatting(builder)
+        applyMarkdownPattern(builder, "\\*\\*(.+?)\\*\\*") { start, end ->
+            builder.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        applyMarkdownPattern(builder, "\\*(.+?)\\*") { start, end ->
+            builder.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        applyMarkdownPattern(builder, "_(.+?)_") { start, end ->
+            builder.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        applyMarkdownPattern(builder, "`([^`]+)`") { start, end ->
+            builder.setSpan(TypefaceSpan("monospace"), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        applyMarkdownPattern(builder, "\\[([^\\]]+)]\\(([^)]+)\\)") { start, end, groups ->
+            builder.setSpan(URLSpan(groups[2]), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        return builder
+    }
+
+    private fun applyLineFormatting(builder: SpannableStringBuilder) {
+        val text = builder.toString()
+        var offset = 0
+        val ranges = mutableListOf<Pair<Int, Int>>()
+        for (line in text.split("\n")) {
+            val end = offset + line.length
+            ranges.add(offset to end)
+            offset = end + 1
+        }
+
+        for (range in ranges.asReversed()) {
+            val start = range.first
+            val end = range.second
+            if (start >= end) continue
+            val line = builder.substring(start, end)
+            when {
+                line.startsWith("### ") -> {
+                    val prefix = 4
+                    builder.delete(start, start + prefix)
+                    val adjustedEnd = end - prefix
+                    builder.setSpan(StyleSpan(Typeface.BOLD), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    builder.setSpan(RelativeSizeSpan(1.1f), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+                line.startsWith("## ") -> {
+                    val prefix = 3
+                    builder.delete(start, start + prefix)
+                    val adjustedEnd = end - prefix
+                    builder.setSpan(StyleSpan(Typeface.BOLD), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    builder.setSpan(RelativeSizeSpan(1.2f), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+                line.startsWith("# ") -> {
+                    val prefix = 2
+                    builder.delete(start, start + prefix)
+                    val adjustedEnd = end - prefix
+                    builder.setSpan(StyleSpan(Typeface.BOLD), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    builder.setSpan(RelativeSizeSpan(1.3f), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+                line.startsWith("> ") -> {
+                    val prefix = 2
+                    builder.delete(start, start + prefix)
+                    val adjustedEnd = end - prefix
+                    builder.setSpan(StyleSpan(Typeface.ITALIC), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    builder.setSpan(LeadingMarginSpan.Standard(32), start, adjustedEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+                line.startsWith("- ") || line.startsWith("* ") || line.matches(Regex("\\d+\\. .*")) -> {
+                    builder.setSpan(LeadingMarginSpan.Standard(32), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+        }
+    }
+
+    private fun applyMarkdownPattern(
+        builder: SpannableStringBuilder,
+        pattern: String,
+        apply: (start: Int, end: Int) -> Unit
+    ) {
+        applyMarkdownPattern(builder, pattern) { start, end, _ ->
+            apply(start, end)
+        }
+    }
+
+    private fun applyMarkdownPattern(
+        builder: SpannableStringBuilder,
+        pattern: String,
+        apply: (start: Int, end: Int, groups: List<String>) -> Unit
+    ) {
+        val regex = Regex(pattern)
+        val matches = regex.findAll(builder.toString()).toList()
+        for (match in matches.asReversed()) {
+            val groups = match.groupValues
+            if (groups.size < 2) continue
+            val replacement = groups[1]
+            val start = match.range.first
+            builder.replace(match.range.first, match.range.last + 1, replacement)
+            val end = start + replacement.length
+            apply(start, end, groups)
+        }
+    }
+
     private fun buildChatItems(
         messages: List<com.celdy.groufr.data.messages.MessageDto>,
         unreadCount: Int
@@ -491,5 +602,3 @@ private enum class EventSection {
     CHAT,
     PARTICIPANTS
 }
-
-
