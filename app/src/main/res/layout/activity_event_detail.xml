@@ -397,17 +397,26 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
+                <View
+                    android:id="@+id/event_participants_separator"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/notification_divider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/event_participants_summary" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/event_participants"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_marginTop="12dp"
                     android:clipToPadding="false"
                     android:paddingBottom="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/event_participants_summary" />
+                    app:layout_constraintTop_toBottomOf="@id/event_participants_separator" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

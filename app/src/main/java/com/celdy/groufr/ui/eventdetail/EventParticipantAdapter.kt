@@ -38,6 +38,15 @@ class EventParticipantAdapter :
                 "not_invited" -> context.getString(com.celdy.groufr.R.string.event_participant_not_invited)
                 else -> participant.status
             }
+            val statusBg = when (participant.status) {
+                "joined" -> com.celdy.groufr.R.drawable.bg_status_joined
+                "maybe" -> com.celdy.groufr.R.drawable.bg_status_maybe
+                "declined" -> com.celdy.groufr.R.drawable.bg_status_declined
+                "invited" -> com.celdy.groufr.R.drawable.bg_status_invited
+                "not_invited" -> com.celdy.groufr.R.drawable.bg_status_not_invited
+                else -> com.celdy.groufr.R.drawable.bg_status_not_invited
+            }
+            binding.participantStatus.setBackgroundResource(statusBg)
             binding.participantRole.text = when (participant.role) {
                 "owner" -> context.getString(com.celdy.groufr.R.string.event_role_owner)
                 "admin" -> context.getString(com.celdy.groufr.R.string.event_role_admin)
