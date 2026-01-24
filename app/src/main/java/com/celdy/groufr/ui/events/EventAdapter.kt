@@ -133,11 +133,9 @@ class EventAdapter(
             val joined = participants["joined"] ?: 0
             val maybe = participants["maybe"] ?: 0
             val declined = participants["declined"] ?: 0
-            val invited = participants["invited"] ?: 0
-            binding.eventSummaryJoined.text = context.getString(R.string.event_summary_joined, joined)
-            binding.eventSummaryMaybe.text = context.getString(R.string.event_summary_maybe, maybe)
-            binding.eventSummaryDeclined.text = context.getString(R.string.event_summary_declined, declined)
-            binding.eventSummaryInvited.text = context.getString(R.string.event_summary_invited, invited)
+            binding.eventSummaryJoined.text = joined.toString()
+            binding.eventSummaryMaybe.text = maybe.toString()
+            binding.eventSummaryDeclined.text = declined.toString()
         }
     }
 

@@ -276,10 +276,10 @@ class EventDetailActivity : AppCompatActivity() {
         val maybe = participants["maybe"] ?: countsFromList["maybe"] ?: 0
         val declined = participants["declined"] ?: countsFromList["declined"] ?: 0
         val invited = participants["invited"] ?: countsFromList["invited"] ?: 0
-        binding.eventSummaryJoined.text = getString(com.celdy.groufr.R.string.event_summary_joined, joined)
-        binding.eventSummaryMaybe.text = getString(com.celdy.groufr.R.string.event_summary_maybe, maybe)
-        binding.eventSummaryDeclined.text = getString(com.celdy.groufr.R.string.event_summary_declined, declined)
-        binding.eventSummaryInvited.text = getString(com.celdy.groufr.R.string.event_summary_invited, invited)
+        binding.eventSummaryJoined.text = joined.toString()
+        binding.eventSummaryMaybe.text = maybe.toString()
+        binding.eventSummaryDeclined.text = declined.toString()
+        binding.eventSummaryInvited.text = invited.toString()
     }
 
     private fun updateStatusBadgeAccess(event: EventDetailDto) {
