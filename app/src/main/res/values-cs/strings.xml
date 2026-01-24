@@ -49,6 +49,7 @@
     <string name="event_end_prefix">Konec</string>
     <string name="notifications_error">Nemohu nahrát oznámení</string>
     <string name="notifications_unread_only">Pouze nepřečtené</string>
+    <string name="event_deadline_hint">Přidej se do (volitelné)</string>
     <string name="notifications_title">Oznámení</string>
     <string name="notifications_empty">Zatím žádná oznámení</string>
     <string name="notifications_mark_all_read">Označ všechny přečtené</string>
@@ -98,4 +99,6 @@
     <string name="events_filter_participation_all">Všechny</string>
     <string name="events_filter_participation_joined">Zúčastním se</string>
     <string name="events_filter_participation_maybe">Možná</string>
+    <string name="event_start_hint">Začíná v</string>
+    <string name="event_end_hint">Končí v (volitelné)</string>
 </resources>

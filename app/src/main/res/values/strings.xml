@@ -37,7 +37,7 @@
     <string name="events_filter_past">Past</string>
     <string name="events_filter_all">All</string>
     <string name="events_filter_participation_all">All</string>
-    <string name="events_filter_participation_joined">I will attend</string>
+    <string name="events_filter_participation_joined">Going</string>
     <string name="events_filter_participation_maybe">Maybe</string>
     <string name="events_filter_participation_declined">Declined</string>
     <string name="event_detail_title">Event</string>
