@@ -85,9 +85,9 @@
     <string name="event_menu_participants">Účastníci</string>
     <string name="event_chat_new_messages">Nové zprávy</string>
     <string name="event_your_status_label">Tvůj stav</string>
-    <string name="event_participant_joined">Zúčastním se</string>
+    <string name="event_participant_joined">Jdu</string>
     <string name="event_participant_maybe">Možná</string>
-    <string name="event_participant_declined">Zamítnuto</string>
+    <string name="event_participant_declined">Nejdu</string>
     <string name="event_summary_invited">Pozvaní %1$d</string>
     <string name="event_role_owner">Vlastník</string>
     <string name="event_role_admin">Administrátor</string>

@@ -65,7 +65,7 @@
     <string name="event_menu_participants">Participants</string>
     <string name="event_chat_new_messages">New messages</string>
     <string name="event_your_status_label">Your status</string>
-    <string name="event_participant_joined">I will attend</string>
+    <string name="event_participant_joined">Going</string>
     <string name="event_participant_maybe">Maybe</string>
     <string name="event_participant_declined">Declined</string>
     <string name="event_participant_invited">Invited</string>
