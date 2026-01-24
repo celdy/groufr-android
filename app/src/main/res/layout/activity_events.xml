@@ -103,19 +103,26 @@
                 app:selectionRequired="true">
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_participation_all"
+                    android:id="@+id/chip_participation_going_maybe"
                     style="@style/Widget.Groufr.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="@string/events_filter_participation_all" />
+                    android:text="@string/events_filter_participation_going_maybe" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_participation_joined"
+                    android:id="@+id/chip_participation_unresponded"
                     style="@style/Widget.Groufr.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/events_filter_participation_joined" />
+                    android:text="@string/events_filter_participation_unresponded" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_participation_going"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/events_filter_participation_going" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_participation_maybe"
@@ -130,6 +137,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/events_filter_participation_declined" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_participation_all"
+                    style="@style/Widget.Groufr.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/events_filter_participation_all" />
 
             </com.google.android.material.chip.ChipGroup>
 

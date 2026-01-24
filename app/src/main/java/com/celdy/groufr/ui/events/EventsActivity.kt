@@ -106,17 +106,23 @@ class EventsActivity : AppCompatActivity() {
         }
 
         // Participation filter chips
-        binding.chipParticipationAll.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.ALL)
+        binding.chipParticipationGoingMaybe.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.GOING_AND_MAYBE)
         }
-        binding.chipParticipationJoined.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.JOINED)
+        binding.chipParticipationUnresponded.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.UNRESPONDED)
+        }
+        binding.chipParticipationGoing.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.GOING)
         }
         binding.chipParticipationMaybe.setOnClickListener {
             viewModel.setParticipationFilter(ParticipationFilter.MAYBE)
         }
         binding.chipParticipationDeclined.setOnClickListener {
             viewModel.setParticipationFilter(ParticipationFilter.DECLINED)
+        }
+        binding.chipParticipationAll.setOnClickListener {
+            viewModel.setParticipationFilter(ParticipationFilter.ALL)
         }
 
         viewModel.timeFilter.observe(this) { filter ->
@@ -126,10 +132,12 @@ class EventsActivity : AppCompatActivity() {
         }
 
         viewModel.participationFilter.observe(this) { filter ->
-            binding.chipParticipationAll.isChecked = filter == ParticipationFilter.ALL
-            binding.chipParticipationJoined.isChecked = filter == ParticipationFilter.JOINED
+            binding.chipParticipationGoingMaybe.isChecked = filter == ParticipationFilter.GOING_AND_MAYBE
+            binding.chipParticipationUnresponded.isChecked = filter == ParticipationFilter.UNRESPONDED
+            binding.chipParticipationGoing.isChecked = filter == ParticipationFilter.GOING
             binding.chipParticipationMaybe.isChecked = filter == ParticipationFilter.MAYBE
             binding.chipParticipationDeclined.isChecked = filter == ParticipationFilter.DECLINED
+            binding.chipParticipationAll.isChecked = filter == ParticipationFilter.ALL
         }
     }
 

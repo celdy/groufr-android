@@ -18,10 +18,12 @@ enum class TimeFilter(val apiValue: String) {
 }
 
 enum class ParticipationFilter(val apiValue: String?) {
-    ALL(null),
-    JOINED("joined"),
+    GOING_AND_MAYBE("joined,maybe"),
+    UNRESPONDED("unresponded"),
+    GOING("joined"),
     MAYBE("maybe"),
-    DECLINED("declined")
+    DECLINED("declined"),
+    ALL(null)
 }
 
 @HiltViewModel
@@ -35,7 +37,7 @@ class EventsViewModel @Inject constructor(
     private val _timeFilter = MutableLiveData(TimeFilter.UPCOMING)
     val timeFilter: LiveData<TimeFilter> = _timeFilter
 
-    private val _participationFilter = MutableLiveData(ParticipationFilter.ALL)
+    private val _participationFilter = MutableLiveData(ParticipationFilter.GOING_AND_MAYBE)
     val participationFilter: LiveData<ParticipationFilter> = _participationFilter
 
     private var currentGroupId: Long = -1L
