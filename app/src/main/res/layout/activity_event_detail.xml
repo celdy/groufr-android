@@ -130,7 +130,7 @@
             android:layout_marginTop="8dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_calendar"
-            android:tint="@color/notification_meta_text"
+            app:tint="@color/notification_meta_text"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/event_group_name" />
 
