@@ -46,17 +46,16 @@ object ChatDateFormatter {
 
         val sameDay = start!!.toLocalDate() == end!!.toLocalDate()
         if (sameDay) {
-            val sameYear = start.year == end.year
-            val datePart = formatDateOnly(start, locale, includeYear = !sameYear)
+            val datePart = formatDateOnly(start, locale, includeYear = true)
             val startTime = start.toLocalTime().format(TIME_FORMAT)
             val endTime = end.toLocalTime().format(TIME_FORMAT)
             return "$datePart $startTime - $endTime"
         }
 
-        val sameYear = start.year == end.year
-        val startPart = formatZoned(start, locale, includeYear = !sameYear)
+        // Different days - show on two lines
+        val startPart = formatZoned(start, locale, includeYear = true)
         val endPart = formatZoned(end, locale, includeYear = true)
-        return "$startPart - $endPart"
+        return "$startPart\n$endPart"
     }
 
     private fun formatFull(zoned: ZonedDateTime, time: String, locale: Locale): String {
