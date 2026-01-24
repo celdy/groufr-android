@@ -22,8 +22,14 @@ object ChatDateFormatter {
 
             when {
                 daysAgo == 0 -> time
-                daysAgo == 1 -> if (isCzech(locale)) "Včera" else "Yesterday"
-                daysAgo == 2 -> if (isCzech(locale)) "Předevčírem" else "2 days ago"
+                daysAgo == 1 -> {
+                    val label = if (isCzech(locale)) "Včera" else "Yesterday"
+                    "$label $time"
+                }
+                daysAgo == 2 -> {
+                    val label = if (isCzech(locale)) "Předevčírem" else "2 days ago"
+                    "$label $time"
+                }
                 else -> formatFull(zoned, time, locale)
             }
         } catch (exception: DateTimeParseException) {
