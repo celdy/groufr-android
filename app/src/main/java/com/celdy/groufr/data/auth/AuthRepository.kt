@@ -4,6 +4,8 @@ import com.celdy.groufr.data.device.DeviceInfoProvider
 import com.celdy.groufr.data.network.ApiService
 import com.celdy.groufr.data.auth.RefreshRequest
 import com.celdy.groufr.data.storage.TokenStore
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
@@ -37,8 +39,10 @@ class AuthRepository @Inject constructor(
             return true
         }
 
-        // Token expired or about to expire - try to refresh
+        // No refresh token means no session
         val refreshToken = tokenStore.getRefreshToken() ?: return false
+
+        // Token expired or about to expire - try to refresh
         return try {
             val response = apiService.refresh(RefreshRequest(refreshToken))
             tokenStore.saveTokens(
@@ -49,15 +53,24 @@ class AuthRepository @Inject constructor(
                 userId = response.user.id
             )
             true
-        } catch (exception: Exception) {
-            // Refresh failed - if we still have a valid token, keep it
-            // The AuthAuthenticator will handle the 401 if needed
-            if (tokenStore.hasValidAccessToken()) {
-                true
-            } else {
+        } catch (e: HttpException) {
+            // HTTP 401 means refresh token is invalid/expired - clear tokens
+            if (e.code() == 401) {
                 tokenStore.clearTokens()
                 false
+            } else {
+                // Other HTTP errors (5xx, etc.) - keep tokens, let user retry
+                // Return true if we have a valid access token, false to show error
+                tokenStore.hasValidAccessToken()
             }
+        } catch (e: IOException) {
+            // Network error - don't clear tokens, user might have valid refresh token
+            // Return true if we have a valid access token to let user continue
+            // Return false to show error but keep tokens for retry
+            tokenStore.hasValidAccessToken()
+        } catch (e: Exception) {
+            // Unknown error - be conservative, don't clear tokens
+            tokenStore.hasValidAccessToken()
         }
     }
 

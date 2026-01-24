@@ -83,9 +83,45 @@ class EventsViewModel @Inject constructor(
                         participation = participation.apiValue
                     )
                 }
-                _state.value = EventsState.Content(events)
+                val sortedEvents = sortEvents(events, time)
+                _state.value = EventsState.Content(sortedEvents)
             } catch (exception: Exception) {
                 _state.value = EventsState.Error
+            }
+        }
+    }
+
+    /**
+     * Sort events based on the time filter:
+     * - UPCOMING: ascending by startAt, NULLs at the end
+     * - PAST: descending by startAt then endAt, NULLs excluded
+     * - ALL: NULLs first, then descending by startAt then endAt
+     */
+    private fun sortEvents(events: List<EventDto>, timeFilter: TimeFilter): List<EventDto> {
+        return when (timeFilter) {
+            TimeFilter.UPCOMING -> {
+                // Ascending by startAt, NULLs at the end
+                events.sortedWith(compareBy(nullsLast()) { it.startAt })
+            }
+            TimeFilter.PAST -> {
+                // Descending by startAt, then endAt; exclude NULLs
+                events
+                    .filter { !it.startAt.isNullOrBlank() }
+                    .sortedWith(
+                        compareByDescending<EventDto> { it.startAt }
+                            .thenByDescending { it.endAt }
+                    )
+            }
+            TimeFilter.ALL -> {
+                // NULLs first, then descending by startAt, endAt
+                val nullStartEvents = events.filter { it.startAt.isNullOrBlank() }
+                val nonNullStartEvents = events
+                    .filter { !it.startAt.isNullOrBlank() }
+                    .sortedWith(
+                        compareByDescending<EventDto> { it.startAt }
+                            .thenByDescending { it.endAt }
+                    )
+                nullStartEvents + nonNullStartEvents
             }
         }
     }

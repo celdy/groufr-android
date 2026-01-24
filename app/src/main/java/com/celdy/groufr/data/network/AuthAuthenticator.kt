@@ -6,6 +6,7 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -20,6 +21,7 @@ class AuthAuthenticator @Inject constructor(
     companion object {
         private const val HEADER_AUTHORIZATION = "Authorization"
         private const val HEADER_REFRESH_ATTEMPTED = "X-Refresh-Attempted"
+        private const val HTTP_UNAUTHORIZED = 401
     }
 
     override fun authenticate(route: Route?, response: Response): Request? {
@@ -76,13 +78,21 @@ class AuthAuthenticator @Inject constructor(
                         .header(HEADER_REFRESH_ATTEMPTED, "true")
                         .build()
                 } else {
-                    // Refresh failed - clear tokens and require re-login
-                    tokenStore.clearTokens()
+                    // HTTP error from refresh endpoint
+                    val code = refreshResponse.code()
+                    if (code == HTTP_UNAUTHORIZED) {
+                        // 401 means refresh token is invalid/expired - clear tokens
+                        tokenStore.clearTokens()
+                    }
+                    // For other errors (5xx, etc.), don't clear tokens - user might retry later
                     null
                 }
+            } catch (e: IOException) {
+                // Network error during refresh - don't clear tokens
+                // User might have valid refresh token but no network connectivity
+                null
             } catch (e: Exception) {
-                // Network error during refresh - clear tokens
-                tokenStore.clearTokens()
+                // Unknown error - be conservative, don't clear tokens
                 null
             }
         }

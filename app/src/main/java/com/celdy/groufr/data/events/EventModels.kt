@@ -22,7 +22,7 @@ data class EventDto(
     val description: String?,
     val state: String,
     @SerializedName("start_at")
-    val startAt: String,
+    val startAt: String?,
     @SerializedName("end_at")
     val endAt: String?,
     @SerializedName("deadline_join_at")
@@ -50,7 +50,7 @@ data class EventDetailDto(
     val description: String?,
     val state: String,
     @SerializedName("start_at")
-    val startAt: String,
+    val startAt: String?,
     @SerializedName("end_at")
     val endAt: String?,
     @SerializedName("deadline_join_at")
