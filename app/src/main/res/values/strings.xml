@@ -36,10 +36,12 @@
     <string name="events_filter_upcoming">Upcoming</string>
     <string name="events_filter_past">Past</string>
     <string name="events_filter_all">All</string>
-    <string name="events_filter_participation_all">All</string>
-    <string name="events_filter_participation_joined">Going</string>
+    <string name="events_filter_participation_going_maybe">Going &amp; Maybe</string>
+    <string name="events_filter_participation_unresponded">No response</string>
+    <string name="events_filter_participation_going">Going</string>
     <string name="events_filter_participation_maybe">Maybe</string>
     <string name="events_filter_participation_declined">Declined</string>
+    <string name="events_filter_participation_all">All</string>
     <string name="event_detail_title">Event</string>
     <string name="event_detail_error">Unable to load event.</string>
     <string name="event_join_button">Join</string>
@@ -55,8 +57,8 @@
     <string name="event_date_end_prefix">end</string>
     <string name="event_status_dialog_title">Change event status</string>
     <string name="event_status_offered">Proposal</string>
-    <string name="event_status_preparing">Preparing</string>
-    <string name="event_status_closed">Closed</string>
+    <string name="event_status_preparing">Confirmed</string>
+    <string name="event_status_closed">Finished</string>
     <string name="event_status_cancelled">Cancelled</string>
     <string name="event_menu_info">Info</string>
     <string name="event_menu_chat">Chat</string>

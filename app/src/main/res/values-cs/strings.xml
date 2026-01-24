@@ -40,7 +40,10 @@
     <string name="events_title">Události</string>
     <string name="events_empty">Zatím žádné události</string>
     <string name="events_error">Nemohu nahrát události</string>
-    <string name="events_filter_participation_declined">Nezúčastním se</string>
+    <string name="events_filter_participation_going_maybe">Jdu + Možná</string>
+    <string name="events_filter_participation_unresponded">Bez odpovědi</string>
+    <string name="events_filter_participation_going">Jdu</string>
+    <string name="events_filter_participation_declined">Nejdu</string>
     <string name="event_detail_title">Událost</string>
     <string name="event_detail_error">Nemohu nahrát událost</string>
     <string name="event_join_button">Přidej se</string>
@@ -72,7 +75,7 @@
     <string name="notification_title_participant_status_changed">%1$s aktualizoval/a svoji účast</string>
     <string name="event_status_dialog_title">Změň stav události</string>
     <string name="event_status_offered">Návrh</string>
-    <string name="event_status_preparing">Připravuje se</string>
+    <string name="event_status_preparing">Potvrzeno</string>
     <string name="event_status_closed">Ukončeno</string>
     <string name="event_status_cancelled">Zrušeno</string>
     <string name="event_date_not_set">Datum není určeno</string>
@@ -96,9 +99,8 @@
     <string name="events_filter_upcoming">Nadcházející</string>
     <string name="events_filter_past">Proběhlé</string>
     <string name="events_filter_all">Všechny</string>
-    <string name="events_filter_participation_all">Všechny</string>
-    <string name="events_filter_participation_joined">Zúčastním se</string>
     <string name="events_filter_participation_maybe">Možná</string>
+    <string name="events_filter_participation_all">Vše</string>
     <string name="event_start_hint">Začíná v</string>
     <string name="event_end_hint">Končí v (volitelné)</string>
 </resources>
