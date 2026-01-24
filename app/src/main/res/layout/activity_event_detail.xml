@@ -142,6 +142,31 @@
             app:layout_constraintStart_toEndOf="@id/event_date_icon"
             app:layout_constraintTop_toBottomOf="@id/event_group_name" />
 
+        <ImageView
+            android:id="@+id/event_place_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="6dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_location"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/event_date"
+            app:tint="@color/notification_meta_text" />
+
+        <TextView
+            android:id="@+id/event_place"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/notification_meta_text"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/event_status"
+            app:layout_constraintStart_toEndOf="@id/event_place_icon"
+            app:layout_constraintTop_toBottomOf="@id/event_date" />
+
         <TextView
             android:id="@+id/event_status"
             android:layout_width="wrap_content"
@@ -175,7 +200,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="event_date,event_user_status" />
+            app:constraint_referenced_ids="event_date,event_place,event_user_status" />
 
         <FrameLayout
             android:id="@+id/event_section_container"

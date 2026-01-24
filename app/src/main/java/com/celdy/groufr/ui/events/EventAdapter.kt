@@ -44,6 +44,10 @@ class EventAdapter(
             binding.eventStatus.text = formatParticipantStatus(event.yourStatus)
             styleUserStatusBadge(event.yourStatus)
             binding.eventTime.text = formatEventDate(event.startAt, event.endAt)
+            val hasPlace = !event.place.isNullOrBlank()
+            binding.eventPlace.isVisible = hasPlace
+            binding.eventPlaceIcon.isVisible = hasPlace
+            binding.eventPlace.text = event.place.orEmpty()
             bindParticipantSummary(event.participants)
             binding.root.setOnClickListener { onClick(event) }
         }

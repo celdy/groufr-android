@@ -104,6 +104,10 @@ class EventDetailActivity : AppCompatActivity() {
                     binding.eventGroupName.text = resolvedGroupName
                     binding.eventGroupName.isVisible = resolvedGroupName.isNotBlank()
                     binding.eventDate.text = formatEventDate(event.startAt, event.endAt, locale)
+                    val hasPlace = !event.place.isNullOrBlank()
+                    binding.eventPlace.isVisible = hasPlace
+                    binding.eventPlaceIcon.isVisible = hasPlace
+                    binding.eventPlace.text = event.place.orEmpty()
                     binding.eventDescription.text = renderBasicMarkdown(event.description.orEmpty())
                     binding.eventDescription.movementMethod = LinkMovementMethod.getInstance()
                     currentStatus = event.state

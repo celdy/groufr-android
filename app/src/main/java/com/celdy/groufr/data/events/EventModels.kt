@@ -20,6 +20,7 @@ data class EventDto(
     val group: EventGroupRef? = null,
     val title: String,
     val description: String?,
+    val place: String?,
     val state: String,
     @SerializedName("start_at")
     val startAt: String?,
@@ -48,6 +49,7 @@ data class EventDetailDto(
     val groupName: String?,
     val title: String,
     val description: String?,
+    val place: String?,
     val state: String,
     @SerializedName("start_at")
     val startAt: String?,

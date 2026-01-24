@@ -73,6 +73,38 @@
             app:layout_constraintStart_toEndOf="@id/event_date_icon"
             app:layout_constraintTop_toBottomOf="@id/event_group_name" />
 
+        <ImageView
+            android:id="@+id/event_place_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="4dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_location"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/event_time"
+            app:tint="@color/notification_meta_text" />
+
+        <TextView
+            android:id="@+id/event_place"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/notification_meta_text"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/event_status"
+            app:layout_constraintStart_toEndOf="@id/event_place_icon"
+            app:layout_constraintTop_toBottomOf="@id/event_time" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/event_time_place_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="event_time,event_place" />
+
         <TextView
             android:id="@+id/event_status"
             android:layout_width="wrap_content"
@@ -106,12 +138,12 @@
             android:id="@+id/event_participants_row"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/event_time">
+            app:layout_constraintTop_toBottomOf="@id/event_time_place_barrier">
 
             <ImageView
                 android:id="@+id/event_icon_joined"
