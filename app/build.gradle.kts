@@ -14,8 +14,8 @@ android {
         applicationId = "com.celdy.groufr"
         minSdk = 26
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.06"
+        versionCode = 7
+        versionName = "0.07"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

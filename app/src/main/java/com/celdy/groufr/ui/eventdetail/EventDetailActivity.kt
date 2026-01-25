@@ -298,23 +298,25 @@ class EventDetailActivity : AppCompatActivity() {
 
     private fun updateStatusBadgeAccess(event: EventDetailDto) {
         val canEdit = canEditStatus(event)
-        binding.eventState.isClickable = canEdit
-        binding.eventState.isFocusable = canEdit
+        binding.eventStateContainer.isClickable = canEdit
+        binding.eventStateContainer.isFocusable = canEdit
+        binding.eventStateDropdown.isVisible = canEdit
         if (canEdit) {
-            binding.eventState.setOnClickListener { showStatusDialog() }
+            binding.eventStateContainer.setOnClickListener { showStatusDialog() }
         } else {
-            binding.eventState.setOnClickListener(null)
+            binding.eventStateContainer.setOnClickListener(null)
         }
     }
 
     private fun updateUserStatusBadgeAccess(event: EventDetailDto) {
         val canEdit = event.yourStatus != "not_invited"
-        binding.eventUserStatus.isClickable = canEdit
-        binding.eventUserStatus.isFocusable = canEdit
+        binding.eventUserStatusContainer.isClickable = canEdit
+        binding.eventUserStatusContainer.isFocusable = canEdit
+        binding.eventUserStatusDropdown.isVisible = canEdit
         if (canEdit) {
-            binding.eventUserStatus.setOnClickListener { showUserStatusDialog(event.yourStatus) }
+            binding.eventUserStatusContainer.setOnClickListener { showUserStatusDialog(event.yourStatus) }
         } else {
-            binding.eventUserStatus.setOnClickListener(null)
+            binding.eventUserStatusContainer.setOnClickListener(null)
         }
     }
 
@@ -372,24 +374,29 @@ class EventDetailActivity : AppCompatActivity() {
     private fun styleStateBadge(state: String) {
         when (state) {
             "offered" -> {
-                binding.eventState.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_offered)
+                binding.eventStateContainer.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_offered)
                 binding.eventState.setTextColor(ContextCompat.getColor(this, com.celdy.groufr.R.color.event_state_offered_text))
+                binding.eventStateDropdown.imageTintList = ContextCompat.getColorStateList(this, com.celdy.groufr.R.color.event_state_offered_text)
             }
             "preparing" -> {
-                binding.eventState.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_preparing)
+                binding.eventStateContainer.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_preparing)
                 binding.eventState.setTextColor(ContextCompat.getColor(this, com.celdy.groufr.R.color.event_state_preparing_text))
+                binding.eventStateDropdown.imageTintList = ContextCompat.getColorStateList(this, com.celdy.groufr.R.color.event_state_preparing_text)
             }
             "closed" -> {
-                binding.eventState.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_closed)
+                binding.eventStateContainer.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_closed)
                 binding.eventState.setTextColor(ContextCompat.getColor(this, com.celdy.groufr.R.color.event_state_closed_text))
+                binding.eventStateDropdown.imageTintList = ContextCompat.getColorStateList(this, com.celdy.groufr.R.color.event_state_closed_text)
             }
             "cancelled" -> {
-                binding.eventState.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_cancelled)
+                binding.eventStateContainer.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_cancelled)
                 binding.eventState.setTextColor(ContextCompat.getColor(this, com.celdy.groufr.R.color.event_state_cancelled_text))
+                binding.eventStateDropdown.imageTintList = ContextCompat.getColorStateList(this, com.celdy.groufr.R.color.event_state_cancelled_text)
             }
             else -> {
-                binding.eventState.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_badge)
+                binding.eventStateContainer.setBackgroundResource(com.celdy.groufr.R.drawable.bg_event_status_badge)
                 binding.eventState.setTextColor(ContextCompat.getColor(this, com.celdy.groufr.R.color.primary_700))
+                binding.eventStateDropdown.imageTintList = ContextCompat.getColorStateList(this, com.celdy.groufr.R.color.primary_700)
             }
         }
     }
@@ -414,7 +421,7 @@ class EventDetailActivity : AppCompatActivity() {
             "not_invited" -> com.celdy.groufr.R.drawable.bg_status_not_invited
             else -> com.celdy.groufr.R.drawable.bg_status_not_invited
         }
-        binding.eventUserStatus.setBackgroundResource(bgRes)
+        binding.eventUserStatusContainer.setBackgroundResource(bgRes)
     }
 
     private fun formatEventDate(startAt: String?, endAt: String?, locale: Locale): String {

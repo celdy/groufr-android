@@ -30,19 +30,19 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
-    @POST("auth/login")
+    @POST("/api/v1/auth/login")
     suspend fun login(@Body request: LoginRequest): TokenResponse
 
-    @POST("auth/refresh")
+    @POST("/api/v1/auth/refresh")
     suspend fun refresh(@Body request: RefreshRequest): TokenResponse
 
-    @GET("sync")
+    @GET("/api/v1/sync")
     suspend fun sync(
         @Query("since") since: String? = null,
         @Query("include") include: String? = null
     ): SyncResponse
 
-    @GET("groups/{groupId}/messages")
+    @GET("/api/v1/groups/{groupId}/messages")
     suspend fun getGroupMessages(
         @Path("groupId") groupId: Long,
         @Query("limit") limit: Int = 50,
@@ -50,7 +50,7 @@ interface ApiService {
         @Query("after_id") afterId: Long? = null
     ): MessagesResponse
 
-    @GET("events/{eventId}/messages")
+    @GET("/api/v1/events/{eventId}/messages")
     suspend fun getEventMessages(
         @Path("eventId") eventId: Long,
         @Query("limit") limit: Int = 50,
@@ -58,19 +58,19 @@ interface ApiService {
         @Query("after_id") afterId: Long? = null
     ): MessagesResponse
 
-    @POST("groups/{groupId}/messages")
+    @POST("/api/v1/groups/{groupId}/messages")
     suspend fun sendGroupMessage(
         @Path("groupId") groupId: Long,
         @Body request: SendMessageRequest
     ): MessageDto
 
-    @POST("events/{eventId}/messages")
+    @POST("/api/v1/events/{eventId}/messages")
     suspend fun sendEventMessage(
         @Path("eventId") eventId: Long,
         @Body request: SendMessageRequest
     ): MessageDto
 
-    @GET("groups/{groupId}/polls")
+    @GET("/api/v1/groups/{groupId}/polls")
     suspend fun getGroupPolls(
         @Path("groupId") groupId: Long,
         @Query("status") status: String = "all",
@@ -78,24 +78,24 @@ interface ApiService {
         @Query("offset") offset: Int = 0
     ): PollsResponse
 
-    @POST("polls/{pollId}/vote")
+    @POST("/api/v1/polls/{pollId}/vote")
     suspend fun voteOnPoll(
         @Path("pollId") pollId: Long,
         @Body request: VoteRequest
     ): PollDto
 
-    @DELETE("polls/{pollId}/vote")
+    @DELETE("/api/v1/polls/{pollId}/vote")
     suspend fun clearPollVote(
         @Path("pollId") pollId: Long
     ): PollDto
 
-    @POST("groups/{groupId}/polls")
+    @POST("/api/v1/groups/{groupId}/polls")
     suspend fun createPoll(
         @Path("groupId") groupId: Long,
         @Body request: CreatePollRequest
     ): PollDto
 
-    @GET("groups/{groupId}/events")
+    @GET("/api/v1/groups/{groupId}/events")
     suspend fun getGroupEvents(
         @Path("groupId") groupId: Long,
         @Query("filter") filter: String = "upcoming",
@@ -104,7 +104,7 @@ interface ApiService {
         @Query("offset") offset: Int = 0
     ): EventsResponse
 
-    @GET("events")
+    @GET("/api/v1/events")
     suspend fun getAllEvents(
         @Query("time") time: String = "upcoming",
         @Query("participation") participation: String? = null,
@@ -113,39 +113,39 @@ interface ApiService {
         @Query("offset") offset: Int = 0
     ): EventsResponse
 
-    @GET("events/{eventId}")
+    @GET("/api/v1/events/{eventId}")
     suspend fun getEventDetail(
         @Path("eventId") eventId: Long
     ): EventDetailDto
 
-    @POST("events/{eventId}/join")
+    @POST("/api/v1/events/{eventId}/join")
     suspend fun joinEvent(
         @Path("eventId") eventId: Long
     ): EventActionResponse
 
-    @POST("events/{eventId}/decline")
+    @POST("/api/v1/events/{eventId}/decline")
     suspend fun declineEvent(
         @Path("eventId") eventId: Long
     ): EventActionResponse
 
-    @POST("events/{eventId}/maybe")
+    @POST("/api/v1/events/{eventId}/maybe")
     suspend fun maybeEvent(
         @Path("eventId") eventId: Long
     ): EventActionResponse
 
-    @PUT("events/{eventId}")
+    @PUT("/api/v1/events/{eventId}")
     suspend fun updateEvent(
         @Path("eventId") eventId: Long,
         @Body request: UpdateEventRequest
     ): EventDetailDto
 
-    @POST("groups/{groupId}/events")
+    @POST("/api/v1/groups/{groupId}/events")
     suspend fun createEvent(
         @Path("groupId") groupId: Long,
         @Body request: CreateEventRequest
     ): EventDto
 
-    @GET("notifications")
+    @GET("/api/v1/notifications")
     suspend fun getNotifications(
         @Query("limit") limit: Int = 50,
         @Query("offset") offset: Int = 0,
@@ -153,20 +153,20 @@ interface ApiService {
         @Query("group_id") groupId: Long? = null
     ): NotificationsResponse
 
-    @GET("notifications/count")
+    @GET("/api/v1/notifications/count")
     suspend fun getNotificationCount(): NotificationCountResponse
 
-    @POST("notifications/{id}/read")
+    @POST("/api/v1/notifications/{id}/read")
     suspend fun markNotificationRead(
         @Path("id") notificationId: Long
     )
 
-    @POST("notifications/mark-read")
+    @POST("/api/v1/notifications/mark-read")
     suspend fun markNotificationsRead(
         @Body request: NotificationMarkReadRequest
     ): MarkReadResponse
 
-    @POST("notifications/read-all")
+    @POST("/api/v1/notifications/read-all")
     suspend fun markAllNotificationsRead(
         @Query("group_id") groupId: Long? = null
     ): MarkReadResponse

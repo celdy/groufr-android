@@ -16,6 +16,6 @@ interface AuthApiService {
      * Synchronous token refresh for use in OkHttp Authenticator.
      * Returns a Call instead of suspend function since Authenticator runs synchronously.
      */
-    @POST("auth/refresh")
+    @POST("/api/v1/auth/refresh")
     fun refreshSync(@Body request: RefreshRequest): Call<TokenResponse>
 }
