@@ -50,6 +50,34 @@ class EventsRepository @Inject constructor(
         return apiService.updateEvent(eventId, UpdateEventRequest(state = state))
     }
 
+    suspend fun updateEventDetails(
+        eventId: Long,
+        title: String,
+        description: String?,
+        place: String?,
+        startAt: String,
+        endAt: String?,
+        deadlineJoinAt: String?,
+        minParticipants: Int?,
+        maxParticipants: Int?,
+        state: String?
+    ): EventDetailDto {
+        return apiService.updateEvent(
+            eventId,
+            UpdateEventRequest(
+                title = title,
+                description = description,
+                place = place,
+                startAt = startAt,
+                endAt = endAt,
+                deadlineJoinAt = deadlineJoinAt,
+                minParticipants = minParticipants,
+                maxParticipants = maxParticipants,
+                state = state
+            )
+        )
+    }
+
     suspend fun createEvent(
         groupId: Long,
         title: String,

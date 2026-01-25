@@ -101,7 +101,7 @@
             android:orientation="horizontal"
             android:paddingStart="10dp"
             android:paddingTop="4dp"
-            android:paddingEnd="8dp"
+            android:paddingEnd="4dp"
             android:paddingBottom="4dp"
             app:layout_constraintBaseline_toBaselineOf="@id/event_title"
             app:layout_constraintEnd_toEndOf="parent">
@@ -116,9 +116,9 @@
 
             <ImageView
                 android:id="@+id/event_state_dropdown"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:layout_marginStart="4dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="0dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_dropdown"
                 android:visibility="gone"
@@ -207,7 +207,7 @@
             android:orientation="horizontal"
             android:paddingStart="10dp"
             android:paddingTop="4dp"
-            android:paddingEnd="8dp"
+            android:paddingEnd="4dp"
             android:paddingBottom="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/event_status">
@@ -222,9 +222,9 @@
 
             <ImageView
                 android:id="@+id/event_user_status_dropdown"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:layout_marginStart="4dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="0dp"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_dropdown"
                 android:visibility="gone"
@@ -253,6 +253,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+
                 <TextView
                     android:id="@+id/event_deadline"
                     android:layout_width="0dp"
@@ -263,6 +264,16 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <View
+                    android:id="@+id/event_info_separator"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/notification_divider"
+                    app:layout_constraintTop_toBottomOf="@id/event_deadline"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    />
+
                 <TextView
                     android:id="@+id/event_description"
                     android:layout_width="0dp"
@@ -272,7 +283,7 @@
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/event_deadline" />
+                    app:layout_constraintTop_toBottomOf="@id/event_info_separator" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -354,10 +365,15 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/event_message_send"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        style="?attr/materialIconButtonStyle"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:layout_marginStart="12dp"
-                        android:text="@string/message_send"
+                        android:contentDescription="@string/message_send"
+                        app:icon="@drawable/ic_send"
+                        app:iconTint="@color/white"
+                        app:backgroundTint="@color/primary_600"
+                        app:cornerRadius="24dp"
                         app:layout_constraintBottom_toBottomOf="@id/event_message_input_layout"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/event_message_input_layout"

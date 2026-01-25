@@ -15,4 +15,9 @@
         android:icon="@drawable/event_participant"
         android:title="@string/event_menu_participants"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_event_edit"
+        android:icon="@drawable/ic_edit"
+        android:title="@string/event_menu_edit"
+        app:showAsAction="ifRoom" />
 </menu>

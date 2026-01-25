@@ -27,6 +27,7 @@ import com.celdy.groufr.data.events.EventDetailDto
 import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityEventDetailBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
+import com.celdy.groufr.ui.eventedit.EventEditActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.OffsetDateTime
@@ -51,6 +52,8 @@ class EventDetailActivity : AppCompatActivity() {
     private var activeSection = EventSection.INFO
     private var chatLoaded = false
     private var chatFirstLoad = true
+    private var currentEvent: EventDetailDto? = null
+    private var shouldRefreshOnResume = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,11 +99,13 @@ class EventDetailActivity : AppCompatActivity() {
                 is EventDetailState.Content -> {
                     val event = state.event
                     val locale = currentLocale()
+                    currentEvent = event
                     binding.eventDetailLoading.isVisible = false
                     binding.eventDetailContent.isVisible = true
                     binding.eventDetailError.isVisible = false
                     binding.eventTitle.text = event.title
                     val resolvedGroupName = if (groupName.isNotBlank()) groupName else event.groupName.orEmpty()
+                    groupName = resolvedGroupName
                     binding.eventGroupName.text = resolvedGroupName
                     binding.eventGroupName.isVisible = resolvedGroupName.isNotBlank()
                     binding.eventDate.text = formatEventDate(event.startAt, event.endAt, locale)
@@ -122,11 +127,14 @@ class EventDetailActivity : AppCompatActivity() {
                     adapter.submitList(sortParticipants(event.participantsList))
                     updateStatusBadgeAccess(event)
                     updateUserStatusBadgeAccess(event)
+                    invalidateOptionsMenu()
                 }
                 EventDetailState.Error -> {
                     binding.eventDetailLoading.isVisible = false
                     binding.eventDetailContent.isVisible = false
                     binding.eventDetailError.isVisible = true
+                    currentEvent = null
+                    invalidateOptionsMenu()
                     if (!authRepository.isLoggedIn()) {
                         startActivity(Intent(this, LoginActivity::class.java))
                         finish()
@@ -223,6 +231,14 @@ class EventDetailActivity : AppCompatActivity() {
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (shouldRefreshOnResume && eventId > 0) {
+            shouldRefreshOnResume = false
+            viewModel.loadEvent(eventId)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(com.celdy.groufr.R.menu.menu_event_detail, menu)
         updateMenuVisibility(menu)
@@ -252,6 +268,14 @@ class EventDetailActivity : AppCompatActivity() {
                 setActiveSection(EventSection.PARTICIPANTS)
                 true
             }
+            com.celdy.groufr.R.id.action_event_edit -> {
+                val intent = Intent(this, EventEditActivity::class.java)
+                    .putExtra(EventEditActivity.EXTRA_EVENT_ID, eventId)
+                    .putExtra(EventEditActivity.EXTRA_GROUP_NAME, groupName)
+                shouldRefreshOnResume = true
+                startActivity(intent)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -279,6 +303,8 @@ class EventDetailActivity : AppCompatActivity() {
         menu.findItem(com.celdy.groufr.R.id.action_event_chat)?.isVisible = activeSection != EventSection.CHAT
         menu.findItem(com.celdy.groufr.R.id.action_event_participants)?.isVisible =
             activeSection != EventSection.PARTICIPANTS
+        val canEdit = currentEvent?.let { canEditEvent(it) } ?: false
+        menu.findItem(com.celdy.groufr.R.id.action_event_edit)?.isVisible = canEdit
     }
 
     private fun bindParticipantSummary(
@@ -297,7 +323,7 @@ class EventDetailActivity : AppCompatActivity() {
     }
 
     private fun updateStatusBadgeAccess(event: EventDetailDto) {
-        val canEdit = canEditStatus(event)
+        val canEdit = canEditEvent(event)
         binding.eventStateContainer.isClickable = canEdit
         binding.eventStateContainer.isFocusable = canEdit
         binding.eventStateDropdown.isVisible = canEdit
@@ -321,9 +347,14 @@ class EventDetailActivity : AppCompatActivity() {
     }
 
     private fun canEditStatus(event: EventDetailDto): Boolean {
+        return canEditEvent(event)
+    }
+
+    private fun canEditEvent(event: EventDetailDto): Boolean {
         val userId = tokenStore.getUserId()
         val role = event.participantsList.firstOrNull { it.user.id == userId }?.role
-        return role == "admin" || role == "owner"
+        val elevatedRoles = setOf("admin", "owner")
+        return role in elevatedRoles || event.yourRole in elevatedRoles
     }
 
     private fun showStatusDialog() {

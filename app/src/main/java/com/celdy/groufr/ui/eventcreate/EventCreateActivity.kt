@@ -56,19 +56,19 @@ class EventCreateActivity : AppCompatActivity() {
         }
 
         binding.eventStartInput.setOnClickListener {
-            showDateTimePicker { isoValue ->
+            showDateTimePicker(binding.eventStartInput.text?.toString()) { isoValue ->
                 binding.eventStartInput.setText(isoValue)
             }
         }
 
         binding.eventEndInput.setOnClickListener {
-            showDateTimePicker { isoValue ->
+            showDateTimePicker(binding.eventEndInput.text?.toString()) { isoValue ->
                 binding.eventEndInput.setText(isoValue)
             }
         }
 
         binding.eventDeadlineInput.setOnClickListener {
-            showDateTimePicker { isoValue ->
+            showDateTimePicker(binding.eventDeadlineInput.text?.toString()) { isoValue ->
                 binding.eventDeadlineInput.setText(isoValue)
             }
         }
@@ -113,8 +113,8 @@ class EventCreateActivity : AppCompatActivity() {
         }
     }
 
-    private fun showDateTimePicker(onSelected: (String) -> Unit) {
-        val now = OffsetDateTime.now()
+    private fun showDateTimePicker(initialValue: String?, onSelected: (String) -> Unit) {
+        val initialDateTime = parseInitialDateTime(initialValue)
         val datePicker = DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
@@ -124,21 +124,34 @@ class EventCreateActivity : AppCompatActivity() {
                     { _, hourOfDay, minute ->
                         val pickedTime = LocalTime.of(hourOfDay, minute)
                         val zone = ZoneId.systemDefault()
-                        val offset = zone.rules.getOffset(now.toInstant())
+                        val offset = zone.rules.getOffset(initialDateTime.toInstant())
                         val dateTime = OffsetDateTime.of(pickedDate, pickedTime, offset)
                         onSelected(dateTime.format(ISO_FORMAT))
                     },
-                    now.hour,
-                    now.minute,
+                    initialDateTime.hour,
+                    initialDateTime.minute,
                     true
                 )
                 timePicker.show()
             },
-            now.year,
-            now.monthValue - 1,
-            now.dayOfMonth
+            initialDateTime.year,
+            initialDateTime.monthValue - 1,
+            initialDateTime.dayOfMonth
         )
         datePicker.show()
+    }
+
+    private fun parseInitialDateTime(value: String?): OffsetDateTime {
+        val trimmed = value?.trim().orEmpty()
+        return if (trimmed.isBlank()) {
+            OffsetDateTime.now()
+        } else {
+            try {
+                OffsetDateTime.parse(trimmed)
+            } catch (exception: Exception) {
+                OffsetDateTime.now()
+            }
+        }
     }
 
     companion object {

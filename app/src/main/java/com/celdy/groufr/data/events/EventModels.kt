@@ -57,8 +57,14 @@ data class EventDetailDto(
     val endAt: String?,
     @SerializedName("deadline_join_at")
     val deadlineJoinAt: String?,
+    @SerializedName("min_participants")
+    val minParticipants: Int? = null,
+    @SerializedName("max_participants")
+    val maxParticipants: Int? = null,
     @SerializedName("your_status")
     val yourStatus: String,
+    @SerializedName("your_role")
+    val yourRole: String? = null,
     val participants: Map<String, Int>,
     @SerializedName("participants_list")
     val participantsList: List<EventParticipantDto>,
@@ -97,5 +103,18 @@ data class CreateEventRequest(
 )
 
 data class UpdateEventRequest(
+    val title: String? = null,
+    val description: String? = null,
+    val place: String? = null,
+    @SerializedName("start_at")
+    val startAt: String? = null,
+    @SerializedName("end_at")
+    val endAt: String? = null,
+    @SerializedName("deadline_join_at")
+    val deadlineJoinAt: String? = null,
+    @SerializedName("min_participants")
+    val minParticipants: Int? = null,
+    @SerializedName("max_participants")
+    val maxParticipants: Int? = null,
     val state: String? = null
 )

@@ -59,6 +59,10 @@
             android:exported="false"
             android:theme="@style/Theme.GroufrNative" />
         <activity
+            android:name=".ui.eventedit.EventEditActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroufrNative" />
+        <activity
             android:name=".ui.notifications.NotificationsActivity"
             android:exported="false"
             android:theme="@style/Theme.GroufrNative" />

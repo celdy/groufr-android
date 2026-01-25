@@ -53,6 +53,9 @@
     <string name="event_create_action">Create</string>
     <string name="event_create_button">Create event</string>
     <string name="event_create_success">Event created.</string>
+    <string name="event_edit_title">Edit event</string>
+    <string name="event_edit_button">Save changes</string>
+    <string name="event_edit_success">Event updated.</string>
     <string name="event_date_not_set">Date not set</string>
     <string name="event_date_end_prefix">end</string>
     <string name="event_status_dialog_title">Change event status</string>
@@ -63,6 +66,7 @@
     <string name="event_menu_info">Info</string>
     <string name="event_menu_chat">Chat</string>
     <string name="event_menu_participants">Participants</string>
+    <string name="event_menu_edit">Edit</string>
     <string name="event_chat_new_messages">New messages</string>
     <string name="event_your_status_label">Your status</string>
     <string name="event_participant_joined">Going</string>
@@ -80,9 +84,13 @@
     <string name="event_role_guest">Guest</string>
     <string name="event_title_hint">Title</string>
     <string name="event_description_hint">Description</string>
+    <string name="event_place_hint">Place (optional)</string>
+    <string name="event_state_hint">State</string>
     <string name="event_start_hint">Start at (YYYY-MM-DDTHH:MM:SS+00:00)</string>
     <string name="event_end_hint">End at (optional)</string>
     <string name="event_deadline_hint">Join deadline (optional)</string>
+    <string name="event_min_participants_hint">Min participants (optional)</string>
+    <string name="event_max_participants_hint">Max participants (optional)</string>
     <string name="notifications_title">Notifications</string>
     <string name="notifications_empty">No notifications yet.</string>
     <string name="notifications_error">Unable to load notifications.</string>

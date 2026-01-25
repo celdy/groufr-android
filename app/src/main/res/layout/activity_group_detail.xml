@@ -70,14 +70,42 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/message_create_event"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="4dp"
+            android:contentDescription="@string/event_create_title"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text=""
+            app:backgroundTint="@color/primary_600"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_add"
+            app:iconPadding="0dp"
+            app:iconTint="@color/white"
+            app:layout_constraintEnd_toStartOf="@id/message_input_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/message_input_layout" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/message_input_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:hint="@string/message_input_hint"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/message_send"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/message_create_event"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -90,10 +118,18 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/message_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginStart="12dp"
-            android:text="@string/message_send"
+            android:contentDescription="@string/message_send"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:backgroundTint="@color/primary_600"
+            app:cornerRadius="24dp"
+            app:icon="@drawable/ic_send"
+            app:iconPadding="0dp"
+            app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="@id/message_input_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/message_input_layout"

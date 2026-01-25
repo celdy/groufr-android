@@ -93,6 +93,15 @@ class EventsActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (groupId > 0) {
+            viewModel.loadEvents(groupId)
+        } else {
+            viewModel.loadAllEvents()
+        }
+    }
+
     private fun setupFilters() {
         // Time filter chips
         binding.chipTimeUpcoming.setOnClickListener {
@@ -143,7 +152,13 @@ class EventsActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_events, menu)
+        menu.findItem(R.id.action_create_event)?.isVisible = groupId > 0
         return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.action_create_event)?.isVisible = groupId > 0
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

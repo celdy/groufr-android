@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityGroupDetailBinding
+import com.celdy.groufr.ui.eventcreate.EventCreateActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
 import com.celdy.groufr.ui.polldetail.PollDetailActivity
@@ -90,6 +91,15 @@ class GroupDetailActivity : AppCompatActivity() {
                     groupId = groupId,
                     body = binding.messageInput.text?.toString().orEmpty()
                 )
+            }
+        }
+
+        binding.messageCreateEvent.setOnClickListener {
+            if (groupId > 0) {
+                val intent = Intent(this, EventCreateActivity::class.java)
+                    .putExtra(EXTRA_GROUP_ID, groupId)
+                    .putExtra(EXTRA_GROUP_NAME, groupName)
+                startActivity(intent)
             }
         }
 

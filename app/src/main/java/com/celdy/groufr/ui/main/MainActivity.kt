@@ -121,6 +121,8 @@ class MainActivity : AppCompatActivity() {
             if (!isValid) {
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                 finish()
+            } else {
+                viewModel.loadUnreadCount()
             }
         }
     }
