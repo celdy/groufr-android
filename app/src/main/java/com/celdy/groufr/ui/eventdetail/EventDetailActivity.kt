@@ -54,6 +54,8 @@ class EventDetailActivity : AppCompatActivity() {
     private var chatFirstLoad = true
     private var currentEvent: EventDetailDto? = null
     private var shouldRefreshOnResume = false
+    private var contentPaddingBottom = 0
+    private var systemBarsBottom = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,14 +78,16 @@ class EventDetailActivity : AppCompatActivity() {
 
         binding.eventParticipants.layoutManager = LinearLayoutManager(this)
         binding.eventParticipants.adapter = adapter
+        contentPaddingBottom = binding.eventDetailContent.paddingBottom
         updateSectionVisibility()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
             val bottomInset = max(systemBars.bottom, imeInsets.bottom)
+            systemBarsBottom = systemBars.bottom
             binding.eventDetailToolbar.updatePadding(top = systemBars.top)
-            binding.eventDetailContent.updatePadding(bottom = systemBars.bottom)
+            updateSectionPadding()
             binding.eventMessageComposer.updatePadding(bottom = bottomInset)
             binding.root.updatePadding(left = systemBars.left, right = systemBars.right)
             insets
@@ -291,11 +295,17 @@ class EventDetailActivity : AppCompatActivity() {
         binding.eventInfoContainer.isVisible = activeSection == EventSection.INFO
         binding.eventChatContainer.isVisible = activeSection == EventSection.CHAT
         binding.eventParticipantsContainer.isVisible = activeSection == EventSection.PARTICIPANTS
+        updateSectionPadding()
         if (activeSection == EventSection.CHAT && !chatLoaded && eventId > 0) {
             chatLoaded = true
             chatFirstLoad = true
             viewModel.loadChat(eventId)
         }
+    }
+
+    private fun updateSectionPadding() {
+        val bottomPadding = if (activeSection == EventSection.CHAT) 0 else contentPaddingBottom + systemBarsBottom
+        binding.eventDetailContent.updatePadding(bottom = bottomPadding)
     }
 
     private fun updateMenuVisibility(menu: Menu) {
