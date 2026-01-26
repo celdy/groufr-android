@@ -22,12 +22,24 @@ class EventCreateViewModel @Inject constructor(
         groupId: Long,
         title: String,
         description: String?,
+        place: String?,
         startAt: String,
         endAt: String?,
-        deadlineJoinAt: String?
+        deadlineJoinAt: String?,
+        minParticipants: String?,
+        maxParticipants: String?,
+        state: String?
     ) {
         if (title.isBlank() || startAt.isBlank()) {
             _state.value = CreateState.Error("Title and start date are required.")
+            return
+        }
+        val minValue = parseOptionalInt(minParticipants, "Min participants must be a number.")
+        if (minParticipants?.trim()?.isNotEmpty() == true && minValue == null) return
+        val maxValue = parseOptionalInt(maxParticipants, "Max participants must be a number.")
+        if (maxParticipants?.trim()?.isNotEmpty() == true && maxValue == null) return
+        if (minValue != null && maxValue != null && minValue > maxValue) {
+            _state.value = CreateState.Error("Min participants cannot exceed max participants.")
             return
         }
         _state.value = CreateState.Sending
@@ -37,9 +49,13 @@ class EventCreateViewModel @Inject constructor(
                     groupId = groupId,
                     title = title.trim(),
                     description = description?.trim()?.ifBlank { null },
+                    place = place?.trim()?.ifBlank { null },
                     startAt = startAt.trim(),
                     endAt = endAt?.trim()?.ifBlank { null },
-                    deadlineJoinAt = deadlineJoinAt?.trim()?.ifBlank { null }
+                    deadlineJoinAt = deadlineJoinAt?.trim()?.ifBlank { null },
+                    minParticipants = minValue,
+                    maxParticipants = maxValue,
+                    state = state
                 )
                 _state.value = CreateState.Success
                 notificationSyncManager.onUserAction()
@@ -47,6 +63,16 @@ class EventCreateViewModel @Inject constructor(
                 _state.value = CreateState.Error("Failed to create event.")
             }
         }
+    }
+
+    private fun parseOptionalInt(value: String?, errorMessage: String): Int? {
+        val trimmed = value?.trim().orEmpty()
+        if (trimmed.isBlank()) return null
+        val parsed = trimmed.toIntOrNull()
+        if (parsed == null) {
+            _state.value = CreateState.Error(errorMessage)
+        }
+        return parsed
     }
 }
 

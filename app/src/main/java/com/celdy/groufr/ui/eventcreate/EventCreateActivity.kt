@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.databinding.ActivityEventCreateBinding
+import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
@@ -20,7 +21,9 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
+import android.view.MotionEvent
 
 @AndroidEntryPoint
 class EventCreateActivity : AppCompatActivity() {
@@ -28,6 +31,7 @@ class EventCreateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEventCreateBinding
     private val viewModel: EventCreateViewModel by viewModels()
     private var groupId: Long = -1L
+    private var currentState: String = "offered"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,31 +60,48 @@ class EventCreateActivity : AppCompatActivity() {
         }
 
         binding.eventStartInput.setOnClickListener {
-            showDateTimePicker(binding.eventStartInput.text?.toString()) { isoValue ->
-                binding.eventStartInput.setText(isoValue)
+            showDateTimePicker(binding.eventStartInput.tag as? String) { isoValue ->
+                setDateField(binding.eventStartInput, isoValue)
             }
         }
 
         binding.eventEndInput.setOnClickListener {
-            showDateTimePicker(binding.eventEndInput.text?.toString()) { isoValue ->
-                binding.eventEndInput.setText(isoValue)
+            showDateTimePicker(binding.eventEndInput.tag as? String) { isoValue ->
+                setDateField(binding.eventEndInput, isoValue)
             }
         }
 
         binding.eventDeadlineInput.setOnClickListener {
-            showDateTimePicker(binding.eventDeadlineInput.text?.toString()) { isoValue ->
-                binding.eventDeadlineInput.setText(isoValue)
+            showDateTimePicker(binding.eventDeadlineInput.tag as? String) { isoValue ->
+                setDateField(binding.eventDeadlineInput, isoValue)
             }
         }
+
+        binding.eventStateInput.setOnClickListener { showStateDialog() }
+        binding.eventStateLayout.setOnClickListener { showStateDialog() }
+        binding.eventStateLayout.setEndIconOnClickListener { showStateDialog() }
+        binding.eventStateInput.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                showStateDialog()
+                true
+            } else {
+                false
+            }
+        }
+        binding.eventStateInput.setText(formatEventStatus(currentState))
 
         binding.eventCreateButton.setOnClickListener {
             viewModel.createEvent(
                 groupId = groupId,
                 title = binding.eventTitleInput.text?.toString().orEmpty(),
                 description = binding.eventDescriptionInput.text?.toString(),
-                startAt = binding.eventStartInput.text?.toString().orEmpty(),
-                endAt = binding.eventEndInput.text?.toString(),
-                deadlineJoinAt = binding.eventDeadlineInput.text?.toString()
+                place = binding.eventPlaceInput.text?.toString(),
+                startAt = getDateIso(binding.eventStartInput),
+                endAt = getOptionalDateIso(binding.eventEndInput),
+                deadlineJoinAt = getOptionalDateIso(binding.eventDeadlineInput),
+                minParticipants = binding.eventMinParticipantsInput.text?.toString(),
+                maxParticipants = binding.eventMaxParticipantsInput.text?.toString(),
+                state = currentState
             )
         }
 
@@ -111,6 +132,53 @@ class EventCreateActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun setDateField(field: android.widget.TextView, isoValue: String?) {
+        field.tag = isoValue
+        field.text = formatDisplayDate(isoValue)
+    }
+
+    private fun formatDisplayDate(isoValue: String?): String {
+        if (isoValue.isNullOrBlank()) return ""
+        return ChatDateFormatter.formatRange(isoValue, null, currentLocale()).orEmpty()
+    }
+
+    private fun showStateDialog() {
+        val entries = STATUS_OPTIONS.map { getString(it.second) }.toTypedArray()
+        val currentIndex = STATUS_OPTIONS.indexOfFirst { it.first == currentState }.coerceAtLeast(0)
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(com.celdy.groufr.R.string.event_status_dialog_title)
+            .setSingleChoiceItems(entries, currentIndex) { dialog, which ->
+                currentState = STATUS_OPTIONS[which].first
+                binding.eventStateInput.setText(getString(STATUS_OPTIONS[which].second))
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun formatEventStatus(status: String): String {
+        return when (status) {
+            "offered" -> getString(com.celdy.groufr.R.string.event_status_offered)
+            "preparing" -> getString(com.celdy.groufr.R.string.event_status_preparing)
+            "closed" -> getString(com.celdy.groufr.R.string.event_status_closed)
+            "cancelled" -> getString(com.celdy.groufr.R.string.event_status_cancelled)
+            else -> status
+        }
+    }
+
+    private fun getDateIso(field: android.widget.TextView): String {
+        return (field.tag as? String).orEmpty()
+    }
+
+    private fun getOptionalDateIso(field: android.widget.TextView): String? {
+        val value = field.tag as? String
+        return value?.trim()?.ifBlank { null }
+    }
+
+    private fun currentLocale(): Locale {
+        val locales = resources.configuration.locales
+        return if (locales.isEmpty) Locale.getDefault() else locales[0]
     }
 
     private fun showDateTimePicker(initialValue: String?, onSelected: (String) -> Unit) {
@@ -158,6 +226,12 @@ class EventCreateActivity : AppCompatActivity() {
         const val EXTRA_GROUP_ID = "extra_group_id"
         const val EXTRA_GROUP_NAME = "extra_group_name"
         private val ISO_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+        private val STATUS_OPTIONS = listOf(
+            "offered" to com.celdy.groufr.R.string.event_status_offered,
+            "preparing" to com.celdy.groufr.R.string.event_status_preparing,
+            "closed" to com.celdy.groufr.R.string.event_status_closed,
+            "cancelled" to com.celdy.groufr.R.string.event_status_cancelled
+        )
     }
 }
 

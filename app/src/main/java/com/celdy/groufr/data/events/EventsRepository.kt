@@ -82,16 +82,24 @@ class EventsRepository @Inject constructor(
         groupId: Long,
         title: String,
         description: String?,
+        place: String?,
         startAt: String,
         endAt: String?,
-        deadlineJoinAt: String?
+        deadlineJoinAt: String?,
+        minParticipants: Int?,
+        maxParticipants: Int?,
+        state: String?
     ): EventDto {
         val request = CreateEventRequest(
             title = title,
             description = description,
+            place = place,
             startAt = startAt,
             endAt = endAt,
-            deadlineJoinAt = deadlineJoinAt
+            deadlineJoinAt = deadlineJoinAt,
+            minParticipants = minParticipants,
+            maxParticipants = maxParticipants,
+            state = state
         )
         return apiService.createEvent(groupId, request)
     }

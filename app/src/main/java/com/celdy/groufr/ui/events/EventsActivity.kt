@@ -45,6 +45,8 @@ class EventsActivity : AppCompatActivity() {
         groupId = intent.getLongExtra(GroupDetailActivity.EXTRA_GROUP_ID, -1L)
         groupName = intent.getStringExtra(GroupDetailActivity.EXTRA_GROUP_NAME).orEmpty()
         binding.eventsToolbar.title = getString(R.string.events_title)
+        setSupportActionBar(binding.eventsToolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.eventsToolbar.setNavigationOnClickListener { finish() }
         binding.eventsGroupBadge.text = groupName
         binding.eventsGroupBadge.isVisible = groupName.isNotBlank()

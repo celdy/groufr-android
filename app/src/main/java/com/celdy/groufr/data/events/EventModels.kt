@@ -94,12 +94,18 @@ data class EventActionResponse(
 data class CreateEventRequest(
     val title: String,
     val description: String?,
+    val place: String?,
     @SerializedName("start_at")
     val startAt: String,
     @SerializedName("end_at")
     val endAt: String?,
     @SerializedName("deadline_join_at")
-    val deadlineJoinAt: String?
+    val deadlineJoinAt: String?,
+    @SerializedName("min_participants")
+    val minParticipants: Int? = null,
+    @SerializedName("max_participants")
+    val maxParticipants: Int? = null,
+    val state: String? = null
 )
 
 data class UpdateEventRequest(
