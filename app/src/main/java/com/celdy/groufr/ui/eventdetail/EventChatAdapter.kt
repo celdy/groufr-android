@@ -1,5 +1,6 @@
 package com.celdy.groufr.ui.eventdetail
 
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -11,6 +12,7 @@ import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.databinding.ItemMessageBinding
 import com.celdy.groufr.databinding.ItemMessageDividerBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
+import com.celdy.groufr.ui.common.MarkdownRenderer
 import java.util.Locale
 
 sealed class EventChatItem {
@@ -89,7 +91,8 @@ class EventChatAdapter(
 
             binding.messageAuthor.isVisible = !isOwn && authorName.isNotBlank()
             binding.messageAuthor.text = authorName
-            binding.messageBody.text = bodyText
+            binding.messageBody.text = MarkdownRenderer.render(bodyText)
+            binding.messageBody.movementMethod = LinkMovementMethod.getInstance()
             binding.messageTimestamp.text = ChatDateFormatter.format(message.createdAt, locale)
 
             val (bgColor, textColor) = when {
