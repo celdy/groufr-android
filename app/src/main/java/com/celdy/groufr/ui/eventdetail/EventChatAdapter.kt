@@ -3,11 +3,13 @@ package com.celdy.groufr.ui.eventdetail
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.celdy.groufr.R
 import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.databinding.ItemMessageBinding
 import com.celdy.groufr.databinding.ItemMessageDividerBinding
@@ -21,7 +23,8 @@ sealed class EventChatItem {
 }
 
 class EventChatAdapter(
-    private val currentUserId: Long
+    private val currentUserId: Long,
+    private val onReportMessage: (MessageDto) -> Unit = {}
 ) : ListAdapter<EventChatItem, RecyclerView.ViewHolder>(DiffCallback) {
 
     override fun getItemViewType(position: Int): Int {
@@ -39,7 +42,7 @@ class EventChatAdapter(
                     parent,
                     false
                 )
-                MessageViewHolder(binding)
+                MessageViewHolder(binding, onReportMessage)
             }
             else -> {
                 val binding = ItemMessageDividerBinding.inflate(
@@ -60,7 +63,8 @@ class EventChatAdapter(
     }
 
     class MessageViewHolder(
-        private val binding: ItemMessageBinding
+        private val binding: ItemMessageBinding,
+        private val onReportMessage: (MessageDto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(message: MessageDto, currentUserId: Long) {
             val context = binding.root.context
@@ -70,21 +74,22 @@ class EventChatAdapter(
             val isJoin = message.messageType == "user_joined"
             val isEvent = message.messageType.contains("event")
             val isPoll = message.messageType.contains("poll")
+            val isSystemMessage = isJoin || isEvent || isPoll
             val authorName = message.refUser?.name
                 ?: message.user?.name
-                ?: context.getString(com.celdy.groufr.R.string.chat_system_user)
+                ?: context.getString(R.string.chat_system_user)
 
             val bodyText = when {
-                isJoin -> context.getString(com.celdy.groufr.R.string.chat_joined_group, authorName)
+                isJoin -> context.getString(R.string.chat_joined_group, authorName)
                 isEvent -> {
                     val title = message.refEvent?.title
-                        ?: context.getString(com.celdy.groufr.R.string.chat_event_fallback)
-                    context.getString(com.celdy.groufr.R.string.chat_event_created, authorName, title)
+                        ?: context.getString(R.string.chat_event_fallback)
+                    context.getString(R.string.chat_event_created, authorName, title)
                 }
                 isPoll -> {
                     val title = message.refPoll?.question
-                        ?: context.getString(com.celdy.groufr.R.string.chat_poll_fallback)
-                    context.getString(com.celdy.groufr.R.string.chat_poll_created, authorName, title)
+                        ?: context.getString(R.string.chat_poll_fallback)
+                    context.getString(R.string.chat_poll_created, authorName, title)
                 }
                 else -> message.body.orEmpty()
             }
@@ -95,18 +100,40 @@ class EventChatAdapter(
             binding.messageBody.movementMethod = LinkMovementMethod.getInstance()
             binding.messageTimestamp.text = ChatDateFormatter.format(message.createdAt, locale)
 
+            val showMenu = !isOwn && !isSystemMessage
+            binding.messageMenu.isVisible = showMenu
+            if (showMenu) {
+                binding.messageMenu.setOnClickListener { view ->
+                    val popup = PopupMenu(context, view)
+                    popup.menu.add(0, MENU_REPORT, 0, R.string.message_menu_report)
+                    popup.setOnMenuItemClickListener { menuItem ->
+                        when (menuItem.itemId) {
+                            MENU_REPORT -> {
+                                onReportMessage(message)
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    popup.show()
+                }
+            } else {
+                binding.messageMenu.setOnClickListener(null)
+            }
+
             val (bgColor, textColor) = when {
-                isOwn -> Pair(com.celdy.groufr.R.color.message_self_bg, com.celdy.groufr.R.color.message_self_text)
-                isJoin -> Pair(com.celdy.groufr.R.color.message_join_bg, com.celdy.groufr.R.color.message_join_text)
-                isEvent -> Pair(com.celdy.groufr.R.color.message_event_bg, com.celdy.groufr.R.color.message_event_text)
-                isPoll -> Pair(com.celdy.groufr.R.color.message_poll_bg, com.celdy.groufr.R.color.message_poll_text)
-                else -> Pair(com.celdy.groufr.R.color.white, com.celdy.groufr.R.color.black)
+                isOwn -> Pair(R.color.message_self_bg, R.color.message_self_text)
+                isJoin -> Pair(R.color.message_join_bg, R.color.message_join_text)
+                isEvent -> Pair(R.color.message_event_bg, R.color.message_event_text)
+                isPoll -> Pair(R.color.message_poll_bg, R.color.message_poll_text)
+                else -> Pair(R.color.white, R.color.black)
             }
 
             binding.messageCard.setCardBackgroundColor(ContextCompat.getColor(context, bgColor))
             binding.messageBody.setTextColor(ContextCompat.getColor(context, textColor))
             binding.messageAuthor.setTextColor(ContextCompat.getColor(context, textColor))
             binding.messageTimestamp.setTextColor(ContextCompat.getColor(context, textColor))
+            binding.messageMenu.imageTintList = ContextCompat.getColorStateList(context, textColor)
 
             val params = binding.messageCard.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
             params.horizontalBias = if (isOwn) 1f else 0f
@@ -133,5 +160,6 @@ class EventChatAdapter(
     companion object {
         private const val VIEW_MESSAGE = 1
         private const val VIEW_DIVIDER = 2
+        private const val MENU_REPORT = 1
     }
 }

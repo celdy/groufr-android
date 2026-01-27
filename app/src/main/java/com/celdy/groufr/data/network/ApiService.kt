@@ -21,6 +21,8 @@ import com.celdy.groufr.data.notifications.NotificationsResponse
 import com.celdy.groufr.data.notifications.MarkReadResponse
 import com.celdy.groufr.data.notifications.NotificationMarkReadRequest
 import com.celdy.groufr.data.notifications.NotificationCountResponse
+import com.celdy.groufr.data.reports.CreateReportRequest
+import com.celdy.groufr.data.reports.ReportResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -170,4 +172,9 @@ interface ApiService {
     suspend fun markAllNotificationsRead(
         @Query("group_id") groupId: Long? = null
     ): MarkReadResponse
+
+    @POST("/api/v1/reports")
+    suspend fun createReport(
+        @Body request: CreateReportRequest
+    ): ReportResponse
 }

@@ -21,6 +21,8 @@ import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityEventDetailBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.common.MarkdownRenderer
+import com.celdy.groufr.ui.common.ReportDialogFragment
+import com.celdy.groufr.data.reports.ReportContentType
 import com.celdy.groufr.ui.eventedit.EventEditActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -65,7 +67,13 @@ class EventDetailActivity : AppCompatActivity() {
         val chatLayoutManager = LinearLayoutManager(this).apply {
             stackFromEnd = true
         }
-        chatAdapter = EventChatAdapter(tokenStore.getUserId())
+        chatAdapter = EventChatAdapter(
+            currentUserId = tokenStore.getUserId(),
+            onReportMessage = { message ->
+                ReportDialogFragment.newInstance(ReportContentType.MESSAGE, message.id)
+                    .show(supportFragmentManager, ReportDialogFragment.TAG)
+            }
+        )
         binding.eventMessagesList.layoutManager = chatLayoutManager
         binding.eventMessagesList.adapter = chatAdapter
 

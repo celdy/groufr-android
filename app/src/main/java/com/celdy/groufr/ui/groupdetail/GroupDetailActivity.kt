@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityGroupDetailBinding
+import com.celdy.groufr.data.reports.ReportContentType
+import com.celdy.groufr.ui.common.ReportDialogFragment
 import com.celdy.groufr.ui.eventcreate.EventCreateActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
@@ -68,6 +70,10 @@ class GroupDetailActivity : AppCompatActivity() {
                     .putExtra(PollDetailActivity.EXTRA_GROUP_NAME, name)
                     .putExtra(PollDetailActivity.EXTRA_POLL_ID, pollId)
                 startActivity(intent)
+            },
+            onReportMessage = { message ->
+                ReportDialogFragment.newInstance(ReportContentType.MESSAGE, message.id)
+                    .show(supportFragmentManager, ReportDialogFragment.TAG)
             }
         )
         binding.messagesList.adapter = adapter

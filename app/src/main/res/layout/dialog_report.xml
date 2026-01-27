@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/report_dialog_reason_label"
+        android:textColor="@color/neutral_900"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/report_reason_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+
+        <RadioButton
+            android:id="@+id/report_reason_spam"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_reason_spam"
+            android:textColor="@color/neutral_900" />
+
+        <RadioButton
+            android:id="@+id/report_reason_harassment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_reason_harassment"
+            android:textColor="@color/neutral_900" />
+
+        <RadioButton
+            android:id="@+id/report_reason_hate_speech"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_reason_hate_speech"
+            android:textColor="@color/neutral_900" />
+
+        <RadioButton
+            android:id="@+id/report_reason_illegal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_reason_illegal"
+            android:textColor="@color/neutral_900" />
+
+        <RadioButton
+            android:id="@+id/report_reason_violence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_reason_violence"
+            android:textColor="@color/neutral_900" />
+
+        <RadioButton
+            android:id="@+id/report_reason_inappropriate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_reason_inappropriate"
+            android:textColor="@color/neutral_900" />
+
+        <RadioButton
+            android:id="@+id/report_reason_other"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_reason_other"
+            android:textColor="@color/neutral_900" />
+    </RadioGroup>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/report_comment_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="@string/report_dialog_comment_hint">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/report_comment_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:maxLines="4" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ProgressBar
+        android:id="@+id/report_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:visibility="gone" />
+</LinearLayout>
