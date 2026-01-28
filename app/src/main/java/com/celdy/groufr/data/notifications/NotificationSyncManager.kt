@@ -24,7 +24,8 @@ class NotificationSyncManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: NotificationsRepository,
     private val authRepository: AuthRepository,
-    private val store: NotificationSyncStore
+    private val store: NotificationSyncStore,
+    private val notifier: NotificationNotifier
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var foregroundJob: Job? = null
@@ -73,6 +74,25 @@ class NotificationSyncManager @Inject constructor(
     fun forceSync() {
         scope.launch {
             performSync()
+        }
+    }
+
+    suspend fun checkForNewNotificationsAndNotify() {
+        if (!authRepository.hasSession()) return
+        val ok = authRepository.ensureValidSession()
+        if (!ok) return
+        try {
+            val notifications = repository.loadNotifications(unreadOnly = true, limit = 1)
+            val now = System.currentTimeMillis()
+            store.setLastCheckAtMs(now)
+            val latest = notifications.firstOrNull() ?: return
+            val lastNotifiedId = store.getLastNotifiedId()
+            if (latest.id != lastNotifiedId) {
+                notifier.showNotificationFor(latest)
+                store.setLastNotifiedId(latest.id)
+            }
+        } catch (exception: Exception) {
+            // Ignore errors; alarm will try again later.
         }
     }
 

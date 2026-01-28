@@ -33,9 +33,16 @@ class NotificationSyncStore @Inject constructor(
         prefs.edit().putInt(KEY_INTERVAL_INDEX, value).apply()
     }
 
+    fun getLastNotifiedId(): Long = prefs.getLong(KEY_LAST_NOTIFIED_ID, 0L)
+
+    fun setLastNotifiedId(value: Long) {
+        prefs.edit().putLong(KEY_LAST_NOTIFIED_ID, value).apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "groufr_notification_sync"
         private const val KEY_LAST_CHECK_MS = "last_check_ms"
         private const val KEY_INTERVAL_INDEX = "interval_index"
+        private const val KEY_LAST_NOTIFIED_ID = "last_notified_id"
     }
 }

@@ -3,6 +3,7 @@ package com.celdy.groufr
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import com.celdy.groufr.data.notifications.NotificationAlarmScheduler
 import com.celdy.groufr.data.notifications.NotificationSyncManager
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -10,10 +11,12 @@ import javax.inject.Inject
 @HiltAndroidApp
 class GroufrApplication : Application() {
     @Inject lateinit var notificationSyncManager: NotificationSyncManager
+    @Inject lateinit var notificationAlarmScheduler: NotificationAlarmScheduler
 
     override fun onCreate() {
         super.onCreate()
         notificationSyncManager.schedulePeriodicWork()
+        notificationAlarmScheduler.scheduleDailyAlarms()
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityStarted(activity: Activity) {
                 notificationSyncManager.onAppForeground()
