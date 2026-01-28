@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.celdy.groufr.R
+import com.celdy.groufr.ui.eventdetail.EventDetailActivity
 import com.celdy.groufr.ui.notifications.NotificationsActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -47,7 +48,7 @@ class NotificationNotifier @Inject constructor(
         val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
         val title = buildTitle(actor, notification.eventType)
         val contentText = buildContentText(notification)
-        val pendingIntent = buildPendingIntent(notification.id.toInt())
+        val pendingIntent = buildPendingIntentFor(notification)
 
         val built = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(resolveIcon(notification.eventType))
@@ -66,7 +67,7 @@ class NotificationNotifier @Inject constructor(
         val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
         val title = buildTitle(actor, notification.eventType)
         val contentText = buildContentText(notification)
-        val pendingIntent = buildPendingIntent(notification.id.toInt())
+        val pendingIntent = buildPendingIntentFor(notification)
 
         val built = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(resolveIcon(notification.eventType))
@@ -119,6 +120,32 @@ class NotificationNotifier @Inject constructor(
             .setGroupSummary(true)
             .build()
         manager.notify(SUMMARY_ID, built)
+    }
+
+    private fun buildPendingIntentFor(notification: NotificationDto): PendingIntent {
+        val intent = buildIntentFor(notification)
+        return PendingIntent.getActivity(
+            context,
+            notification.id.toInt(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun buildIntentFor(notification: NotificationDto): Intent {
+        if (notification.eventType == "new_message") {
+            val eventId = notification.eventIdFromPayload()
+            if (eventId != null && eventId > 0) {
+                return Intent(context, EventDetailActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventId)
+                    putExtra(EventDetailActivity.EXTRA_GROUP_NAME, notification.groupName.orEmpty())
+                    putExtra(EventDetailActivity.EXTRA_SHOW_CHAT, true)
+                }
+            }
+        }
+        return Intent(context, NotificationsActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 
     private fun buildPendingIntent(requestCode: Int): PendingIntent {

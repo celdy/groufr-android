@@ -59,6 +59,10 @@ class EventDetailActivity : AppCompatActivity() {
 
         eventId = intent.getLongExtra(EXTRA_EVENT_ID, -1L)
         groupName = intent.getStringExtra(EXTRA_GROUP_NAME).orEmpty()
+        val showChat = intent.getBooleanExtra(EXTRA_SHOW_CHAT, false)
+        if (showChat) {
+            activeSection = EventSection.CHAT
+        }
         setSupportActionBar(binding.eventDetailToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -534,6 +538,7 @@ class EventDetailActivity : AppCompatActivity() {
         const val EXTRA_GROUP_ID = "extra_group_id"
         const val EXTRA_GROUP_NAME = "extra_group_name"
         const val EXTRA_EVENT_ID = "extra_event_id"
+        const val EXTRA_SHOW_CHAT = "extra_show_chat"
         private val DISPLAY_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         private val STATUS_OPTIONS = listOf(
             "offered" to com.celdy.groufr.R.string.event_status_offered,

@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.celdy.groufr.data.auth.AuthRepository
+import com.celdy.groufr.data.notifications.eventIdFromPayload
 import com.celdy.groufr.databinding.ActivityNotificationsBinding
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
 import com.celdy.groufr.ui.groupdetail.GroupDetailActivity
@@ -106,6 +107,18 @@ class NotificationsActivity : AppCompatActivity() {
                 }
             }
             "new_message", "user_joined" -> {
+                if (notification.eventType == "new_message") {
+                    val eventId = notification.eventIdFromPayload() ?: -1L
+                    if (eventId > 0) {
+                        val intent = Intent(this, EventDetailActivity::class.java)
+                            .putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventId)
+                            .putExtra(EventDetailActivity.EXTRA_GROUP_NAME, groupName)
+                            .putExtra(EventDetailActivity.EXTRA_SHOW_CHAT, true)
+                        startActivity(intent)
+                        finish()
+                        return
+                    }
+                }
                 if (groupId > 0) {
                     val intent = Intent(this, GroupDetailActivity::class.java)
                         .putExtra(GroupDetailActivity.EXTRA_GROUP_ID, groupId)
