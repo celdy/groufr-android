@@ -1,6 +1,7 @@
 package com.celdy.groufr.data.notifications
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -30,27 +31,31 @@ class NotificationNotifier @Inject constructor(
         val manager = NotificationManagerCompat.from(context)
 
         if (notifications.size == 1) {
-            showSingleNotification(manager, notifications.first())
+            val notification = notifications.first()
+            val built = buildSingleNotification(notification)
+            manager.notify(NOTIFICATION_ID, built)
             return
         }
 
         notifications.forEach { notification ->
-            showGroupedNotification(manager, notification)
+            val built = buildGroupedNotification(notification)
+            manager.notify(notification.id.toInt(), built)
         }
-        showSummaryNotification(manager, notifications)
+        val summaryNotification = buildSummaryNotification(notifications)
+        manager.notify(SUMMARY_ID, summaryNotification)
     }
 
     fun showNotificationFor(notification: NotificationDto) {
         showNotificationsFor(listOf(notification))
     }
 
-    private fun showSingleNotification(manager: NotificationManagerCompat, notification: NotificationDto) {
+    private fun buildSingleNotification(notification: NotificationDto): Notification {
         val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
         val title = buildTitle(actor, notification.eventType)
         val contentText = buildContentText(notification)
         val pendingIntent = buildPendingIntentFor(notification)
 
-        val built = NotificationCompat.Builder(context, CHANNEL_ID)
+        return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(resolveIcon(notification.eventType))
             .setContentTitle(title)
             .setContentText(contentText)
@@ -60,16 +65,15 @@ class NotificationNotifier @Inject constructor(
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
-        manager.notify(NOTIFICATION_ID, built)
     }
 
-    private fun showGroupedNotification(manager: NotificationManagerCompat, notification: NotificationDto) {
+    private fun buildGroupedNotification(notification: NotificationDto): Notification {
         val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
         val title = buildTitle(actor, notification.eventType)
         val contentText = buildContentText(notification)
         val pendingIntent = buildPendingIntentFor(notification)
 
-        val built = NotificationCompat.Builder(context, CHANNEL_ID)
+        return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(resolveIcon(notification.eventType))
             .setContentTitle(title)
             .setContentText(contentText)
@@ -80,10 +84,9 @@ class NotificationNotifier @Inject constructor(
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setGroup(GROUP_KEY)
             .build()
-        manager.notify(notification.id.toInt(), built)
     }
 
-    private fun showSummaryNotification(manager: NotificationManagerCompat, notifications: List<NotificationDto>) {
+    private fun buildSummaryNotification(notifications: List<NotificationDto>): Notification {
         val pendingIntent = buildPendingIntent(SUMMARY_ID)
         val summaryText = context.resources.getQuantityString(
             R.plurals.notification_summary,
@@ -107,7 +110,7 @@ class NotificationNotifier @Inject constructor(
             )
         }
 
-        val built = NotificationCompat.Builder(context, CHANNEL_ID)
+        return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ico_message)
             .setContentTitle(context.getString(R.string.app_name))
             .setContentText(summaryText)
@@ -119,7 +122,6 @@ class NotificationNotifier @Inject constructor(
             .setGroup(GROUP_KEY)
             .setGroupSummary(true)
             .build()
-        manager.notify(SUMMARY_ID, built)
     }
 
     private fun buildPendingIntentFor(notification: NotificationDto): PendingIntent {
@@ -214,6 +216,12 @@ class NotificationNotifier @Inject constructor(
         val payload = notification.payload ?: return ""
         val preview = payload["preview"] ?: return ""
         return preview as? String ?: preview.toString()
+    }
+
+    private fun NotificationDto.eventIdFromPayload(): Long? {
+        val payload = this.payload ?: return null
+        val eventId = payload["event_id"] ?: return null
+        return (eventId as? Number)?.toLong()
     }
 
     private fun resolveIcon(eventType: String): Int {
