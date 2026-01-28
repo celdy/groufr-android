@@ -107,6 +107,14 @@
     <string name="notification_channel_name">Notifications</string>
     <string name="notification_channel_description">Updates about new activity in Groufr.</string>
     <string name="notification_system_title">New notifications</string>
+    <plurals name="notification_summary">
+        <item quantity="one">%d new notification</item>
+        <item quantity="other">%d new notifications</item>
+    </plurals>
+    <plurals name="notification_more">
+        <item quantity="one">+%d more</item>
+        <item quantity="other">+%d more</item>
+    </plurals>
     <string name="poll_create_title">Create poll</string>
     <string name="poll_create_action">Create</string>
     <string name="poll_create_button">Create poll</string>

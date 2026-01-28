@@ -1,9 +1,14 @@
 package com.celdy.groufr.ui.main
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -44,6 +49,10 @@ class MainActivity : AppCompatActivity() {
             horizontalOffset = 12
         }
     }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ -> }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +121,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.loadGroups()
+        requestNotificationPermissions()
     }
 
     override fun onResume() {
@@ -133,5 +143,18 @@ class MainActivity : AppCompatActivity() {
             BadgeUtils.attachBadgeDrawable(notificationsBadge, binding.mainToolbar, R.id.action_notifications)
         } else {
             BadgeUtils.detachBadgeDrawable(notificationsBadge, binding.mainToolbar, R.id.action_notifications)
-        }    }
+        }
+    }
+
+    private fun requestNotificationPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
 }

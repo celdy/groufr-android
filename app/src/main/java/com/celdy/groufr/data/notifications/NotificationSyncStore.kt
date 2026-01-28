@@ -39,6 +39,13 @@ class NotificationSyncStore @Inject constructor(
         prefs.edit().putLong(KEY_LAST_NOTIFIED_ID, value).apply()
     }
 
+    fun updateLastNotifiedIdIfHigher(value: Long) {
+        val current = getLastNotifiedId()
+        if (value > current) {
+            setLastNotifiedId(value)
+        }
+    }
+
     companion object {
         private const val PREFS_NAME = "groufr_notification_sync"
         private const val KEY_LAST_CHECK_MS = "last_check_ms"

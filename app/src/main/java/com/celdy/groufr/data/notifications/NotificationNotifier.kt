@@ -21,21 +21,35 @@ import javax.inject.Singleton
 class NotificationNotifier @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    fun showNotificationFor(notification: NotificationDto) {
+    fun showNotificationsFor(notifications: List<NotificationDto>) {
         if (!canPostNotifications()) return
+        if (notifications.isEmpty()) return
         ensureChannel()
+
+        val manager = NotificationManagerCompat.from(context)
+
+        if (notifications.size == 1) {
+            showSingleNotification(manager, notifications.first())
+            return
+        }
+
+        notifications.forEach { notification ->
+            showGroupedNotification(manager, notification)
+        }
+        showSummaryNotification(manager, notifications)
+    }
+
+    fun showNotificationFor(notification: NotificationDto) {
+        showNotificationsFor(listOf(notification))
+    }
+
+    private fun showSingleNotification(manager: NotificationManagerCompat, notification: NotificationDto) {
         val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
         val title = buildTitle(actor, notification.eventType)
         val contentText = buildContentText(notification)
-        val intent = Intent(context, NotificationsActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val pendingIntent = buildPendingIntent(notification.id.toInt())
+
+        val built = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(resolveIcon(notification.eventType))
             .setContentTitle(title)
             .setContentText(contentText)
@@ -45,7 +59,77 @@ class NotificationNotifier @Inject constructor(
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        manager.notify(NOTIFICATION_ID, built)
+    }
+
+    private fun showGroupedNotification(manager: NotificationManagerCompat, notification: NotificationDto) {
+        val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
+        val title = buildTitle(actor, notification.eventType)
+        val contentText = buildContentText(notification)
+        val pendingIntent = buildPendingIntent(notification.id.toInt())
+
+        val built = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(resolveIcon(notification.eventType))
+            .setContentTitle(title)
+            .setContentText(contentText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setGroup(GROUP_KEY)
+            .build()
+        manager.notify(notification.id.toInt(), built)
+    }
+
+    private fun showSummaryNotification(manager: NotificationManagerCompat, notifications: List<NotificationDto>) {
+        val pendingIntent = buildPendingIntent(SUMMARY_ID)
+        val summaryText = context.resources.getQuantityString(
+            R.plurals.notification_summary,
+            notifications.size,
+            notifications.size
+        )
+
+        val inboxStyle = NotificationCompat.InboxStyle()
+            .setBigContentTitle(summaryText)
+
+        notifications.take(MAX_INBOX_LINES).forEach { notification ->
+            val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
+            val line = buildTitle(actor, notification.eventType)
+            inboxStyle.addLine(line)
+        }
+
+        if (notifications.size > MAX_INBOX_LINES) {
+            val moreCount = notifications.size - MAX_INBOX_LINES
+            inboxStyle.setSummaryText(
+                context.resources.getQuantityString(R.plurals.notification_more, moreCount, moreCount)
+            )
+        }
+
+        val built = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ico_message)
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(summaryText)
+            .setStyle(inboxStyle)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setGroup(GROUP_KEY)
+            .setGroupSummary(true)
+            .build()
+        manager.notify(SUMMARY_ID, built)
+    }
+
+    private fun buildPendingIntent(requestCode: Int): PendingIntent {
+        val intent = Intent(context, NotificationsActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        return PendingIntent.getActivity(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun ensureChannel() {
@@ -118,5 +202,8 @@ class NotificationNotifier @Inject constructor(
     companion object {
         const val CHANNEL_ID = "groufr_notifications"
         private const val NOTIFICATION_ID = 4201
+        private const val SUMMARY_ID = 4200
+        private const val GROUP_KEY = "com.celdy.groufr.NOTIFICATION_GROUP"
+        private const val MAX_INBOX_LINES = 5
     }
 }

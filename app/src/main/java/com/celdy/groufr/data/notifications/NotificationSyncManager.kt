@@ -82,15 +82,18 @@ class NotificationSyncManager @Inject constructor(
         val ok = authRepository.ensureValidSession()
         if (!ok) return
         try {
-            val notifications = repository.loadNotifications(unreadOnly = true, limit = 1)
+            val notifications = repository.loadNotifications(unreadOnly = true, limit = MAX_NOTIFICATIONS_TO_FETCH)
             val now = System.currentTimeMillis()
             store.setLastCheckAtMs(now)
-            val latest = notifications.firstOrNull() ?: return
+            if (notifications.isEmpty()) return
+
             val lastNotifiedId = store.getLastNotifiedId()
-            if (latest.id != lastNotifiedId) {
-                notifier.showNotificationFor(latest)
-                store.setLastNotifiedId(latest.id)
-            }
+            val newNotifications = notifications.filter { it.id > lastNotifiedId }
+            if (newNotifications.isEmpty()) return
+
+            notifier.showNotificationsFor(newNotifications)
+            val highestId = newNotifications.maxOf { it.id }
+            store.updateLastNotifiedIdIfHigher(highestId)
         } catch (exception: Exception) {
             // Ignore errors; alarm will try again later.
         }
@@ -129,8 +132,9 @@ class NotificationSyncManager @Inject constructor(
         val ok = authRepository.ensureValidSession()
         if (!ok) return
         try {
-            val notifications = repository.loadNotifications(unreadOnly = true, limit = 1)
-            val hasNew = notifications.isNotEmpty()
+            val notifications = repository.loadNotifications(unreadOnly = true, limit = MAX_NOTIFICATIONS_TO_FETCH)
+            val lastNotifiedId = store.getLastNotifiedId()
+            val hasNew = notifications.any { it.id > lastNotifiedId }
             val now = System.currentTimeMillis()
             store.setLastCheckAtMs(now)
             store.setIntervalIndex(nextIntervalIndex(hasNew))
@@ -173,5 +177,6 @@ class NotificationSyncManager @Inject constructor(
         )
         private const val ONE_HOUR_MS = 60 * 60_000L
         private const val WORK_NAME = "notification_sync_work"
+        private const val MAX_NOTIFICATIONS_TO_FETCH = 20
     }
 }
