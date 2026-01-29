@@ -33,16 +33,16 @@ class NotificationNotifier @Inject constructor(
         if (notifications.size == 1) {
             val notification = notifications.first()
             val built = buildSingleNotification(notification)
-            manager.notify(NOTIFICATION_ID, built)
+            safeNotify(manager, NOTIFICATION_ID, built)
             return
         }
 
         notifications.forEach { notification ->
             val built = buildGroupedNotification(notification)
-            manager.notify(notification.id.toInt(), built)
+            safeNotify(manager, notification.id.toInt(), built)
         }
         val summaryNotification = buildSummaryNotification(notifications)
-        manager.notify(SUMMARY_ID, summaryNotification)
+        safeNotify(manager, SUMMARY_ID, summaryNotification)
     }
 
     fun showNotificationFor(notification: NotificationDto) {
@@ -176,6 +176,19 @@ class NotificationNotifier @Inject constructor(
         manager.createNotificationChannel(channel)
     }
 
+    private fun safeNotify(
+        manager: NotificationManagerCompat,
+        notificationId: Int,
+        notification: Notification
+    ) {
+        if (!canPostNotifications()) return
+        try {
+            manager.notify(notificationId, notification)
+        } catch (securityException: SecurityException) {
+            // Ignore; user may have revoked notification permission mid-session.
+        }
+    }
+
     private fun canPostNotifications(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
         return ContextCompat.checkSelfPermission(
@@ -216,12 +229,6 @@ class NotificationNotifier @Inject constructor(
         val payload = notification.payload ?: return ""
         val preview = payload["preview"] ?: return ""
         return preview as? String ?: preview.toString()
-    }
-
-    private fun NotificationDto.eventIdFromPayload(): Long? {
-        val payload = this.payload ?: return null
-        val eventId = payload["event_id"] ?: return null
-        return (eventId as? Number)?.toLong()
     }
 
     private fun resolveIcon(eventType: String): Int {
