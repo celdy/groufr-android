@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.R
 import com.celdy.groufr.data.notifications.NotificationDto
+import com.celdy.groufr.data.notifications.eventIdFromPayload
 import com.celdy.groufr.databinding.ItemNotificationBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
 import java.util.Locale
@@ -50,6 +51,10 @@ class NotificationsAdapter(
             )
             binding.notificationIcon.setImageResource(resolveIcon(notification.eventType))
             binding.notificationTitle.text = title
+            val eventTitle = extractEventTitle(notification)
+            val showEvent = shouldShowEvent(notification, eventTitle)
+            binding.notificationEvent.isVisible = showEvent
+            binding.notificationEvent.text = eventTitle
             binding.notificationSubtitle.isVisible = notification.eventType == "new_message" && preview.isNotBlank()
             binding.notificationSubtitle.text = preview
             binding.notificationMeta.text = "$groupName - ${formatTimestamp(notification.createdAt, locale)}"
@@ -93,6 +98,29 @@ class NotificationsAdapter(
 
         private fun formatTimestamp(createdAt: String, locale: Locale): String {
             return ChatDateFormatter.format(createdAt, locale)
+        }
+
+        private fun shouldShowEvent(notification: NotificationDto, eventTitle: String): Boolean {
+            if (eventTitle.isBlank()) return false
+            return when (notification.eventType) {
+                "event_created",
+                "event_updated",
+                "participant_status_changed",
+                "event_invitation_received" -> true
+                "new_message" -> (notification.eventIdFromPayload() ?: -1L) > 0
+                else -> false
+            }
+        }
+
+        private fun extractEventTitle(notification: NotificationDto): String {
+            val payload = notification.payload ?: return ""
+            val title = payload["event_title"]
+                ?: payload["eventTitle"]
+                ?: payload["title"]
+                ?: payload["event_name"]
+                ?: payload["eventName"]
+                ?: return ""
+            return title as? String ?: title.toString()
         }
     }
 
