@@ -34,6 +34,8 @@
     <color name="notification_divider">#e5e7eb</color>
     <color name="notification_meta_text">#6b7280</color>
 
+    <color name="group_avatar_bg">#f4f2fe</color>
+
     <color name="event_status_joined">#166534</color>
     <color name="event_status_maybe">#a16207</color>
     <color name="event_status_declined">#b91c1c</color>

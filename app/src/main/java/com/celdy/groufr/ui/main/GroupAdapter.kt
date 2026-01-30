@@ -29,9 +29,24 @@ class GroupAdapter(
         private val binding: ItemGroupBinding
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(group: GroupDto, onClick: (GroupDto) -> Unit) {
+            val initials = buildInitials(group.name)
+            binding.groupAvatar.text = initials
             binding.groupName.text = group.name
             binding.groupDescription.text = group.description.orEmpty()
             binding.root.setOnClickListener { onClick(group) }
+        }
+
+        private fun buildInitials(name: String): String {
+            val trimmed = name.trim()
+            if (trimmed.isEmpty()) return "--"
+            val initials = if (trimmed.length >= 2) {
+                trimmed.substring(0, 2)
+            } else {
+                trimmed
+            }
+            val locales = binding.root.resources.configuration.locales
+            val locale = if (locales.isEmpty) java.util.Locale.getDefault() else locales[0]
+            return initials.uppercase(locale)
         }
     }
 
