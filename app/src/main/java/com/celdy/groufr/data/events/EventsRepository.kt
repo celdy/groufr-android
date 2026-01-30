@@ -1,21 +1,39 @@
 package com.celdy.groufr.data.events
 
+import com.celdy.groufr.data.local.EventDao
+import com.celdy.groufr.data.local.UserDao
+import com.celdy.groufr.data.local.toDetailDto
+import com.celdy.groufr.data.local.toDto
+import com.celdy.groufr.data.local.toEntity
 import com.celdy.groufr.data.network.ApiService
 import javax.inject.Inject
 
 class EventsRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val eventDao: EventDao,
+    private val userDao: UserDao
 ) {
     suspend fun loadEvents(
         groupId: Long,
         filter: String = "upcoming",
         participation: String? = null
     ): List<EventDto> {
-        return apiService.getGroupEvents(
-            groupId = groupId,
-            filter = filter,
-            participation = participation
-        ).events
+        return try {
+            val events = apiService.getGroupEvents(
+                groupId = groupId,
+                filter = filter,
+                participation = participation
+            ).events
+            eventDao.upsertAll(events.map { it.toEntity() })
+            events
+        } catch (exception: Exception) {
+            val cached = eventDao.getByGroup(groupId)
+            if (cached.isNotEmpty()) {
+                cached.map { it.toDto() }
+            } else {
+                throw exception
+            }
+        }
     }
 
     suspend fun loadAllEvents(
@@ -23,15 +41,37 @@ class EventsRepository @Inject constructor(
         participation: String? = null,
         state: String? = null
     ): List<EventDto> {
-        return apiService.getAllEvents(
-            time = time,
-            participation = participation,
-            state = state
-        ).events
+        return try {
+            val events = apiService.getAllEvents(
+                time = time,
+                participation = participation,
+                state = state
+            ).events
+            eventDao.upsertAll(events.map { it.toEntity() })
+            events
+        } catch (exception: Exception) {
+            val cached = eventDao.getAll()
+            if (cached.isNotEmpty()) {
+                cached.map { it.toDto() }
+            } else {
+                throw exception
+            }
+        }
     }
 
     suspend fun loadEventDetail(eventId: Long): EventDetailDto {
-        return apiService.getEventDetail(eventId)
+        return try {
+            val event = apiService.getEventDetail(eventId)
+            val users = event.participantsList.map { it.user.toEntity() }
+            if (users.isNotEmpty()) {
+                userDao.upsertAll(users)
+            }
+            eventDao.upsert(event.toEntity())
+            event
+        } catch (exception: Exception) {
+            val cached = eventDao.getById(eventId)
+            cached?.toDetailDto() ?: throw exception
+        }
     }
 
     suspend fun joinEvent(eventId: Long): EventActionResponse {
@@ -47,7 +87,13 @@ class EventsRepository @Inject constructor(
     }
 
     suspend fun updateEventState(eventId: Long, state: String): EventDetailDto {
-        return apiService.updateEvent(eventId, UpdateEventRequest(state = state))
+        val event = apiService.updateEvent(eventId, UpdateEventRequest(state = state))
+        val users = event.participantsList.map { it.user.toEntity() }
+        if (users.isNotEmpty()) {
+            userDao.upsertAll(users)
+        }
+        eventDao.upsert(event.toEntity())
+        return event
     }
 
     suspend fun updateEventDetails(
@@ -62,7 +108,7 @@ class EventsRepository @Inject constructor(
         maxParticipants: Int?,
         state: String?
     ): EventDetailDto {
-        return apiService.updateEvent(
+        val event = apiService.updateEvent(
             eventId,
             UpdateEventRequest(
                 title = title,
@@ -76,6 +122,12 @@ class EventsRepository @Inject constructor(
                 state = state
             )
         )
+        val users = event.participantsList.map { it.user.toEntity() }
+        if (users.isNotEmpty()) {
+            userDao.upsertAll(users)
+        }
+        eventDao.upsert(event.toEntity())
+        return event
     }
 
     suspend fun createEvent(
@@ -101,6 +153,8 @@ class EventsRepository @Inject constructor(
             maxParticipants = maxParticipants,
             state = state
         )
-        return apiService.createEvent(groupId, request)
+        val event = apiService.createEvent(groupId, request)
+        eventDao.upsert(event.toEntity())
+        return event
     }
 }

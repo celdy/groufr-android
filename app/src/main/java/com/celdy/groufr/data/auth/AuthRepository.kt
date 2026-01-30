@@ -3,6 +3,8 @@ package com.celdy.groufr.data.auth
 import com.celdy.groufr.data.device.DeviceInfoProvider
 import com.celdy.groufr.data.network.ApiService
 import com.celdy.groufr.data.auth.RefreshRequest
+import com.celdy.groufr.data.local.UserDao
+import com.celdy.groufr.data.local.toEntity
 import com.celdy.groufr.data.storage.TokenStore
 import retrofit2.HttpException
 import java.io.IOException
@@ -13,7 +15,8 @@ import kotlinx.coroutines.sync.withLock
 class AuthRepository @Inject constructor(
     private val apiService: ApiService,
     private val tokenStore: TokenStore,
-    private val deviceInfoProvider: DeviceInfoProvider
+    private val deviceInfoProvider: DeviceInfoProvider,
+    private val userDao: UserDao
 ) {
     private val refreshMutex = Mutex()
 
@@ -24,6 +27,7 @@ class AuthRepository @Inject constructor(
             device = deviceInfoProvider.buildDeviceInfo()
         )
         val response = apiService.login(request)
+        userDao.upsert(response.user.toEntity())
         tokenStore.saveTokens(
             accessToken = response.accessToken,
             refreshToken = response.refreshToken,
@@ -55,6 +59,7 @@ class AuthRepository @Inject constructor(
             // Token expired or about to expire - try to refresh
             try {
                 val response = apiService.refresh(RefreshRequest(refreshToken))
+                userDao.upsert(response.user.toEntity())
                 tokenStore.saveTokens(
                     accessToken = response.accessToken,
                     refreshToken = response.refreshToken,

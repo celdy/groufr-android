@@ -1,25 +1,54 @@
 package com.celdy.groufr.data.polls
 
+import com.celdy.groufr.data.local.PollDao
+import com.celdy.groufr.data.local.toDto
+import com.celdy.groufr.data.local.toEntity
 import com.celdy.groufr.data.network.ApiService
 import javax.inject.Inject
 
 class PollsRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val pollDao: PollDao
 ) {
     suspend fun loadPolls(groupId: Long, status: String = "all"): List<PollDto> {
-        return apiService.getGroupPolls(groupId, status = status).polls
+        return try {
+            val polls = apiService.getGroupPolls(groupId, status = status).polls
+            pollDao.upsertAll(polls.map { it.toEntity() })
+            polls
+        } catch (exception: Exception) {
+            val cached = if (status == "all") {
+                pollDao.getByGroup(groupId)
+            } else {
+                pollDao.getByGroupAndStatus(groupId, status)
+            }
+            if (cached.isNotEmpty()) {
+                cached.map { it.toDto() }
+            } else {
+                throw exception
+            }
+        }
     }
 
     suspend fun loadPoll(groupId: Long, pollId: Long): PollDto? {
-        return apiService.getGroupPolls(groupId, status = "all").polls.firstOrNull { it.id == pollId }
+        return try {
+            val polls = apiService.getGroupPolls(groupId, status = "all").polls
+            pollDao.upsertAll(polls.map { it.toEntity() })
+            polls.firstOrNull { it.id == pollId }
+        } catch (exception: Exception) {
+            pollDao.getById(pollId)?.toDto()
+        }
     }
 
     suspend fun vote(pollId: Long, optionIds: List<Long>): PollDto {
-        return apiService.voteOnPoll(pollId, VoteRequest(optionIds = optionIds))
+        val poll = apiService.voteOnPoll(pollId, VoteRequest(optionIds = optionIds))
+        pollDao.upsert(poll.toEntity())
+        return poll
     }
 
     suspend fun clearVote(pollId: Long): PollDto {
-        return apiService.clearPollVote(pollId)
+        val poll = apiService.clearPollVote(pollId)
+        pollDao.upsert(poll.toEntity())
+        return poll
     }
 
     suspend fun createPoll(
@@ -37,6 +66,8 @@ class PollsRepository @Inject constructor(
             options = options,
             deadlineAt = deadlineAt
         )
-        return apiService.createPoll(groupId, request)
+        val poll = apiService.createPoll(groupId, request)
+        pollDao.upsert(poll.toEntity())
+        return poll
     }
 }
