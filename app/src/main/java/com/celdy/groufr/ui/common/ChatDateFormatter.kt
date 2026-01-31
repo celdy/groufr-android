@@ -37,6 +37,19 @@ object ChatDateFormatter {
         }
     }
 
+    fun formatAbsolute(
+        isoString: String,
+        locale: Locale,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): String {
+        return try {
+            val zoned = OffsetDateTime.parse(isoString).atZoneSameInstant(zoneId)
+            formatZoned(zoned, locale, includeYear = true)
+        } catch (exception: DateTimeParseException) {
+            ""
+        }
+    }
+
     fun formatRange(
         startIso: String?,
         endIso: String?,

@@ -8,6 +8,13 @@
     <string name="poll_detail_title">Hlasování</string>
     <string name="poll_detail_error">Nemohu nahrát hlasování.</string>
     <string name="poll_vote_button">Hlasuj</string>
+    <string name="poll_vote_change_button">Změň hlas</string>
+    <string name="poll_status_open">Otevřeno</string>
+    <string name="poll_status_closed">Uzavřeno</string>
+    <string name="poll_votes_format">Hlasující: %1$d</string>
+    <string name="poll_voters_title">Hlasující</string>
+    <string name="poll_voters_empty">Zatím nikdo nehlasoval.</string>
+    <string name="poll_deadline_format">Uzávěrka: %1$s</string>
     <string name="chat_generic_user">Uživatel</string>
     <string name="chat_joined_group">%1$s se připojil/a ke skupině</string>
     <string name="chat_event_created">%1$s vytvořil/a novou událost: %2$s</string>

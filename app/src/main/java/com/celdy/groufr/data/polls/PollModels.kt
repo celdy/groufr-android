@@ -17,6 +17,10 @@ data class PollDto(
     val id: Long,
     @SerializedName("group_id")
     val groupId: Long,
+    @SerializedName("event_id")
+    val eventId: Long? = null,
+    @SerializedName("created_by")
+    val createdBy: PollUserDto? = null,
     val question: String,
     val description: String?,
     val multiselect: Boolean,
@@ -25,18 +29,32 @@ data class PollDto(
     val yourVotes: List<Long>,
     @SerializedName("total_voters")
     val totalVoters: Int,
+    @SerializedName("total_votes")
+    val totalVotes: Int = 0,
     val status: String,
+    @SerializedName("can_change_status")
+    val canChangeStatus: Boolean = false,
     @SerializedName("deadline_at")
     val deadlineAt: String?,
     @SerializedName("created_at")
-    val createdAt: String
+    val createdAt: String,
+    @SerializedName("updated_at")
+    val updatedAt: String? = null
 )
 
 data class PollOptionDto(
     val id: Long,
     val label: String,
     @SerializedName("vote_count")
-    val voteCount: Int
+    val voteCount: Int,
+    @SerializedName("is_voted")
+    val isVoted: Boolean = false,
+    val voters: List<PollUserDto> = emptyList()
+)
+
+data class PollUserDto(
+    val id: Long,
+    val name: String
 )
 
 data class VoteRequest(

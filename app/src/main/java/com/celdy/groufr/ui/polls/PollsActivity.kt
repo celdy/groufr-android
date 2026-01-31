@@ -40,11 +40,9 @@ class PollsActivity : AppCompatActivity() {
 
         groupId = intent.getLongExtra(GroupDetailActivity.EXTRA_GROUP_ID, -1L)
         groupName = intent.getStringExtra(GroupDetailActivity.EXTRA_GROUP_NAME).orEmpty()
-        binding.pollsToolbar.title = if (groupName.isNotBlank()) {
-            "$groupName · Polls"
-        } else {
-            getString(com.celdy.groufr.R.string.polls_title)
-        }
+        binding.pollsToolbar.title = getString(com.celdy.groufr.R.string.polls_title)
+        binding.pollsGroupBadge.text = groupName
+        binding.pollsGroupBadge.isVisible = groupName.isNotBlank()
         binding.pollsToolbar.setNavigationOnClickListener { finish() }
 
         binding.pollsList.layoutManager = LinearLayoutManager(this)

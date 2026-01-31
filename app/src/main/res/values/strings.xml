@@ -29,7 +29,14 @@
     <string name="poll_detail_title">Poll</string>
     <string name="poll_detail_error">Unable to load poll.</string>
     <string name="poll_vote_button">Vote</string>
+    <string name="poll_vote_change_button">Change vote</string>
     <string name="poll_clear_button">Clear vote</string>
+    <string name="poll_status_open">Open</string>
+    <string name="poll_status_closed">Closed</string>
+    <string name="poll_votes_format">Voters: %1$d</string>
+    <string name="poll_voters_title">Voters</string>
+    <string name="poll_voters_empty">No voters yet.</string>
+    <string name="poll_deadline_format">Deadline: %1$s</string>
     <string name="events_title">Events</string>
     <string name="events_empty">No events yet.</string>
     <string name="events_error">Unable to load events.</string>

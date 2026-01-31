@@ -10,23 +10,39 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:navigationIcon="@drawable/ic_arrow_back"
         android:title="@string/polls_title"
         android:titleTextColor="@color/neutral_900"
+        app:contentInsetStartWithNavigation="0dp"
+        app:titleCentered="false"
+        app:navigationIcon="@drawable/ic_arrow_back"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/polls_group_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/neutral_900"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/polls_toolbar" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/polls_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:padding="16dp"
+        android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/polls_toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/polls_group_badge"
+        app:layout_goneMarginTop="0dp"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/polls_empty"

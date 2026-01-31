@@ -11,11 +11,40 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         app:navigationIcon="@drawable/ic_arrow_back"
-        android:title="@string/poll_detail_title"
-        android:titleTextColor="@color/neutral_900"
+        app:titleCentered="false"
+        app:contentInsetStartWithNavigation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/poll_detail_toolbar_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:id="@+id/poll_detail_toolbar_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ico_poll" />
+
+            <TextView
+                android:id="@+id/poll_detail_toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/poll_detail_title"
+                android:textColor="@color/neutral_900"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <ProgressBar
         android:id="@+id/poll_detail_loading"
@@ -55,12 +84,40 @@
             android:id="@+id/poll_question"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:textColor="@color/neutral_900"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/poll_state"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/poll_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_event_status_badge"
+            android:paddingStart="10dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/primary_700"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBaseline_toBaselineOf="@id/poll_question"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/poll_group_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/neutral_900"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/poll_question" />
 
         <TextView
             android:id="@+id/poll_description"
@@ -71,30 +128,73 @@
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/poll_question" />
+            app:layout_constraintTop_toBottomOf="@id/poll_group_name" />
+
+        <ImageView
+            android:id="@+id/poll_deadline_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_alarm"
+            app:tint="@color/notification_meta_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/poll_description" />
 
         <TextView
-            android:id="@+id/poll_meta"
+            android:id="@+id/poll_deadline"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="12dp"
+            android:lineSpacingMultiplier="1.25"
+            android:textColor="@color/neutral_900"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@id/poll_votes_icon"
+            app:layout_constraintStart_toEndOf="@id/poll_deadline_icon"
+            app:layout_constraintTop_toBottomOf="@id/poll_description" />
+
+        <ImageView
+            android:id="@+id/poll_votes_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:layout_marginTop="8dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_person"
+            app:tint="@color/notification_meta_text"
+            app:layout_constraintEnd_toStartOf="@id/poll_votes"
+            app:layout_constraintTop_toBottomOf="@id/poll_description" />
+
+        <TextView
+            android:id="@+id/poll_votes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="6dp"
             android:textColor="@color/neutral_900"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/poll_description" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/poll_header_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="poll_deadline,poll_votes" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/poll_options"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:clipToPadding="false"
             android:paddingBottom="12dp"
             app:layout_constraintBottom_toTopOf="@id/poll_buttons"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/poll_meta" />
+            app:layout_constraintTop_toBottomOf="@id/poll_header_bottom" />
 
         <LinearLayout
             android:id="@+id/poll_buttons"
@@ -107,20 +207,10 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/poll_vote_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
+                android:layout_weight="0"
                 android:text="@string/poll_vote_button" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/poll_clear_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/poll_clear_button"
-                app:backgroundTint="@color/primary_100"
-                app:iconTint="@color/primary_700" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

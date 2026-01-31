@@ -80,6 +80,11 @@ interface ApiService {
         @Query("offset") offset: Int = 0
     ): PollsResponse
 
+    @GET("/api/v1/polls/{pollId}")
+    suspend fun getPollDetail(
+        @Path("pollId") pollId: Long
+    ): PollDto
+
     @POST("/api/v1/polls/{pollId}/vote")
     suspend fun voteOnPoll(
         @Path("pollId") pollId: Long,

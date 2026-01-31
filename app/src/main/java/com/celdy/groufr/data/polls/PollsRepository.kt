@@ -31,9 +31,9 @@ class PollsRepository @Inject constructor(
 
     suspend fun loadPoll(groupId: Long, pollId: Long): PollDto? {
         return try {
-            val polls = apiService.getGroupPolls(groupId, status = "all").polls
-            pollDao.upsertAll(polls.map { it.toEntity() })
-            polls.firstOrNull { it.id == pollId }
+            val poll = apiService.getPollDetail(pollId)
+            pollDao.upsert(poll.toEntity())
+            poll
         } catch (exception: Exception) {
             pollDao.getById(pollId)?.toDto()
         }

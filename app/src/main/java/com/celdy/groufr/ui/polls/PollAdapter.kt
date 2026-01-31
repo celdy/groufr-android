@@ -2,14 +2,16 @@ package com.celdy.groufr.ui.polls
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.celdy.groufr.R
 import com.celdy.groufr.data.polls.PollDto
 import com.celdy.groufr.databinding.ItemPollBinding
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
+import com.celdy.groufr.ui.common.ChatDateFormatter
 import java.time.format.DateTimeParseException
+import java.util.Locale
 
 class PollAdapter(
     private val onClick: (PollDto) -> Unit
@@ -32,22 +34,40 @@ class PollAdapter(
         private val binding: ItemPollBinding
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(poll: PollDto, onClick: (PollDto) -> Unit) {
+            val context = binding.root.context
             binding.pollQuestion.text = poll.question
             binding.pollDescription.text = poll.description.orEmpty()
-            binding.pollStatus.text = poll.status
-            binding.pollVotes.text = "Voters: ${poll.totalVoters}"
-            binding.pollDeadline.text = formatDeadline(poll.deadlineAt)
+            binding.pollStatus.text = formatStatus(poll.status)
+            binding.pollVotes.text = context.getString(R.string.poll_votes_format, poll.totalVoters)
+            val deadlineText = formatDeadline(poll.deadlineAt)
+            binding.pollDeadline.text = deadlineText
+            binding.pollDeadline.isVisible = deadlineText.isNotBlank()
+            binding.pollDeadlineIcon.isVisible = deadlineText.isNotBlank()
             binding.root.setOnClickListener { onClick(poll) }
+        }
+
+        private fun formatStatus(status: String): String {
+            val context = binding.root.context
+            return when (status.lowercase()) {
+                "open" -> context.getString(R.string.poll_status_open)
+                "closed" -> context.getString(R.string.poll_status_closed)
+                else -> status
+            }
         }
 
         private fun formatDeadline(deadline: String?): String {
             if (deadline.isNullOrBlank()) return ""
             return try {
-                val instant = OffsetDateTime.parse(deadline)
-                "Deadline: ${instant.format(DISPLAY_FORMAT)}"
+                val locale = currentLocale()
+                ChatDateFormatter.formatAbsolute(deadline, locale)
             } catch (exception: DateTimeParseException) {
                 ""
             }
+        }
+
+        private fun currentLocale(): Locale {
+            val locales = binding.root.context.resources.configuration.locales
+            return if (locales.isEmpty) Locale.getDefault() else locales[0]
         }
     }
 
@@ -61,7 +81,4 @@ class PollAdapter(
         }
     }
 
-    companion object {
-        private val DISPLAY_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-    }
 }

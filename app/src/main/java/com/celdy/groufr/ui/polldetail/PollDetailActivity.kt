@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.view.ViewCompat
@@ -12,8 +13,10 @@ import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.databinding.ActivityPollDetailBinding
+import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -21,9 +24,12 @@ class PollDetailActivity : AppCompatActivity() {
     @Inject lateinit var authRepository: AuthRepository
     private lateinit var binding: ActivityPollDetailBinding
     private val viewModel: PollDetailViewModel by viewModels()
-    private val adapter = PollOptionAdapter()
+    private val adapter = PollOptionAdapter { option ->
+        showVotersDialog(option)
+    }
     private var pollId: Long = -1L
     private var groupId: Long = -1L
+    private var originalVotes: Set<Long> = emptySet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,15 +40,15 @@ class PollDetailActivity : AppCompatActivity() {
         groupId = intent.getLongExtra(EXTRA_GROUP_ID, -1L)
         val groupName = intent.getStringExtra(EXTRA_GROUP_NAME).orEmpty()
 
-        binding.pollDetailToolbar.title = if (groupName.isNotBlank()) {
-            "$groupName · Poll"
-        } else {
-            getString(com.celdy.groufr.R.string.poll_detail_title)
-        }
+        binding.pollGroupName.text = groupName
+        binding.pollGroupName.isVisible = groupName.isNotBlank()
         binding.pollDetailToolbar.setNavigationOnClickListener { finish() }
 
         binding.pollOptions.layoutManager = LinearLayoutManager(this)
         binding.pollOptions.adapter = adapter
+        adapter.setOnSelectionChanged { selection ->
+            updateVoteButton(selection)
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -53,11 +59,12 @@ class PollDetailActivity : AppCompatActivity() {
         }
 
         binding.pollVoteButton.setOnClickListener {
-            viewModel.vote(pollId, adapter.selectedOptionIds())
-        }
-
-        binding.pollClearButton.setOnClickListener {
-            viewModel.clearVote(pollId)
+            val selection = adapter.selectedOptionIds()
+            if (selection.isEmpty()) {
+                viewModel.clearVote(pollId)
+            } else {
+                viewModel.vote(pollId, selection)
+            }
         }
 
         viewModel.state.observe(this) { state ->
@@ -74,10 +81,19 @@ class PollDetailActivity : AppCompatActivity() {
                     binding.pollDetailError.isVisible = false
                     binding.pollQuestion.text = poll.question
                     binding.pollDescription.text = poll.description.orEmpty()
+                    binding.pollState.text = formatStatus(poll.status)
                     adapter.multiselect = poll.multiselect
+                    adapter.totalVotes = if (poll.totalVotes > 0) poll.totalVotes else poll.totalVoters
                     adapter.submitList(poll.options)
                     adapter.setSelected(poll.yourVotes)
-                    binding.pollMeta.text = "Voters: ${poll.totalVoters}"
+                    originalVotes = poll.yourVotes.toSet()
+                    updateVoteButton(originalVotes)
+                    binding.pollVotes.text = getString(com.celdy.groufr.R.string.poll_votes_format, poll.totalVoters)
+                    val deadlineText = formatDeadline(poll.deadlineAt)
+                    binding.pollDeadline.text = deadlineText
+                    val showDeadline = deadlineText.isNotBlank()
+                    binding.pollDeadline.isVisible = showDeadline
+                    binding.pollDeadlineIcon.isVisible = showDeadline
                 }
                 PollDetailState.Error -> {
                     binding.pollDetailLoading.isVisible = false
@@ -96,15 +112,14 @@ class PollDetailActivity : AppCompatActivity() {
                 VoteState.Idle -> Unit
                 VoteState.Sending -> {
                     binding.pollVoteButton.isEnabled = false
-                    binding.pollClearButton.isEnabled = false
                 }
                 VoteState.Sent -> {
                     binding.pollVoteButton.isEnabled = true
-                    binding.pollClearButton.isEnabled = true
+                    originalVotes = adapter.selectedOptionIds().toSet()
+                    updateVoteButton(originalVotes)
                 }
                 is VoteState.Error -> {
                     binding.pollVoteButton.isEnabled = true
-                    binding.pollClearButton.isEnabled = true
                     Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -117,6 +132,56 @@ class PollDetailActivity : AppCompatActivity() {
             binding.pollDetailContent.isVisible = false
             binding.pollDetailError.isVisible = true
         }
+    }
+
+    private fun formatStatus(status: String): String {
+        return when (status.lowercase()) {
+            "open" -> getString(com.celdy.groufr.R.string.poll_status_open)
+            "closed" -> getString(com.celdy.groufr.R.string.poll_status_closed)
+            else -> status
+        }
+    }
+
+    private fun formatDeadline(deadline: String?): String {
+        if (deadline.isNullOrBlank()) return ""
+        val locale = currentLocale()
+        return ChatDateFormatter.formatAbsolute(deadline, locale)
+    }
+
+    private fun currentLocale(): Locale {
+        val locales = resources.configuration.locales
+        return if (locales.isEmpty) Locale.getDefault() else locales[0]
+    }
+
+    private fun updateVoteButton(selection: Set<Long>) {
+        val hasVoted = originalVotes.isNotEmpty()
+        binding.pollVoteButton.text = if (hasVoted) {
+            getString(com.celdy.groufr.R.string.poll_vote_change_button)
+        } else {
+            getString(com.celdy.groufr.R.string.poll_vote_button)
+        }
+        val sameSelection = selection == originalVotes
+        binding.pollVoteButton.isEnabled = if (hasVoted) {
+            !sameSelection
+        } else {
+            selection.isNotEmpty()
+        }
+    }
+
+    private fun showVotersDialog(option: com.celdy.groufr.data.polls.PollOptionDto) {
+        val voters = option.voters.map { it.name }
+        val title = option.label.takeIf { it.isNotBlank() }
+            ?: getString(com.celdy.groufr.R.string.poll_voters_title)
+        val builder = AlertDialog.Builder(this)
+            .setTitle(title)
+        if (voters.isEmpty()) {
+            builder.setMessage(com.celdy.groufr.R.string.poll_voters_empty)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
+        builder.setItems(voters.toTypedArray(), null)
+            .show()
     }
 
     companion object {

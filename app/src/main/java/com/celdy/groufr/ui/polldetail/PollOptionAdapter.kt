@@ -8,17 +8,27 @@ import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.data.polls.PollOptionDto
 import com.celdy.groufr.databinding.ItemPollOptionBinding
 
-class PollOptionAdapter : ListAdapter<PollOptionDto, PollOptionAdapter.OptionViewHolder>(DiffCallback) {
+class PollOptionAdapter(
+    private val onVotesClick: (PollOptionDto) -> Unit
+) : ListAdapter<PollOptionDto, PollOptionAdapter.OptionViewHolder>(DiffCallback) {
     private val selected = linkedSetOf<Long>()
+    private var onSelectionChanged: ((Set<Long>) -> Unit)? = null
     var multiselect: Boolean = false
+    var totalVotes: Int = 0
 
     fun setSelected(optionIds: List<Long>) {
         selected.clear()
         selected.addAll(optionIds)
         notifyDataSetChanged()
+        onSelectionChanged?.invoke(selected)
     }
 
     fun selectedOptionIds(): List<Long> = selected.toList()
+
+    fun setOnSelectionChanged(listener: (Set<Long>) -> Unit) {
+        onSelectionChanged = listener
+        listener.invoke(selected)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OptionViewHolder {
         val binding = ItemPollOptionBinding.inflate(
@@ -30,7 +40,7 @@ class PollOptionAdapter : ListAdapter<PollOptionDto, PollOptionAdapter.OptionVie
     }
 
     override fun onBindViewHolder(holder: OptionViewHolder, position: Int) {
-        holder.bind(getItem(position), selected, multiselect) { optionId ->
+        holder.bind(getItem(position), selected, multiselect, totalVotes, onVotesClick) { optionId ->
             if (!multiselect) {
                 selected.clear()
             }
@@ -40,6 +50,7 @@ class PollOptionAdapter : ListAdapter<PollOptionDto, PollOptionAdapter.OptionVie
                 selected.add(optionId)
             }
             notifyDataSetChanged()
+            onSelectionChanged?.invoke(selected)
         }
     }
 
@@ -50,14 +61,23 @@ class PollOptionAdapter : ListAdapter<PollOptionDto, PollOptionAdapter.OptionVie
             option: PollOptionDto,
             selected: Set<Long>,
             multiselect: Boolean,
+            totalVotes: Int,
+            onVotesClick: (PollOptionDto) -> Unit,
             onClick: (Long) -> Unit
         ) {
             binding.optionLabel.text = option.label
-            binding.optionVotes.text = "Votes: ${option.voteCount}"
-            binding.optionCheck.setOnCheckedChangeListener(null)
-            binding.optionCheck.isChecked = selected.contains(option.id)
-            binding.optionCheck.setOnCheckedChangeListener { _, _ -> onClick(option.id) }
+            binding.optionVotes.text = formatVotes(option.voteCount, totalVotes)
+            binding.optionCheck.isSelected = selected.contains(option.id)
             binding.root.setOnClickListener { onClick(option.id) }
+            binding.optionVotesBadge.setOnClickListener { onVotesClick(option) }
+        }
+
+        private fun formatVotes(voteCount: Int, totalVotes: Int): String {
+            if (totalVotes <= 0) {
+                return "${voteCount} (0%)"
+            }
+            val percent = ((voteCount.toDouble() / totalVotes.toDouble()) * 100).toInt()
+            return "${voteCount} (${percent}%)"
         }
     }
 
