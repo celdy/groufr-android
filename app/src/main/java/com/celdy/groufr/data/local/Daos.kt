@@ -7,16 +7,16 @@ import androidx.room.Upsert
 
 @Dao
 interface GroupDao {
-    @Query("SELECT * FROM groups ORDER BY name")
+    @Query("SELECT * FROM `groups` ORDER BY name")
     suspend fun getAll(): List<GroupEntity>
 
     @Upsert
     suspend fun upsertAll(groups: List<GroupEntity>)
 
-    @Query("DELETE FROM groups")
+    @Query("DELETE FROM `groups`")
     suspend fun clear()
 
-    @Query("DELETE FROM groups WHERE id NOT IN (:ids)")
+    @Query("DELETE FROM `groups` WHERE id NOT IN (:ids)")
     suspend fun deleteNotIn(ids: List<Long>)
 
     @Transaction

@@ -113,6 +113,17 @@
     <string name="event_min_participants_hint">Min účastníků (volitelně)</string>
     <string name="notification_channel_name">Oznámení</string>
     <string name="notification_channel_description">Aktualizace o nové aktivitě v Groufr</string>
+    <string name="notification_system_title">Nová oznámení</string>
+    <plurals name="notification_summary">
+        <item quantity="one">%d nové oznámení</item>
+        <item quantity="few">%d nové oznámení</item>
+        <item quantity="many">%d nových oznámení</item>
+    </plurals>
+    <plurals name="notification_more">
+        <item quantity="one">+%d další</item>
+        <item quantity="few">+%d další</item>
+        <item quantity="many">+%d dalších</item>
+    </plurals>
     <string name="message_menu_report">Nahlaš zprávu</string>
     <string name="message_menu_reply">Odpověz</string>
     <string name="report_dialog_title">Nahlaš zprávu</string>

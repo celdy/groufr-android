@@ -32,7 +32,6 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalBadgeUtils::class)
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject lateinit var authRepository: AuthRepository
@@ -146,7 +145,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
+
+    @androidx.annotation.OptIn(ExperimentalBadgeUtils::class)
     private fun showNotificationsBadge(count: Int) {
         if (count > 0) {
             notificationsBadge.number = count
