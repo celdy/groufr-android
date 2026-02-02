@@ -363,7 +363,8 @@ class EventDetailActivity : AppCompatActivity() {
     }
 
     private fun updateUserStatusBadgeAccess(event: EventDetailDto) {
-        val canEdit = event.yourStatus != "not_invited"
+        // val canEdit = event.yourStatus != "not_invited"
+        val canEdit = true
         binding.eventUserStatusContainer.isClickable = canEdit
         binding.eventUserStatusContainer.isFocusable = canEdit
         binding.eventUserStatusDropdown.isVisible = canEdit
