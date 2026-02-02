@@ -57,6 +57,14 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { _ -> }
 
+    private val notificationsActivityLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == NotificationsActivity.RESULT_GROUPS_CHANGED) {
+            viewModel.loadGroups()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -68,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         binding.mainToolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_notifications -> {
-                    startActivity(Intent(this, NotificationsActivity::class.java))
+                    notificationsActivityLauncher.launch(Intent(this, NotificationsActivity::class.java))
                     true
                 }
                 R.id.action_events -> {

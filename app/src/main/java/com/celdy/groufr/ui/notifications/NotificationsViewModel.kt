@@ -64,10 +64,11 @@ class NotificationsViewModel @Inject constructor(
         }
     }
 
-    fun acceptInvitation(invitationId: Long) {
+    fun acceptInvitation(token: String, notificationId: Long) {
         viewModelScope.launch {
             try {
-                repository.acceptInvitation(invitationId)
+                repository.acceptInvitation(token)
+                repository.markRead(notificationId)
                 _invitationResult.value = InvitationResult.Accepted
                 loadNotifications(unreadOnly)
             } catch (exception: Exception) {
@@ -76,10 +77,11 @@ class NotificationsViewModel @Inject constructor(
         }
     }
 
-    fun declineInvitation(invitationId: Long) {
+    fun declineInvitation(token: String, notificationId: Long) {
         viewModelScope.launch {
             try {
-                repository.declineInvitation(invitationId)
+                repository.declineInvitation(token)
+                repository.markRead(notificationId)
                 _invitationResult.value = InvitationResult.Declined
                 loadNotifications(unreadOnly)
             } catch (exception: Exception) {

@@ -203,13 +203,28 @@ interface ApiService {
         @Path("contentId") contentId: Long
     ): ReactionSummary
 
-    @POST("/api/v1/invitations/{invitationId}/accept")
+    @POST("/api/v1/invitations/{token}/accept")
     suspend fun acceptInvitation(
-        @Path("invitationId") invitationId: Long
-    )
+        @Path("token") token: String
+    ): InvitationAcceptResponse
 
-    @POST("/api/v1/invitations/{invitationId}/decline")
+    @POST("/api/v1/invitations/{token}/decline")
     suspend fun declineInvitation(
-        @Path("invitationId") invitationId: Long
-    )
+        @Path("token") token: String
+    ): InvitationDeclineResponse
 }
+
+data class InvitationAcceptResponse(
+    val success: Boolean,
+    val group: InvitationGroupInfo?
+)
+
+data class InvitationDeclineResponse(
+    val success: Boolean
+)
+
+data class InvitationGroupInfo(
+    val id: Long,
+    val slug: String,
+    val name: String
+)

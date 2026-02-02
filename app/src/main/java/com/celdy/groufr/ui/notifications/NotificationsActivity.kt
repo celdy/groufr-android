@@ -16,7 +16,7 @@ import com.celdy.groufr.R
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.data.notifications.NotificationDto
 import com.celdy.groufr.data.notifications.eventIdFromPayload
-import com.celdy.groufr.data.notifications.invitationIdFromPayload
+import com.celdy.groufr.data.notifications.invitationTokenFromPayload
 import com.celdy.groufr.data.notifications.invitedGroupNameFromPayload
 import com.celdy.groufr.databinding.ActivityNotificationsBinding
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
@@ -29,6 +29,11 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotificationsActivity : AppCompatActivity() {
+    companion object {
+        const val RESULT_GROUPS_CHANGED = 1001
+    }
+
+    private var groupsChanged = false
     @Inject lateinit var authRepository: AuthRepository
     private lateinit var binding: ActivityNotificationsBinding
     private val viewModel: NotificationsViewModel by viewModels()
@@ -87,6 +92,7 @@ class NotificationsActivity : AppCompatActivity() {
             when (result) {
                 InvitationResult.Accepted -> {
                     Toast.makeText(this, R.string.invitation_accepted, Toast.LENGTH_SHORT).show()
+                    groupsChanged = true
                     viewModel.clearInvitationResult()
                 }
                 InvitationResult.Declined -> {
@@ -158,8 +164,8 @@ class NotificationsActivity : AppCompatActivity() {
     }
 
     private fun showInvitationDialog(notification: NotificationDto) {
-        val invitationId = notification.invitationIdFromPayload()
-        if (invitationId == null || invitationId <= 0) {
+        val token = notification.invitationTokenFromPayload()
+        if (token.isNullOrBlank()) {
             Toast.makeText(this, R.string.invitation_error, Toast.LENGTH_SHORT).show()
             return
         }
@@ -171,11 +177,11 @@ class NotificationsActivity : AppCompatActivity() {
             .setTitle(R.string.invitation_dialog_title)
             .setMessage(getString(R.string.invitation_dialog_message, actor, invitedGroupName))
             .setPositiveButton(R.string.invitation_accept) { dialog, _ ->
-                viewModel.acceptInvitation(invitationId)
+                viewModel.acceptInvitation(token, notification.id)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.invitation_decline) { dialog, _ ->
-                viewModel.declineInvitation(invitationId)
+                viewModel.declineInvitation(token, notification.id)
                 dialog.dismiss()
             }
             .show()
@@ -205,5 +211,12 @@ class NotificationsActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun finish() {
+        if (groupsChanged) {
+            setResult(RESULT_GROUPS_CHANGED)
+        }
+        super.finish()
     }
 }
