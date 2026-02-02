@@ -37,18 +37,29 @@ class EventsViewModel @Inject constructor(
     private val _timeFilter = MutableLiveData(TimeFilter.UPCOMING)
     val timeFilter: LiveData<TimeFilter> = _timeFilter
 
-    private val _participationFilter = MutableLiveData(ParticipationFilter.GOING_AND_MAYBE)
+    private val _participationFilter = MutableLiveData<ParticipationFilter>()
     val participationFilter: LiveData<ParticipationFilter> = _participationFilter
 
     private var currentGroupId: Long = -1L
+    private var filtersInitialized = false
 
     fun loadEvents(groupId: Long) {
         currentGroupId = groupId
+        if (!filtersInitialized) {
+            // From group detail: default to All participation
+            _participationFilter.value = ParticipationFilter.ALL
+            filtersInitialized = true
+        }
         reload()
     }
 
     fun loadAllEvents() {
         currentGroupId = -1L
+        if (!filtersInitialized) {
+            // From main activity: default to Going & Maybe
+            _participationFilter.value = ParticipationFilter.GOING_AND_MAYBE
+            filtersInitialized = true
+        }
         reload()
     }
 

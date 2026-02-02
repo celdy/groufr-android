@@ -96,7 +96,7 @@ class EventCreateActivity : AppCompatActivity() {
                 title = binding.eventTitleInput.text?.toString().orEmpty(),
                 description = binding.eventDescriptionInput.text?.toString(),
                 place = binding.eventPlaceInput.text?.toString(),
-                startAt = getDateIso(binding.eventStartInput),
+                startAt = getOptionalDateIso(binding.eventStartInput),
                 endAt = getOptionalDateIso(binding.eventEndInput),
                 deadlineJoinAt = getOptionalDateIso(binding.eventDeadlineInput),
                 minParticipants = binding.eventMinParticipantsInput.text?.toString(),
@@ -119,6 +119,7 @@ class EventCreateActivity : AppCompatActivity() {
                     binding.eventCreateButton.isEnabled = true
                     binding.eventCreateLoading.isVisible = false
                     Toast.makeText(this, com.celdy.groufr.R.string.event_create_success, Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
                     finish()
                 }
                 is CreateState.Error -> {
@@ -165,10 +166,6 @@ class EventCreateActivity : AppCompatActivity() {
             "cancelled" -> getString(com.celdy.groufr.R.string.event_status_cancelled)
             else -> status
         }
-    }
-
-    private fun getDateIso(field: android.widget.TextView): String {
-        return (field.tag as? String).orEmpty()
     }
 
     private fun getOptionalDateIso(field: android.widget.TextView): String? {

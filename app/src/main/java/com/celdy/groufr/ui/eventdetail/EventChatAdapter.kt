@@ -24,6 +24,7 @@ sealed class EventChatItem {
 
 class EventChatAdapter(
     private val currentUserId: Long,
+    private val onReactMessage: (MessageDto) -> Unit = {},
     private val onReportMessage: (MessageDto) -> Unit = {}
 ) : ListAdapter<EventChatItem, RecyclerView.ViewHolder>(DiffCallback) {
 
@@ -42,7 +43,7 @@ class EventChatAdapter(
                     parent,
                     false
                 )
-                MessageViewHolder(binding, onReportMessage)
+                MessageViewHolder(binding, onReactMessage, onReportMessage)
             }
             else -> {
                 val binding = ItemMessageDividerBinding.inflate(
@@ -64,6 +65,7 @@ class EventChatAdapter(
 
     class MessageViewHolder(
         private val binding: ItemMessageBinding,
+        private val onReactMessage: (MessageDto) -> Unit,
         private val onReportMessage: (MessageDto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(message: MessageDto, currentUserId: Long) {
@@ -100,14 +102,21 @@ class EventChatAdapter(
             binding.messageBody.movementMethod = LinkMovementMethod.getInstance()
             binding.messageTimestamp.text = ChatDateFormatter.format(message.createdAt, locale)
 
-            val showMenu = !isOwn && !isSystemMessage
+            val showMenu = !isSystemMessage
             binding.messageMenu.isVisible = showMenu
             if (showMenu) {
                 binding.messageMenu.setOnClickListener { view ->
                     val popup = PopupMenu(context, view)
-                    popup.menu.add(0, MENU_REPORT, 0, R.string.message_menu_report)
+                    popup.menu.add(0, MENU_REACT, 0, R.string.message_menu_react)
+                    if (!isOwn) {
+                        popup.menu.add(0, MENU_REPORT, 1, R.string.message_menu_report)
+                    }
                     popup.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
+                            MENU_REACT -> {
+                                onReactMessage(message)
+                                true
+                            }
                             MENU_REPORT -> {
                                 onReportMessage(message)
                                 true
@@ -160,6 +169,7 @@ class EventChatAdapter(
     companion object {
         private const val VIEW_MESSAGE = 1
         private const val VIEW_DIVIDER = 2
-        private const val MENU_REPORT = 1
+        private const val MENU_REACT = 1
+        private const val MENU_REPORT = 2
     }
 }

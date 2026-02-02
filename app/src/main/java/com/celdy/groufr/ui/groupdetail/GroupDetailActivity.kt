@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.view.ViewCompat
@@ -17,7 +18,9 @@ import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityGroupDetailBinding
 import com.celdy.groufr.data.reports.ReportContentType
+import com.celdy.groufr.data.reactions.ReactionContentType
 import com.celdy.groufr.ui.common.ReportDialogFragment
+import com.celdy.groufr.ui.common.ReactionDialogFragment
 import com.celdy.groufr.ui.eventcreate.EventCreateActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
@@ -36,6 +39,14 @@ class GroupDetailActivity : AppCompatActivity() {
     private var groupId: Long = -1L
     private var groupName: String = ""
     private var menuRef: Menu? = null
+    private val createEventLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && groupId > 0) {
+            viewModel.refresh()
+            viewModel.loadBadgeCounts(groupId)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +82,10 @@ class GroupDetailActivity : AppCompatActivity() {
                     .putExtra(PollDetailActivity.EXTRA_POLL_ID, pollId)
                 startActivity(intent)
             },
+            onReactMessage = { message ->
+                ReactionDialogFragment.newInstance(ReactionContentType.MESSAGE, message.id)
+                    .show(supportFragmentManager, ReactionDialogFragment.TAG)
+            },
             onReportMessage = { message ->
                 ReportDialogFragment.newInstance(ReportContentType.MESSAGE, message.id)
                     .show(supportFragmentManager, ReportDialogFragment.TAG)
@@ -105,7 +120,7 @@ class GroupDetailActivity : AppCompatActivity() {
                 val intent = Intent(this, EventCreateActivity::class.java)
                     .putExtra(EXTRA_GROUP_ID, groupId)
                     .putExtra(EXTRA_GROUP_NAME, groupName)
-                startActivity(intent)
+                createEventLauncher.launch(intent)
             }
         }
 

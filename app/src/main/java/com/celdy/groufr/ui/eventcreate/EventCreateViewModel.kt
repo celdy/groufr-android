@@ -23,15 +23,15 @@ class EventCreateViewModel @Inject constructor(
         title: String,
         description: String?,
         place: String?,
-        startAt: String,
+        startAt: String?,
         endAt: String?,
         deadlineJoinAt: String?,
         minParticipants: String?,
         maxParticipants: String?,
         state: String?
     ) {
-        if (title.isBlank() || startAt.isBlank()) {
-            _state.value = CreateState.Error("Title and start date are required.")
+        if (title.isBlank()) {
+            _state.value = CreateState.Error("Title is required.")
             return
         }
         val minValue = parseOptionalInt(minParticipants, "Min participants must be a number.")
@@ -50,7 +50,7 @@ class EventCreateViewModel @Inject constructor(
                     title = title.trim(),
                     description = description?.trim()?.ifBlank { null },
                     place = place?.trim()?.ifBlank { null },
-                    startAt = startAt.trim(),
+                    startAt = startAt?.trim()?.ifBlank { null },
                     endAt = endAt?.trim()?.ifBlank { null },
                     deadlineJoinAt = deadlineJoinAt?.trim()?.ifBlank { null },
                     minParticipants = minValue,

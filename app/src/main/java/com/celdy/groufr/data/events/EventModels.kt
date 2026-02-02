@@ -96,7 +96,7 @@ data class CreateEventRequest(
     val description: String?,
     val place: String?,
     @SerializedName("start_at")
-    val startAt: String,
+    val startAt: String? = null,
     @SerializedName("end_at")
     val endAt: String?,
     @SerializedName("deadline_join_at")

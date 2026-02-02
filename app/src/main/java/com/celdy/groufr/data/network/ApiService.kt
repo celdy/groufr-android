@@ -21,6 +21,9 @@ import com.celdy.groufr.data.notifications.NotificationsResponse
 import com.celdy.groufr.data.notifications.MarkReadResponse
 import com.celdy.groufr.data.notifications.NotificationMarkReadRequest
 import com.celdy.groufr.data.notifications.NotificationCountResponse
+import com.celdy.groufr.data.reactions.ReactionDetail
+import com.celdy.groufr.data.reactions.ReactionRequest
+import com.celdy.groufr.data.reactions.ReactionSummary
 import com.celdy.groufr.data.reports.CreateReportRequest
 import com.celdy.groufr.data.reports.ReportResponse
 import retrofit2.http.Body
@@ -182,4 +185,21 @@ interface ApiService {
     suspend fun createReport(
         @Body request: CreateReportRequest
     ): ReportResponse
+
+    @POST("/api/v1/reactions")
+    suspend fun toggleReaction(
+        @Body request: ReactionRequest
+    ): ReactionSummary
+
+    @GET("/api/v1/reactions/{contentType}/{contentId}")
+    suspend fun getReactions(
+        @Path("contentType") contentType: String,
+        @Path("contentId") contentId: Long
+    ): ReactionDetail
+
+    @DELETE("/api/v1/reactions/{contentType}/{contentId}")
+    suspend fun clearReaction(
+        @Path("contentType") contentType: String,
+        @Path("contentId") contentId: Long
+    ): ReactionSummary
 }

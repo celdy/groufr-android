@@ -18,6 +18,7 @@ import com.celdy.groufr.ui.eventcreate.EventCreateActivity
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
 import com.celdy.groufr.ui.groupdetail.GroupDetailActivity
 import com.celdy.groufr.ui.login.LoginActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -105,50 +106,88 @@ class EventsActivity : AppCompatActivity() {
     }
 
     private fun setupFilters() {
-        // Time filter chips
-        binding.chipTimeUpcoming.setOnClickListener {
-            viewModel.setTimeFilter(TimeFilter.UPCOMING)
-        }
-        binding.chipTimePast.setOnClickListener {
-            viewModel.setTimeFilter(TimeFilter.PAST)
-        }
-        binding.chipTimeAll.setOnClickListener {
-            viewModel.setTimeFilter(TimeFilter.ALL)
+        // Time filter chip - shows dialog on click
+        binding.chipTimeFilter.setOnClickListener {
+            showTimeFilterDialog()
         }
 
-        // Participation filter chips
-        binding.chipParticipationGoingMaybe.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.GOING_AND_MAYBE)
-        }
-        binding.chipParticipationUnresponded.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.UNRESPONDED)
-        }
-        binding.chipParticipationGoing.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.GOING)
-        }
-        binding.chipParticipationMaybe.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.MAYBE)
-        }
-        binding.chipParticipationDeclined.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.DECLINED)
-        }
-        binding.chipParticipationAll.setOnClickListener {
-            viewModel.setParticipationFilter(ParticipationFilter.ALL)
+        // Participation filter chip - shows dialog on click
+        binding.chipParticipationFilter.setOnClickListener {
+            showParticipationFilterDialog()
         }
 
+        // Update chip text when filter changes
         viewModel.timeFilter.observe(this) { filter ->
-            binding.chipTimeUpcoming.isChecked = filter == TimeFilter.UPCOMING
-            binding.chipTimePast.isChecked = filter == TimeFilter.PAST
-            binding.chipTimeAll.isChecked = filter == TimeFilter.ALL
+            binding.chipTimeFilter.text = getTimeFilterText(filter)
         }
 
         viewModel.participationFilter.observe(this) { filter ->
-            binding.chipParticipationGoingMaybe.isChecked = filter == ParticipationFilter.GOING_AND_MAYBE
-            binding.chipParticipationUnresponded.isChecked = filter == ParticipationFilter.UNRESPONDED
-            binding.chipParticipationGoing.isChecked = filter == ParticipationFilter.GOING
-            binding.chipParticipationMaybe.isChecked = filter == ParticipationFilter.MAYBE
-            binding.chipParticipationDeclined.isChecked = filter == ParticipationFilter.DECLINED
-            binding.chipParticipationAll.isChecked = filter == ParticipationFilter.ALL
+            binding.chipParticipationFilter.text = getParticipationFilterText(filter)
+        }
+    }
+
+    private fun showTimeFilterDialog() {
+        val options = arrayOf(
+            getString(R.string.events_filter_upcoming),
+            getString(R.string.events_filter_past),
+            getString(R.string.events_filter_all)
+        )
+        val filters = arrayOf(TimeFilter.UPCOMING, TimeFilter.PAST, TimeFilter.ALL)
+        val currentIndex = filters.indexOf(viewModel.timeFilter.value ?: TimeFilter.UPCOMING)
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.events_filter_time_title)
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                viewModel.setTimeFilter(filters[which])
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showParticipationFilterDialog() {
+        val options = arrayOf(
+            getString(R.string.events_filter_participation_going_maybe),
+            getString(R.string.events_filter_participation_unresponded),
+            getString(R.string.events_filter_participation_going),
+            getString(R.string.events_filter_participation_maybe),
+            getString(R.string.events_filter_participation_declined),
+            getString(R.string.events_filter_participation_all)
+        )
+        val filters = arrayOf(
+            ParticipationFilter.GOING_AND_MAYBE,
+            ParticipationFilter.UNRESPONDED,
+            ParticipationFilter.GOING,
+            ParticipationFilter.MAYBE,
+            ParticipationFilter.DECLINED,
+            ParticipationFilter.ALL
+        )
+        val currentIndex = filters.indexOf(viewModel.participationFilter.value ?: ParticipationFilter.GOING_AND_MAYBE)
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.events_filter_participation_title)
+            .setSingleChoiceItems(options, currentIndex) { dialog, which ->
+                viewModel.setParticipationFilter(filters[which])
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun getTimeFilterText(filter: TimeFilter): String {
+        return when (filter) {
+            TimeFilter.UPCOMING -> getString(R.string.events_filter_upcoming)
+            TimeFilter.PAST -> getString(R.string.events_filter_past)
+            TimeFilter.ALL -> getString(R.string.events_filter_all)
+        }
+    }
+
+    private fun getParticipationFilterText(filter: ParticipationFilter): String {
+        return when (filter) {
+            ParticipationFilter.GOING_AND_MAYBE -> getString(R.string.events_filter_participation_going_maybe)
+            ParticipationFilter.UNRESPONDED -> getString(R.string.events_filter_participation_unresponded)
+            ParticipationFilter.GOING -> getString(R.string.events_filter_participation_going)
+            ParticipationFilter.MAYBE -> getString(R.string.events_filter_participation_maybe)
+            ParticipationFilter.DECLINED -> getString(R.string.events_filter_participation_declined)
+            ParticipationFilter.ALL -> getString(R.string.events_filter_participation_all)
         }
     }
 

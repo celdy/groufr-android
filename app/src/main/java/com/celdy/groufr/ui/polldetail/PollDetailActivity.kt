@@ -12,8 +12,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.celdy.groufr.data.auth.AuthRepository
+import com.celdy.groufr.data.reactions.ReactionContentType
 import com.celdy.groufr.databinding.ActivityPollDetailBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
+import com.celdy.groufr.ui.common.ReactionDialogFragment
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
@@ -42,6 +44,8 @@ class PollDetailActivity : AppCompatActivity() {
 
         binding.pollGroupName.text = groupName
         binding.pollGroupName.isVisible = groupName.isNotBlank()
+        setSupportActionBar(binding.pollDetailToolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.pollDetailToolbar.setNavigationOnClickListener { finish() }
 
         binding.pollOptions.layoutManager = LinearLayoutManager(this)
@@ -131,6 +135,28 @@ class PollDetailActivity : AppCompatActivity() {
             binding.pollDetailLoading.isVisible = false
             binding.pollDetailContent.isVisible = false
             binding.pollDetailError.isVisible = true
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(com.celdy.groufr.R.menu.menu_poll_detail, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            com.celdy.groufr.R.id.action_poll_react -> {
+                if (pollId > 0) {
+                    ReactionDialogFragment.newInstance(ReactionContentType.POLL, pollId)
+                        .show(supportFragmentManager, ReactionDialogFragment.TAG)
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

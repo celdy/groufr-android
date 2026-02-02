@@ -51,6 +51,7 @@
     <string name="events_filter_participation_unresponded">Bez odpovědi</string>
     <string name="events_filter_participation_going">Jdu</string>
     <string name="events_filter_participation_declined">Nejdu</string>
+    <string name="events_filter_participation_title">Filtr podle účasti</string>
     <string name="event_detail_title">Událost</string>
     <string name="event_detail_error">Nemohu nahrát událost</string>
     <string name="event_join_button">Přidej se</string>
@@ -149,4 +150,5 @@
     <string name="report_error">Nepovedlo se odeslat hlášení</string>
     <string name="report_error_already_reported">Už jsi nahlásil tento obsah</string>
     <string name="report_error_own_content">Nemůžeš nahlásit svůj obsah</string>
+    <string name="events_filter_time_title">Filtr podle času</string>
 </resources>

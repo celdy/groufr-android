@@ -22,6 +22,7 @@ class MessageAdapter(
     private val groupName: String,
     private val onEventClick: (Long, String) -> Unit,
     private val onPollClick: (Long, String) -> Unit,
+    private val onReactMessage: (MessageDto) -> Unit = {},
     private val onReportMessage: (MessageDto) -> Unit = {}
 ) : ListAdapter<MessageDto, MessageAdapter.MessageViewHolder>(DiffCallback) {
 
@@ -31,7 +32,7 @@ class MessageAdapter(
             parent,
             false
         )
-        return MessageViewHolder(binding, onReportMessage)
+        return MessageViewHolder(binding, onReactMessage, onReportMessage)
     }
 
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
@@ -47,6 +48,7 @@ class MessageAdapter(
 
     class MessageViewHolder(
         private val binding: ItemMessageBinding,
+        private val onReactMessage: (MessageDto) -> Unit,
         private val onReportMessage: (MessageDto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(
@@ -100,14 +102,21 @@ class MessageAdapter(
             binding.messageBody.movementMethod = LinkMovementMethod.getInstance()
             binding.messageTimestamp.text = formatTimestamp(message.createdAt, locale)
 
-            val showMenu = !isOwn && !isSystemMessage
+            val showMenu = !isSystemMessage
             binding.messageMenu.isVisible = showMenu
             if (showMenu) {
                 binding.messageMenu.setOnClickListener { view ->
                     val popup = PopupMenu(context, view)
-                    popup.menu.add(0, MENU_REPORT, 0, R.string.message_menu_report)
+                    popup.menu.add(0, MENU_REACT, 0, R.string.message_menu_react)
+                    if (!isOwn) {
+                        popup.menu.add(0, MENU_REPORT, 1, R.string.message_menu_report)
+                    }
                     popup.setOnMenuItemClickListener { menuItem ->
                         when (menuItem.itemId) {
+                            MENU_REACT -> {
+                                onReactMessage(message)
+                                true
+                            }
                             MENU_REPORT -> {
                                 onReportMessage(message)
                                 true
@@ -172,6 +181,7 @@ class MessageAdapter(
     }
 
     companion object {
-        private const val MENU_REPORT = 1
+        private const val MENU_REACT = 1
+        private const val MENU_REPORT = 2
     }
 }

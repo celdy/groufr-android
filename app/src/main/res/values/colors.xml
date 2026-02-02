@@ -15,6 +15,8 @@
     <color name="neutral_50">#f8fafc</color>
     <color name="neutral_100">#f1f5f9</color>
     <color name="neutral_200">#e2e8f0</color>
+    <color name="neutral_300">#cbd5e1</color>
+    <color name="neutral_600">#475569</color>
     <color name="neutral_900">#111827</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>

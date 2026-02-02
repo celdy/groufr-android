@@ -23,6 +23,8 @@ import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.common.MarkdownRenderer
 import com.celdy.groufr.ui.common.ReportDialogFragment
 import com.celdy.groufr.data.reports.ReportContentType
+import com.celdy.groufr.data.reactions.ReactionContentType
+import com.celdy.groufr.ui.common.ReactionDialogFragment
 import com.celdy.groufr.ui.eventedit.EventEditActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -73,6 +75,10 @@ class EventDetailActivity : AppCompatActivity() {
         }
         chatAdapter = EventChatAdapter(
             currentUserId = tokenStore.getUserId(),
+            onReactMessage = { message ->
+                ReactionDialogFragment.newInstance(ReactionContentType.MESSAGE, message.id)
+                    .show(supportFragmentManager, ReactionDialogFragment.TAG)
+            },
             onReportMessage = { message ->
                 ReportDialogFragment.newInstance(ReportContentType.MESSAGE, message.id)
                     .show(supportFragmentManager, ReportDialogFragment.TAG)
@@ -283,6 +289,13 @@ class EventDetailActivity : AppCompatActivity() {
                     .putExtra(EventEditActivity.EXTRA_GROUP_NAME, groupName)
                 shouldRefreshOnResume = true
                 startActivity(intent)
+                true
+            }
+            com.celdy.groufr.R.id.action_event_react -> {
+                if (eventId > 0) {
+                    ReactionDialogFragment.newInstance(ReactionContentType.EVENT, eventId)
+                        .show(supportFragmentManager, ReactionDialogFragment.TAG)
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

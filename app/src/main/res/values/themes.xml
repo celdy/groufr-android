@@ -24,4 +24,23 @@
         <item name="chipStrokeWidth">1dp</item>
         <item name="checkedIconVisible">false</item>
     </style>
+
+    <style name="Widget.Groufr.Chip.Dropdown" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@color/neutral_100</item>
+        <item name="android:textColor">@color/neutral_900</item>
+        <item name="chipStrokeColor">@color/neutral_300</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipIconTint">@color/neutral_600</item>
+        <item name="closeIconTint">@color/neutral_600</item>
+        <item name="chipIconSize">18dp</item>
+        <item name="closeIconSize">18dp</item>
+        <item name="chipStartPadding">8dp</item>
+        <item name="chipEndPadding">8dp</item>
+        <item name="iconStartPadding">0dp</item>
+        <item name="iconEndPadding">0dp</item>
+        <item name="closeIconStartPadding">0dp</item>
+        <item name="closeIconEndPadding">0dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
 </resources>

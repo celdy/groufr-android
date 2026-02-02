@@ -20,4 +20,8 @@
         android:icon="@drawable/ic_edit"
         android:title="@string/event_menu_edit"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_event_react"
+        android:title="@string/reaction_menu_react"
+        app:showAsAction="never" />
 </menu>

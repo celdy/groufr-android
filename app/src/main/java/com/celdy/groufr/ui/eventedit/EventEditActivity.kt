@@ -87,7 +87,7 @@ class EventEditActivity : AppCompatActivity() {
                 title = binding.eventTitleInput.text?.toString().orEmpty(),
                 description = binding.eventDescriptionInput.text?.toString(),
                 place = binding.eventPlaceInput.text?.toString(),
-                startAt = getDateIso(binding.eventStartInput),
+                startAt = getOptionalDateIso(binding.eventStartInput),
                 endAt = getOptionalDateIso(binding.eventEndInput),
                 deadlineJoinAt = getOptionalDateIso(binding.eventDeadlineInput),
                 minParticipants = binding.eventMinParticipantsInput.text?.toString(),
@@ -184,10 +184,6 @@ class EventEditActivity : AppCompatActivity() {
     private fun formatDisplayDate(isoValue: String?): String {
         if (isoValue.isNullOrBlank()) return ""
         return ChatDateFormatter.formatRange(isoValue, null, currentLocale()).orEmpty()
-    }
-
-    private fun getDateIso(field: android.widget.TextView): String {
-        return (field.tag as? String).orEmpty()
     }
 
     private fun getOptionalDateIso(field: android.widget.TextView): String? {
