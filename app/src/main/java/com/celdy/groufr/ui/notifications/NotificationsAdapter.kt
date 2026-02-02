@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.R
 import com.celdy.groufr.data.notifications.NotificationDto
 import com.celdy.groufr.data.notifications.eventIdFromPayload
+import com.celdy.groufr.data.notifications.invitedGroupNameFromPayload
 import com.celdy.groufr.databinding.ItemNotificationBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
 import java.util.Locale
@@ -39,7 +40,6 @@ class NotificationsAdapter(
             val locales = context.resources.configuration.locales
             val locale = if (locales.isEmpty) Locale.getDefault() else locales[0]
             val actor = notification.actor?.name ?: "System"
-            val groupName = notification.groupName ?: "Group"
             val title = buildTitle(context, actor, notification.eventType)
             val preview = extractPreview(notification)
 
@@ -57,7 +57,14 @@ class NotificationsAdapter(
             binding.notificationEvent.text = eventTitle
             binding.notificationSubtitle.isVisible = notification.eventType == "new_message" && preview.isNotBlank()
             binding.notificationSubtitle.text = preview
-            binding.notificationMeta.text = "$groupName - ${formatTimestamp(notification.createdAt, locale)}"
+
+            // For invitation notifications, show the invited group name from payload
+            val displayGroupName = if (notification.eventType == "invitation_received") {
+                notification.invitedGroupNameFromPayload() ?: notification.groupName ?: "Group"
+            } else {
+                notification.groupName ?: "Group"
+            }
+            binding.notificationMeta.text = "$displayGroupName - ${formatTimestamp(notification.createdAt, locale)}"
             binding.root.setOnClickListener { onClick(notification) }
         }
 
@@ -70,6 +77,7 @@ class NotificationsAdapter(
                 "poll_closed" -> R.string.notification_title_poll_closed
                 "user_joined" -> R.string.notification_title_user_joined
                 "participant_status_changed" -> R.string.notification_title_participant_status_changed
+                "invitation_received" -> R.string.notification_title_invitation_received
                 else -> R.string.notification_title_generic
             }
 
@@ -91,7 +99,7 @@ class NotificationsAdapter(
                 "event_created", "event_updated", "participant_status_changed" -> R.drawable.ico_event
                 "new_message" -> R.drawable.ico_message
                 "poll_created", "poll_closed" -> R.drawable.ico_poll
-                "user_joined" -> R.drawable.ico_user
+                "user_joined", "invitation_received" -> R.drawable.ico_user
                 else -> R.drawable.ico_message
             }
         }

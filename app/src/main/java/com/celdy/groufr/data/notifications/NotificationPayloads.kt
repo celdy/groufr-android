@@ -9,3 +9,19 @@ fun NotificationDto.eventIdFromPayload(): Long? {
         else -> raw.toString().toLongOrNull()
     }
 }
+
+fun NotificationDto.invitationIdFromPayload(): Long? {
+    val payload = payload ?: return null
+    val raw = payload["invitation_id"] ?: payload["invitationId"] ?: return null
+    return when (raw) {
+        is Number -> raw.toLong()
+        is String -> raw.toLongOrNull()
+        else -> raw.toString().toLongOrNull()
+    }
+}
+
+fun NotificationDto.invitedGroupNameFromPayload(): String? {
+    val payload = payload ?: return null
+    val raw = payload["group_name"] ?: payload["groupName"] ?: return null
+    return raw as? String ?: raw.toString()
+}

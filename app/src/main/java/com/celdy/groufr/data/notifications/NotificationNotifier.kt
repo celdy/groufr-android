@@ -206,6 +206,7 @@ class NotificationNotifier @Inject constructor(
             "poll_closed" -> R.string.notification_title_poll_closed
             "user_joined" -> R.string.notification_title_user_joined
             "participant_status_changed" -> R.string.notification_title_participant_status_changed
+            "invitation_received" -> R.string.notification_title_invitation_received
             else -> R.string.notification_title_generic
         }
 
@@ -217,12 +218,15 @@ class NotificationNotifier @Inject constructor(
     }
 
     private fun buildContentText(notification: NotificationDto): String {
-        val groupName = notification.groupName
         if (notification.eventType == "new_message") {
             val preview = extractPreview(notification)
             if (preview.isNotBlank()) return preview
         }
-        return groupName ?: context.getString(R.string.notification_system_title)
+        if (notification.eventType == "invitation_received") {
+            val invitedGroupName = notification.invitedGroupNameFromPayload()
+            if (!invitedGroupName.isNullOrBlank()) return invitedGroupName
+        }
+        return notification.groupName ?: context.getString(R.string.notification_system_title)
     }
 
     private fun extractPreview(notification: NotificationDto): String {
@@ -236,7 +240,7 @@ class NotificationNotifier @Inject constructor(
             "event_created", "event_updated", "participant_status_changed" -> R.drawable.ico_event
             "new_message" -> R.drawable.ico_message
             "poll_created", "poll_closed" -> R.drawable.ico_poll
-            "user_joined" -> R.drawable.ico_user
+            "user_joined", "invitation_received" -> R.drawable.ico_user
             else -> R.drawable.ico_message
         }
     }

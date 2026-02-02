@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -11,13 +12,18 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.celdy.groufr.R
 import com.celdy.groufr.data.auth.AuthRepository
+import com.celdy.groufr.data.notifications.NotificationDto
 import com.celdy.groufr.data.notifications.eventIdFromPayload
+import com.celdy.groufr.data.notifications.invitationIdFromPayload
+import com.celdy.groufr.data.notifications.invitedGroupNameFromPayload
 import com.celdy.groufr.databinding.ActivityNotificationsBinding
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
 import com.celdy.groufr.ui.groupdetail.GroupDetailActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.polldetail.PollDetailActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -77,10 +83,28 @@ class NotificationsActivity : AppCompatActivity() {
             }
         }
 
+        viewModel.invitationResult.observe(this) { result ->
+            when (result) {
+                InvitationResult.Accepted -> {
+                    Toast.makeText(this, R.string.invitation_accepted, Toast.LENGTH_SHORT).show()
+                    viewModel.clearInvitationResult()
+                }
+                InvitationResult.Declined -> {
+                    Toast.makeText(this, R.string.invitation_declined, Toast.LENGTH_SHORT).show()
+                    viewModel.clearInvitationResult()
+                }
+                InvitationResult.Error -> {
+                    Toast.makeText(this, R.string.invitation_error, Toast.LENGTH_SHORT).show()
+                    viewModel.clearInvitationResult()
+                }
+                null -> { /* no-op */ }
+            }
+        }
+
         viewModel.loadNotifications()
     }
 
-    private fun handleNotificationClick(notification: com.celdy.groufr.data.notifications.NotificationDto) {
+    private fun handleNotificationClick(notification: NotificationDto) {
         val groupId = notification.groupId ?: -1L
         val groupName = notification.groupName.orEmpty()
         when (notification.eventType) {
@@ -106,6 +130,9 @@ class NotificationsActivity : AppCompatActivity() {
                     finish()
                 }
             }
+            "invitation_received" -> {
+                showInvitationDialog(notification)
+            }
             "new_message", "user_joined" -> {
                 if (notification.eventType == "new_message") {
                     val eventId = notification.eventIdFromPayload() ?: -1L
@@ -128,6 +155,30 @@ class NotificationsActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showInvitationDialog(notification: NotificationDto) {
+        val invitationId = notification.invitationIdFromPayload()
+        if (invitationId == null || invitationId <= 0) {
+            Toast.makeText(this, R.string.invitation_error, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val actor = notification.actor?.name ?: "Someone"
+        val invitedGroupName = notification.invitedGroupNameFromPayload() ?: "a group"
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.invitation_dialog_title)
+            .setMessage(getString(R.string.invitation_dialog_message, actor, invitedGroupName))
+            .setPositiveButton(R.string.invitation_accept) { dialog, _ ->
+                viewModel.acceptInvitation(invitationId)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.invitation_decline) { dialog, _ ->
+                viewModel.declineInvitation(invitationId)
+                dialog.dismiss()
+            }
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

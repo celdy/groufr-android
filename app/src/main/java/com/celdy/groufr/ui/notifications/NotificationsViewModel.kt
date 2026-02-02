@@ -18,6 +18,9 @@ class NotificationsViewModel @Inject constructor(
     val state: LiveData<NotificationsState> = _state
     private var unreadOnly: Boolean = false
 
+    private val _invitationResult = MutableLiveData<InvitationResult?>()
+    val invitationResult: LiveData<InvitationResult?> = _invitationResult
+
     fun loadNotifications(unreadOnly: Boolean = false) {
         this.unreadOnly = unreadOnly
         _state.value = NotificationsState.Loading
@@ -60,10 +63,44 @@ class NotificationsViewModel @Inject constructor(
             }
         }
     }
+
+    fun acceptInvitation(invitationId: Long) {
+        viewModelScope.launch {
+            try {
+                repository.acceptInvitation(invitationId)
+                _invitationResult.value = InvitationResult.Accepted
+                loadNotifications(unreadOnly)
+            } catch (exception: Exception) {
+                _invitationResult.value = InvitationResult.Error
+            }
+        }
+    }
+
+    fun declineInvitation(invitationId: Long) {
+        viewModelScope.launch {
+            try {
+                repository.declineInvitation(invitationId)
+                _invitationResult.value = InvitationResult.Declined
+                loadNotifications(unreadOnly)
+            } catch (exception: Exception) {
+                _invitationResult.value = InvitationResult.Error
+            }
+        }
+    }
+
+    fun clearInvitationResult() {
+        _invitationResult.value = null
+    }
 }
 
 sealed class NotificationsState {
     data object Loading : NotificationsState()
     data class Content(val notifications: List<NotificationDto>) : NotificationsState()
     data object Error : NotificationsState()
+}
+
+sealed class InvitationResult {
+    data object Accepted : InvitationResult()
+    data object Declined : InvitationResult()
+    data object Error : InvitationResult()
 }

@@ -202,4 +202,14 @@ interface ApiService {
         @Path("contentType") contentType: String,
         @Path("contentId") contentId: Long
     ): ReactionSummary
+
+    @POST("/api/v1/invitations/{invitationId}/accept")
+    suspend fun acceptInvitation(
+        @Path("invitationId") invitationId: Long
+    )
+
+    @POST("/api/v1/invitations/{invitationId}/decline")
+    suspend fun declineInvitation(
+        @Path("invitationId") invitationId: Long
+    )
 }

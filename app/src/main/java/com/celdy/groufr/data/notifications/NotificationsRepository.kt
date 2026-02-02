@@ -52,4 +52,12 @@ class NotificationsRepository @Inject constructor(
         )
         return response.markedCount
     }
+
+    suspend fun acceptInvitation(invitationId: Long) {
+        apiService.acceptInvitation(invitationId)
+    }
+
+    suspend fun declineInvitation(invitationId: Long) {
+        apiService.declineInvitation(invitationId)
+    }
 }
