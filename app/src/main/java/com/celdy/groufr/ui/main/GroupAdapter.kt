@@ -2,11 +2,13 @@ package com.celdy.groufr.ui.main
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.data.groups.GroupDto
 import com.celdy.groufr.databinding.ItemGroupBinding
+import com.celdy.groufr.ui.common.ChatDateFormatter
 
 class GroupAdapter(
     private val onClick: (GroupDto) -> Unit
@@ -33,6 +35,24 @@ class GroupAdapter(
             binding.groupAvatar.text = initials
             binding.groupName.text = group.name
             binding.groupDescription.text = group.description.orEmpty()
+
+            if (group.unreadCount > 0) {
+                binding.groupUnreadBadge.text = group.unreadCount.toString()
+                binding.groupUnreadBadge.isVisible = true
+            } else {
+                binding.groupUnreadBadge.isVisible = false
+            }
+
+            val lastActivity = group.lastActivityAt
+            if (lastActivity != null) {
+                val locales = binding.root.resources.configuration.locales
+                val locale = if (locales.isEmpty) java.util.Locale.getDefault() else locales[0]
+                binding.groupLastActivity.text = ChatDateFormatter.format(lastActivity, locale)
+                binding.groupLastActivity.isVisible = true
+            } else {
+                binding.groupLastActivity.isVisible = false
+            }
+
             binding.root.setOnClickListener { onClick(group) }
         }
 

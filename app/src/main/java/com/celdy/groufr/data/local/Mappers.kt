@@ -14,14 +14,18 @@ fun GroupDto.toEntity(): GroupEntity = GroupEntity(
     id = id,
     slug = slug,
     name = name,
-    description = description
+    description = description,
+    lastActivityAt = lastActivityAt,
+    unreadCount = unreadCount
 )
 
 fun GroupEntity.toDto(): GroupDto = GroupDto(
     id = id,
     slug = slug,
     name = name,
-    description = description
+    description = description,
+    lastActivityAt = lastActivityAt,
+    unreadCount = unreadCount
 )
 
 fun UserEntity.toDto(): com.celdy.groufr.data.auth.UserDto = com.celdy.groufr.data.auth.UserDto(

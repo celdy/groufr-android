@@ -12,7 +12,7 @@ import androidx.room.TypeConverters
         PollEntity::class,
         MessageEntity::class
     ],
-    version = 2,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

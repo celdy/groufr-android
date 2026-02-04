@@ -12,7 +12,9 @@ data class GroupEntity(
     @PrimaryKey val id: Long,
     val slug: String,
     val name: String,
-    val description: String?
+    val description: String?,
+    val lastActivityAt: String?,
+    val unreadCount: Int = 0
 )
 
 @Entity(tableName = "users")

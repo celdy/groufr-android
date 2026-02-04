@@ -27,8 +27,6 @@ import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.badge.ExperimentalBadgeUtils
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.Collator
-import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
@@ -111,12 +109,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 is MainState.Content -> {
                     binding.groupsLoading.isVisible = false
-                    val locales = resources.configuration.locales
-                    val locale = if (locales.isEmpty) Locale.getDefault() else locales[0]
-                    val collator = Collator.getInstance(locale).apply {
-                        strength = Collator.SECONDARY
-                    }
-                    val sorted = state.groups.sortedWith(compareBy(collator) { it.name })
+                    val sorted = state.groups.sortedByDescending { it.lastActivityAt }
                     adapter.submitList(sorted)
                     binding.groupsEmpty.isVisible = state.groups.isEmpty()
                     binding.groupsEmpty.text = getString(R.string.groups_empty)
