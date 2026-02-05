@@ -181,7 +181,7 @@ class EventDetailActivity : AppCompatActivity() {
                 }
                 is EventChatState.Content -> {
                     binding.eventMessagesLoading.isVisible = false
-                    val items = buildChatItems(state.messages, state.unreadCount)
+                    val items = buildChatItems(state.messages, state.dividerBeforeMessageId)
                     val shouldScrollToBottom = chatFirstLoad || !binding.eventMessagesList.canScrollVertically(1)
                     chatAdapter.submitList(items)
                     binding.eventMessagesEmpty.isVisible = state.messages.isEmpty()
@@ -518,17 +518,14 @@ class EventDetailActivity : AppCompatActivity() {
 
     private fun buildChatItems(
         messages: List<com.celdy.groufr.data.messages.MessageDto>,
-        unreadCount: Int
+        dividerBeforeMessageId: Long?
     ): List<EventChatItem> {
-        if (messages.isEmpty()) return emptyList()
-        val safeUnread = unreadCount.coerceAtLeast(0).coerceAtMost(messages.size)
-        if (safeUnread == 0) {
+        if (messages.isEmpty() || dividerBeforeMessageId == null) {
             return messages.map { EventChatItem.Message(it) }
         }
-        val dividerIndex = messages.size - safeUnread
         val items = mutableListOf<EventChatItem>()
-        messages.forEachIndexed { index, message ->
-            if (index == dividerIndex) {
+        for (message in messages) {
+            if (message.id == dividerBeforeMessageId) {
                 items.add(EventChatItem.Divider)
             }
             items.add(EventChatItem.Message(message))

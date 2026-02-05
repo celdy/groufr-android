@@ -15,6 +15,7 @@ import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.data.auth.AuthRepository
+import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityGroupDetailBinding
 import com.celdy.groufr.data.reports.ReportContentType
@@ -132,11 +133,12 @@ class GroupDetailActivity : AppCompatActivity() {
                 }
                 is GroupDetailState.Content -> {
                     binding.messagesLoading.isVisible = false
+                    val items = buildChatItems(state.messages, state.dividerBeforeMessageId)
                     val shouldScrollToBottom = !binding.messagesList.canScrollVertically(1)
-                    adapter.submitList(state.messages)
+                    adapter.submitList(items)
                     binding.messagesEmpty.isVisible = state.messages.isEmpty()
-                    if (shouldScrollToBottom && state.messages.isNotEmpty()) {
-                        binding.messagesList.scrollToPosition(state.messages.size - 1)
+                    if (shouldScrollToBottom && items.isNotEmpty()) {
+                        binding.messagesList.scrollToPosition(items.size - 1)
                     }
                 }
                 GroupDetailState.Error -> {
@@ -253,6 +255,23 @@ class GroupDetailActivity : AppCompatActivity() {
         } else {
             badgeView.visibility = android.view.View.GONE
         }
+    }
+
+    private fun buildChatItems(
+        messages: List<MessageDto>,
+        dividerBeforeMessageId: Long?
+    ): List<GroupChatItem> {
+        if (messages.isEmpty() || dividerBeforeMessageId == null) {
+            return messages.map { GroupChatItem.Message(it) }
+        }
+        val items = mutableListOf<GroupChatItem>()
+        for (message in messages) {
+            if (message.id == dividerBeforeMessageId) {
+                items.add(GroupChatItem.Divider)
+            }
+            items.add(GroupChatItem.Message(message))
+        }
+        return items
     }
 
     companion object {

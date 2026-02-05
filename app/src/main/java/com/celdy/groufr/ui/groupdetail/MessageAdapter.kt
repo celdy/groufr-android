@@ -10,11 +10,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.R
 import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.databinding.ItemMessageBinding
+import com.celdy.groufr.databinding.ItemMessageDividerBinding
 import androidx.core.view.isVisible
 import androidx.core.content.ContextCompat
 import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.common.MarkdownRenderer
 import java.util.Locale
+
+sealed class GroupChatItem {
+    data class Message(val value: MessageDto) : GroupChatItem()
+    data object Divider : GroupChatItem()
+}
 
 class MessageAdapter(
     private val currentUserId: Long,
@@ -24,26 +30,48 @@ class MessageAdapter(
     private val onPollClick: (Long, String) -> Unit,
     private val onReactMessage: (MessageDto) -> Unit = {},
     private val onReportMessage: (MessageDto) -> Unit = {}
-) : ListAdapter<MessageDto, MessageAdapter.MessageViewHolder>(DiffCallback) {
+) : ListAdapter<GroupChatItem, RecyclerView.ViewHolder>(DiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
-        val binding = ItemMessageBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return MessageViewHolder(binding, onReactMessage, onReportMessage)
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is GroupChatItem.Message -> VIEW_MESSAGE
+            GroupChatItem.Divider -> VIEW_DIVIDER
+        }
     }
 
-    override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
-        holder.bind(
-            getItem(position),
-            currentUserId,
-            groupId,
-            groupName,
-            onEventClick,
-            onPollClick
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            VIEW_MESSAGE -> {
+                val binding = ItemMessageBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                MessageViewHolder(binding, onReactMessage, onReportMessage)
+            }
+            else -> {
+                val binding = ItemMessageDividerBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                DividerViewHolder(binding)
+            }
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is GroupChatItem.Message -> (holder as MessageViewHolder).bind(
+                item.value,
+                currentUserId,
+                groupId,
+                groupName,
+                onEventClick,
+                onPollClick
+            )
+            GroupChatItem.Divider -> Unit
+        }
     }
 
     class MessageViewHolder(
@@ -170,17 +198,25 @@ class MessageAdapter(
         }
     }
 
-    private object DiffCallback : DiffUtil.ItemCallback<MessageDto>() {
-        override fun areItemsTheSame(oldItem: MessageDto, newItem: MessageDto): Boolean {
-            return oldItem.id == newItem.id
+    class DividerViewHolder(binding: ItemMessageDividerBinding) : RecyclerView.ViewHolder(binding.root)
+
+    private object DiffCallback : DiffUtil.ItemCallback<GroupChatItem>() {
+        override fun areItemsTheSame(oldItem: GroupChatItem, newItem: GroupChatItem): Boolean {
+            return when {
+                oldItem is GroupChatItem.Message && newItem is GroupChatItem.Message -> oldItem.value.id == newItem.value.id
+                oldItem is GroupChatItem.Divider && newItem is GroupChatItem.Divider -> true
+                else -> false
+            }
         }
 
-        override fun areContentsTheSame(oldItem: MessageDto, newItem: MessageDto): Boolean {
+        override fun areContentsTheSame(oldItem: GroupChatItem, newItem: GroupChatItem): Boolean {
             return oldItem == newItem
         }
     }
 
     companion object {
+        private const val VIEW_MESSAGE = 1
+        private const val VIEW_DIVIDER = 2
         private const val MENU_REACT = 1
         private const val MENU_REPORT = 2
     }

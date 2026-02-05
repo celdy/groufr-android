@@ -9,6 +9,7 @@ import com.celdy.groufr.data.messages.MessagesRepository
 import com.celdy.groufr.data.events.EventsRepository
 import com.celdy.groufr.data.polls.PollsRepository
 import com.celdy.groufr.data.notifications.NotificationSyncManager
+import com.celdy.groufr.data.storage.ChatLastSeenStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,7 +19,8 @@ class GroupDetailViewModel @Inject constructor(
     private val messagesRepository: MessagesRepository,
     private val eventsRepository: EventsRepository,
     private val pollsRepository: PollsRepository,
-    private val notificationSyncManager: NotificationSyncManager
+    private val notificationSyncManager: NotificationSyncManager,
+    private val chatLastSeenStore: ChatLastSeenStore
 ) : ViewModel() {
     private val _state = MutableLiveData<GroupDetailState>(GroupDetailState.Loading)
     val state: LiveData<GroupDetailState> = _state
@@ -37,6 +39,8 @@ class GroupDetailViewModel @Inject constructor(
     private var oldestId: Long? = null
     private var hasMore = true
     private var isLoadingMore = false
+    private var dividerBeforeMessageId: Long? = null
+    private var dividerComputed = false
 
     fun loadMessages(groupId: Long) {
         currentGroupId = groupId
@@ -65,7 +69,7 @@ class GroupDetailViewModel @Inject constructor(
         val groupId = currentGroupId ?: return
         if (isLoadingMore || !hasMore) return
         isLoadingMore = true
-        _state.value = GroupDetailState.Content(currentMessages, isLoadingMore = true)
+        _state.value = GroupDetailState.Content(currentMessages, dividerBeforeMessageId, isLoadingMore = true)
         fetchMessages(groupId = groupId, beforeId = oldestId, append = true, isRefresh = false)
     }
 
@@ -108,7 +112,16 @@ class GroupDetailViewModel @Inject constructor(
                 oldestId = response.meta?.oldestId ?: currentMessages.lastOrNull()?.id
                 hasMore = response.meta?.hasMore ?: false
                 isLoadingMore = false
-                _state.value = GroupDetailState.Content(currentMessages, isLoadingMore = false)
+                if (isRefresh && !dividerComputed) {
+                    val lastSeenId = chatLastSeenStore.getLastSeenMessageId("group", groupId)
+                    if (lastSeenId != 0L) {
+                        dividerBeforeMessageId = currentMessages.firstOrNull { it.id > lastSeenId }?.id
+                    }
+                    val maxId = currentMessages.maxOfOrNull { it.id } ?: 0L
+                    chatLastSeenStore.setLastSeenMessageId("group", groupId, maxId)
+                    dividerComputed = true
+                }
+                _state.value = GroupDetailState.Content(currentMessages, dividerBeforeMessageId, isLoadingMore = false)
             } catch (exception: Exception) {
                 isLoadingMore = false
                 _state.value = GroupDetailState.Error
@@ -137,7 +150,11 @@ class GroupDetailViewModel @Inject constructor(
 
 sealed class GroupDetailState {
     data object Loading : GroupDetailState()
-    data class Content(val messages: List<MessageDto>, val isLoadingMore: Boolean) : GroupDetailState()
+    data class Content(
+        val messages: List<MessageDto>,
+        val dividerBeforeMessageId: Long?,
+        val isLoadingMore: Boolean
+    ) : GroupDetailState()
     data object Error : GroupDetailState()
 }
 

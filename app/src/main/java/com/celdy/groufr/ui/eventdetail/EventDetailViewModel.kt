@@ -10,6 +10,7 @@ import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.data.messages.MessagesRepository
 import com.celdy.groufr.data.notifications.NotificationsRepository
 import com.celdy.groufr.data.notifications.NotificationSyncManager
+import com.celdy.groufr.data.storage.ChatLastSeenStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,7 +20,8 @@ class EventDetailViewModel @Inject constructor(
     private val eventsRepository: EventsRepository,
     private val messagesRepository: MessagesRepository,
     private val notificationsRepository: NotificationsRepository,
-    private val notificationSyncManager: NotificationSyncManager
+    private val notificationSyncManager: NotificationSyncManager,
+    private val chatLastSeenStore: ChatLastSeenStore
 ) : ViewModel() {
     private val _state = MutableLiveData<EventDetailState>(EventDetailState.Loading)
     val state: LiveData<EventDetailState> = _state
@@ -41,7 +43,8 @@ class EventDetailViewModel @Inject constructor(
     private var oldestId: Long? = null
     private var hasMore = true
     private var isLoadingMore = false
-    private var unreadCount = 0
+    private var dividerBeforeMessageId: Long? = null
+    private var dividerComputed = false
 
     fun loadEvent(eventId: Long) {
         _state.value = EventDetailState.Loading
@@ -124,7 +127,7 @@ class EventDetailViewModel @Inject constructor(
         val eventId = currentEventId ?: return
         if (isLoadingMore || !hasMore) return
         isLoadingMore = true
-        _chatState.value = EventChatState.Content(currentMessages, unreadCount, isLoadingMore = true)
+        _chatState.value = EventChatState.Content(currentMessages, dividerBeforeMessageId, isLoadingMore = true)
         fetchChatMessages(eventId = eventId, beforeId = oldestId, append = true, isRefresh = false)
     }
 
@@ -160,9 +163,6 @@ class EventDetailViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                if (isRefresh) {
-                    unreadCount = notificationsRepository.loadUnreadEventCount(eventId)
-                }
                 val response = messagesRepository.loadEventMessages(eventId, beforeId)
                 val incoming = response.messages
                 val merged = mergeMessages(currentMessages, incoming, append)
@@ -170,7 +170,16 @@ class EventDetailViewModel @Inject constructor(
                 oldestId = response.meta?.oldestId ?: currentMessages.lastOrNull()?.id
                 hasMore = response.meta?.hasMore ?: false
                 isLoadingMore = false
-                _chatState.value = EventChatState.Content(currentMessages, unreadCount, isLoadingMore = false)
+                if (isRefresh && !dividerComputed) {
+                    val lastSeenId = chatLastSeenStore.getLastSeenMessageId("event", eventId)
+                    if (lastSeenId != 0L) {
+                        dividerBeforeMessageId = currentMessages.firstOrNull { it.id > lastSeenId }?.id
+                    }
+                    val maxId = currentMessages.maxOfOrNull { it.id } ?: 0L
+                    chatLastSeenStore.setLastSeenMessageId("event", eventId, maxId)
+                    dividerComputed = true
+                }
+                _chatState.value = EventChatState.Content(currentMessages, dividerBeforeMessageId, isLoadingMore = false)
                 if (isRefresh) {
                     notificationsRepository.markEventMessagesRead(eventId)
                     notificationSyncManager.onUserAction()
@@ -218,7 +227,7 @@ sealed class EventChatState {
     data object Loading : EventChatState()
     data class Content(
         val messages: List<MessageDto>,
-        val unreadCount: Int,
+        val dividerBeforeMessageId: Long?,
         val isLoadingMore: Boolean
     ) : EventChatState()
     data object Error : EventChatState()
