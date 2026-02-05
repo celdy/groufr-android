@@ -40,7 +40,7 @@ class NotificationsAdapter(
             val locales = context.resources.configuration.locales
             val locale = if (locales.isEmpty) Locale.getDefault() else locales[0]
             val actor = notification.actor?.name ?: "System"
-            val title = buildTitle(context, actor, notification.eventType)
+            val title = buildTitle(context, actor, notification)
             val preview = extractPreview(notification)
 
             binding.notificationRoot.setBackgroundColor(
@@ -55,7 +55,8 @@ class NotificationsAdapter(
             val showEvent = shouldShowEvent(notification, eventTitle)
             binding.notificationEvent.isVisible = showEvent
             binding.notificationEvent.text = eventTitle
-            binding.notificationSubtitle.isVisible = notification.eventType == "new_message" && preview.isNotBlank()
+            val showSubtitle = (notification.eventType == "new_message" || notification.eventType == "reaction_message") && preview.isNotBlank()
+            binding.notificationSubtitle.isVisible = showSubtitle
             binding.notificationSubtitle.text = preview
 
             // For invitation notifications, show the invited group name from payload
@@ -68,7 +69,8 @@ class NotificationsAdapter(
             binding.root.setOnClickListener { onClick(notification) }
         }
 
-        private fun buildTitle(context: android.content.Context, actor: String, eventType: String): String {
+        private fun buildTitle(context: android.content.Context, actor: String, notification: NotificationDto): String {
+            val eventType = notification.eventType
             val resId = when (eventType) {
                 "event_created" -> R.string.notification_title_event_created
                 "event_updated" -> R.string.notification_title_event_updated
@@ -78,14 +80,32 @@ class NotificationsAdapter(
                 "user_joined" -> R.string.notification_title_user_joined
                 "participant_status_changed" -> R.string.notification_title_participant_status_changed
                 "invitation_received" -> R.string.notification_title_invitation_received
+                "reaction_message" -> R.string.notification_title_reaction_message
+                "reaction_event" -> R.string.notification_title_reaction_event
+                "reaction_poll" -> R.string.notification_title_reaction_poll
                 else -> R.string.notification_title_generic
             }
 
-            return if (resId == R.string.notification_title_generic) {
-                context.getString(resId, actor, eventType)
-            } else {
-                context.getString(resId, actor)
+            return when {
+                resId == R.string.notification_title_generic ->
+                    context.getString(resId, actor, eventType)
+                eventType.startsWith("reaction_") ->
+                    context.getString(resId, actor, extractReactionEmojis(notification))
+                else ->
+                    context.getString(resId, actor)
             }
+        }
+
+        private fun extractReactionEmojis(notification: NotificationDto): String {
+            val payload = notification.payload ?: return "👍"
+            val reactions = payload["reactions"]
+            if (reactions is List<*>) {
+                val emojis = reactions.mapNotNull { item ->
+                    if (item is Map<*, *>) item["emoji"] as? String else null
+                }.distinct()
+                if (emojis.isNotEmpty()) return emojis.joinToString("")
+            }
+            return "👍"
         }
 
         private fun extractPreview(notification: NotificationDto): String {
@@ -100,6 +120,7 @@ class NotificationsAdapter(
                 "new_message" -> R.drawable.ico_message
                 "poll_created", "poll_closed" -> R.drawable.ico_poll
                 "user_joined", "invitation_received" -> R.drawable.ico_user
+                "reaction_message", "reaction_event", "reaction_poll" -> R.drawable.ico_reaction
                 else -> R.drawable.ico_message
             }
         }
@@ -114,7 +135,9 @@ class NotificationsAdapter(
                 "event_created",
                 "event_updated",
                 "participant_status_changed",
-                "event_invitation_received" -> true
+                "event_invitation_received",
+                "reaction_event",
+                "reaction_poll" -> true
                 "new_message" -> (notification.eventIdFromPayload() ?: -1L) > 0
                 else -> false
             }
@@ -122,6 +145,16 @@ class NotificationsAdapter(
 
         private fun extractEventTitle(notification: NotificationDto): String {
             val payload = notification.payload ?: return ""
+            if (notification.eventType == "reaction_event" || notification.eventType == "reaction_poll") {
+                val preview = payload["preview"]
+                    ?: payload["event_title"]
+                    ?: payload["eventTitle"]
+                    ?: payload["poll_question"]
+                    ?: payload["pollQuestion"]
+                    ?: payload["title"]
+                    ?: return ""
+                return preview as? String ?: preview.toString()
+            }
             val title = payload["event_title"]
                 ?: payload["eventTitle"]
                 ?: payload["title"]

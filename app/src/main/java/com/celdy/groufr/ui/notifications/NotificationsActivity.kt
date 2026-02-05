@@ -114,7 +114,7 @@ class NotificationsActivity : AppCompatActivity() {
         val groupId = notification.groupId ?: -1L
         val groupName = notification.groupName.orEmpty()
         when (notification.eventType) {
-            "event_created", "event_updated", "participant_status_changed" -> {
+            "event_created", "event_updated", "participant_status_changed", "reaction_event" -> {
                 val eventId = notification.entityId ?: -1L
                 if (eventId > 0 && groupId > 0) {
                     val intent = Intent(this, EventDetailActivity::class.java)
@@ -125,7 +125,7 @@ class NotificationsActivity : AppCompatActivity() {
                     finish()
                 }
             }
-            "poll_created", "poll_closed" -> {
+            "poll_created", "poll_closed", "reaction_poll" -> {
                 val pollId = notification.entityId ?: -1L
                 if (pollId > 0 && groupId > 0) {
                     val intent = Intent(this, PollDetailActivity::class.java)
@@ -139,8 +139,8 @@ class NotificationsActivity : AppCompatActivity() {
             "invitation_received" -> {
                 showInvitationDialog(notification)
             }
-            "new_message", "user_joined" -> {
-                if (notification.eventType == "new_message") {
+            "new_message", "user_joined", "reaction_message" -> {
+                if (notification.eventType == "new_message" || notification.eventType == "reaction_message") {
                     val eventId = notification.eventIdFromPayload() ?: -1L
                     if (eventId > 0) {
                         val intent = Intent(this, EventDetailActivity::class.java)
