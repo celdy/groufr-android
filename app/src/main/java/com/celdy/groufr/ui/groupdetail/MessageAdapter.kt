@@ -179,6 +179,17 @@ class MessageAdapter(
             params.horizontalBias = if (isOwn) 1f else 0f
             binding.messageCard.layoutParams = params
 
+            val reactionsParams = binding.reactionsRow.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+            if (isOwn) {
+                reactionsParams.startToStart = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
+                reactionsParams.startToEnd = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
+                reactionsParams.endToEnd = binding.messageCard.id
+            } else {
+                reactionsParams.endToEnd = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
+                reactionsParams.startToStart = binding.messageCard.id
+            }
+            binding.reactionsRow.layoutParams = reactionsParams
+
             binding.messageCard.setOnClickListener(null)
             if (isEvent && message.refEvent != null) {
                 binding.messageCard.setOnClickListener {
