@@ -15,6 +15,7 @@ import androidx.core.view.isVisible
 import androidx.core.content.ContextCompat
 import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.common.MarkdownRenderer
+import com.celdy.groufr.ui.common.ReactionHelper
 import java.util.Locale
 
 sealed class GroupChatItem {
@@ -29,7 +30,8 @@ class MessageAdapter(
     private val onEventClick: (Long, String) -> Unit,
     private val onPollClick: (Long, String) -> Unit,
     private val onReactMessage: (MessageDto) -> Unit = {},
-    private val onReportMessage: (MessageDto) -> Unit = {}
+    private val onReportMessage: (MessageDto) -> Unit = {},
+    private val onShowReactors: (MessageDto) -> Unit = {}
 ) : ListAdapter<GroupChatItem, RecyclerView.ViewHolder>(DiffCallback) {
 
     override fun getItemViewType(position: Int): Int {
@@ -47,7 +49,7 @@ class MessageAdapter(
                     parent,
                     false
                 )
-                MessageViewHolder(binding, onReactMessage, onReportMessage)
+                MessageViewHolder(binding, onReactMessage, onReportMessage, onShowReactors)
             }
             else -> {
                 val binding = ItemMessageDividerBinding.inflate(
@@ -77,7 +79,8 @@ class MessageAdapter(
     class MessageViewHolder(
         private val binding: ItemMessageBinding,
         private val onReactMessage: (MessageDto) -> Unit,
-        private val onReportMessage: (MessageDto) -> Unit
+        private val onReportMessage: (MessageDto) -> Unit,
+        private val onShowReactors: (MessageDto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(
             message: MessageDto,
@@ -186,6 +189,12 @@ class MessageAdapter(
                     onPollClick(message.refPoll.id, groupName)
                 }
             }
+
+            ReactionHelper.bindReactions(
+                binding, message, isSystemMessage,
+                onSummaryClick = { onShowReactors(message) },
+                onReactClick = { onReactMessage(message) }
+            )
         }
 
         private fun formatTimestamp(createdAt: String, locale: Locale): String {

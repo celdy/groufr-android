@@ -22,6 +22,7 @@ import com.celdy.groufr.data.reports.ReportContentType
 import com.celdy.groufr.data.reactions.ReactionContentType
 import com.celdy.groufr.ui.common.ReportDialogFragment
 import com.celdy.groufr.ui.common.ReactionDialogFragment
+import com.celdy.groufr.ui.common.ReactorListDialogFragment
 import com.celdy.groufr.ui.eventcreate.EventCreateActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
@@ -84,12 +85,19 @@ class GroupDetailActivity : AppCompatActivity() {
                 startActivity(intent)
             },
             onReactMessage = { message ->
-                ReactionDialogFragment.newInstance(ReactionContentType.MESSAGE, message.id)
-                    .show(supportFragmentManager, ReactionDialogFragment.TAG)
+                ReactionDialogFragment.newInstance(
+                    ReactionContentType.MESSAGE,
+                    message.id,
+                    message.reactions?.userReaction
+                ).show(supportFragmentManager, ReactionDialogFragment.TAG)
             },
             onReportMessage = { message ->
                 ReportDialogFragment.newInstance(ReportContentType.MESSAGE, message.id)
                     .show(supportFragmentManager, ReportDialogFragment.TAG)
+            },
+            onShowReactors = { message ->
+                ReactorListDialogFragment.newInstance(ReactionContentType.MESSAGE, message.id, tokenStore.getUserId())
+                    .show(supportFragmentManager, ReactorListDialogFragment.TAG)
             }
         )
         binding.messagesList.adapter = adapter
@@ -176,6 +184,14 @@ class GroupDetailActivity : AppCompatActivity() {
 
         viewModel.refreshing.observe(this) { refreshing ->
             binding.messagesRefresh.isRefreshing = refreshing
+        }
+
+        supportFragmentManager.setFragmentResultListener(
+            ReactionDialogFragment.RESULT_KEY, this
+        ) { _, bundle ->
+            if (bundle.getBoolean(ReactionDialogFragment.RESULT_CHANGED, false)) {
+                viewModel.refresh()
+            }
         }
 
         if (groupId > 0) {

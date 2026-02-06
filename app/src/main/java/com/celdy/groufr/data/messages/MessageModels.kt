@@ -27,7 +27,23 @@ data class MessageDto(
     @SerializedName("ref_event")
     val refEvent: MessageEventRef? = null,
     @SerializedName("ref_poll")
-    val refPoll: MessagePollRef? = null
+    val refPoll: MessagePollRef? = null,
+    val reactions: MessageReactions? = null
+)
+
+data class MessageReactions(
+    @SerializedName("total_count")
+    val totalCount: Int = 0,
+    @SerializedName("top_reactions")
+    val topReactions: List<MessageTopReaction> = emptyList(),
+    @SerializedName("user_reaction")
+    val userReaction: String? = null
+)
+
+data class MessageTopReaction(
+    val type: String,
+    val emoji: String,
+    val count: Int
 )
 
 data class MessageUserRef(

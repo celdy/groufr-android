@@ -154,4 +154,9 @@
     <string name="report_error_already_reported">Už jsi nahlásil tento obsah</string>
     <string name="report_error_own_content">Nemůžeš nahlásit svůj obsah</string>
     <string name="events_filter_time_title">Filtr podle času</string>
+    <string name="reaction_list_title">Reakce</string>
+    <string name="reaction_list_loading">Načítání reakcí…</string>
+    <string name="reaction_list_empty">Zatím žádné reakce.</string>
+    <string name="reaction_list_close">Zavřít</string>
+    <string name="reaction_list_you_suffix">(ty)</string>
 </resources>

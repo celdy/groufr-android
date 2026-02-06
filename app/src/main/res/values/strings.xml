@@ -154,6 +154,12 @@
     <string name="reaction_added">Reaction set to %1$s</string>
     <string name="reaction_removed">Reaction removed</string>
     <string name="reaction_error">Unable to update reaction</string>
+    <string name="reaction_badge_description">Your reaction</string>
+    <string name="reaction_list_title">Reactions</string>
+    <string name="reaction_list_loading">Loading reactions…</string>
+    <string name="reaction_list_empty">No reactions yet.</string>
+    <string name="reaction_list_close">Close</string>
+    <string name="reaction_list_you_suffix">(you)</string>
     <string name="report_dialog_title">Report message</string>
     <string name="report_dialog_reason_label">Select reason</string>
     <string name="report_dialog_comment_hint">Additional details (optional)</string>

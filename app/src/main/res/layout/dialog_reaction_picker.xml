@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="20dp">
+
+    <TextView
+        android:id="@+id/reaction_thumbs_up"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_reaction_picker_item"
+        android:gravity="center"
+        android:text="&#x1F44D;"
+        android:textSize="24sp"
+        android:layout_marginHorizontal="4dp" />
+
+    <TextView
+        android:id="@+id/reaction_heart"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_reaction_picker_item"
+        android:gravity="center"
+        android:text="&#x2764;&#xFE0F;"
+        android:textSize="24sp"
+        android:layout_marginHorizontal="4dp" />
+
+    <TextView
+        android:id="@+id/reaction_thanks"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_reaction_picker_item"
+        android:gravity="center"
+        android:text="&#x1F64F;"
+        android:textSize="24sp"
+        android:layout_marginHorizontal="4dp" />
+
+    <TextView
+        android:id="@+id/reaction_sad"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_reaction_picker_item"
+        android:gravity="center"
+        android:text="&#x1F622;"
+        android:textSize="24sp"
+        android:layout_marginHorizontal="4dp" />
+
+    <TextView
+        android:id="@+id/reaction_surprised"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_reaction_picker_item"
+        android:gravity="center"
+        android:text="&#x1F62E;"
+        android:textSize="24sp"
+        android:layout_marginHorizontal="4dp" />
+
+</LinearLayout>

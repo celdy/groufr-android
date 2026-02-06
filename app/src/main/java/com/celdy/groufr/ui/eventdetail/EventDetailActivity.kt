@@ -25,6 +25,7 @@ import com.celdy.groufr.ui.common.ReportDialogFragment
 import com.celdy.groufr.data.reports.ReportContentType
 import com.celdy.groufr.data.reactions.ReactionContentType
 import com.celdy.groufr.ui.common.ReactionDialogFragment
+import com.celdy.groufr.ui.common.ReactorListDialogFragment
 import com.celdy.groufr.ui.eventedit.EventEditActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,12 +77,19 @@ class EventDetailActivity : AppCompatActivity() {
         chatAdapter = EventChatAdapter(
             currentUserId = tokenStore.getUserId(),
             onReactMessage = { message ->
-                ReactionDialogFragment.newInstance(ReactionContentType.MESSAGE, message.id)
-                    .show(supportFragmentManager, ReactionDialogFragment.TAG)
+                ReactionDialogFragment.newInstance(
+                    ReactionContentType.MESSAGE,
+                    message.id,
+                    message.reactions?.userReaction
+                ).show(supportFragmentManager, ReactionDialogFragment.TAG)
             },
             onReportMessage = { message ->
                 ReportDialogFragment.newInstance(ReportContentType.MESSAGE, message.id)
                     .show(supportFragmentManager, ReportDialogFragment.TAG)
+            },
+            onShowReactors = { message ->
+                ReactorListDialogFragment.newInstance(ReactionContentType.MESSAGE, message.id, tokenStore.getUserId())
+                    .show(supportFragmentManager, ReactorListDialogFragment.TAG)
             }
         )
         binding.eventMessagesList.layoutManager = chatLayoutManager
@@ -215,6 +223,14 @@ class EventDetailActivity : AppCompatActivity() {
 
         viewModel.chatRefreshing.observe(this) { refreshing ->
             binding.eventMessagesRefresh.isRefreshing = refreshing
+        }
+
+        supportFragmentManager.setFragmentResultListener(
+            ReactionDialogFragment.RESULT_KEY, this
+        ) { _, bundle ->
+            if (bundle.getBoolean(ReactionDialogFragment.RESULT_CHANGED, false)) {
+                viewModel.refreshChat()
+            }
         }
 
         if (eventId > 0) {

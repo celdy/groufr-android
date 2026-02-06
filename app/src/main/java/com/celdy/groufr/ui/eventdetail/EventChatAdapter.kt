@@ -15,6 +15,7 @@ import com.celdy.groufr.databinding.ItemMessageBinding
 import com.celdy.groufr.databinding.ItemMessageDividerBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.common.MarkdownRenderer
+import com.celdy.groufr.ui.common.ReactionHelper
 import java.util.Locale
 
 sealed class EventChatItem {
@@ -25,7 +26,8 @@ sealed class EventChatItem {
 class EventChatAdapter(
     private val currentUserId: Long,
     private val onReactMessage: (MessageDto) -> Unit = {},
-    private val onReportMessage: (MessageDto) -> Unit = {}
+    private val onReportMessage: (MessageDto) -> Unit = {},
+    private val onShowReactors: (MessageDto) -> Unit = {}
 ) : ListAdapter<EventChatItem, RecyclerView.ViewHolder>(DiffCallback) {
 
     override fun getItemViewType(position: Int): Int {
@@ -43,7 +45,7 @@ class EventChatAdapter(
                     parent,
                     false
                 )
-                MessageViewHolder(binding, onReactMessage, onReportMessage)
+                MessageViewHolder(binding, onReactMessage, onReportMessage, onShowReactors)
             }
             else -> {
                 val binding = ItemMessageDividerBinding.inflate(
@@ -66,7 +68,8 @@ class EventChatAdapter(
     class MessageViewHolder(
         private val binding: ItemMessageBinding,
         private val onReactMessage: (MessageDto) -> Unit,
-        private val onReportMessage: (MessageDto) -> Unit
+        private val onReportMessage: (MessageDto) -> Unit,
+        private val onShowReactors: (MessageDto) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(message: MessageDto, currentUserId: Long) {
             val context = binding.root.context
@@ -147,6 +150,12 @@ class EventChatAdapter(
             val params = binding.messageCard.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
             params.horizontalBias = if (isOwn) 1f else 0f
             binding.messageCard.layoutParams = params
+
+            ReactionHelper.bindReactions(
+                binding, message, isSystemMessage,
+                onSummaryClick = { onShowReactors(message) },
+                onReactClick = { onReactMessage(message) }
+            )
         }
     }
 
