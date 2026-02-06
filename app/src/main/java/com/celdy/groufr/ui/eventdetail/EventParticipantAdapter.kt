@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.data.events.EventParticipantDto
 import com.celdy.groufr.databinding.ItemParticipantBinding
+import com.celdy.groufr.ui.common.AvatarHelper
 
 class EventParticipantAdapter :
     ListAdapter<EventParticipantDto, EventParticipantAdapter.ParticipantViewHolder>(DiffCallback) {
@@ -29,6 +30,7 @@ class EventParticipantAdapter :
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(participant: EventParticipantDto) {
             val context = binding.root.context
+            AvatarHelper.bindAvatar(binding.participantAvatar, participant.user.name)
             binding.participantName.text = participant.user.name
             binding.participantStatus.text = when (participant.status) {
                 "joined" -> context.getString(com.celdy.groufr.R.string.event_participant_joined)

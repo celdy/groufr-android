@@ -5,6 +5,21 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp">
 
+    <TextView
+        android:id="@+id/message_avatar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@drawable/bg_group_avatar"
+        android:backgroundTint="@color/primary_100"
+        android:gravity="center"
+        android:textAllCaps="true"
+        android:textColor="@color/primary_700"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/message_card" />
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/message_card"
         android:layout_width="0dp"
@@ -19,8 +34,9 @@
         app:layout_constraintWidth_default="percent"
         app:layout_constrainedWidth="true"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toEndOf="@id/message_avatar"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="8dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

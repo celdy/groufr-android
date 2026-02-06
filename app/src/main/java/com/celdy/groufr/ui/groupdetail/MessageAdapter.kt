@@ -15,6 +15,7 @@ import androidx.core.view.isVisible
 import androidx.core.content.ContextCompat
 import com.celdy.groufr.ui.common.ChatDateFormatter
 import com.celdy.groufr.ui.common.MarkdownRenderer
+import com.celdy.groufr.ui.common.AvatarHelper
 import com.celdy.groufr.ui.common.ReactionHelper
 import java.util.Locale
 
@@ -125,6 +126,12 @@ class MessageAdapter(
                     }
                 }
                 else -> message.body.orEmpty()
+            }
+
+            val showAvatar = !isOwn && !isSystemMessage
+            binding.messageAvatar.isVisible = showAvatar
+            if (showAvatar) {
+                AvatarHelper.bindAvatar(binding.messageAvatar, authorName)
             }
 
             binding.messageAuthor.isVisible = !isOwn && authorName.isNotBlank()
