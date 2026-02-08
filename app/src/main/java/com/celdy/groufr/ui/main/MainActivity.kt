@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.celdy.groufr.R
 import com.celdy.groufr.data.auth.AuthRepository
+import com.celdy.groufr.data.calendar.CalendarSyncManager
+import com.celdy.groufr.data.calendar.CalendarSyncStore
 import com.celdy.groufr.databinding.ActivityMainBinding
 import com.celdy.groufr.ui.events.EventsActivity
 import com.celdy.groufr.ui.groupdetail.GroupDetailActivity
@@ -33,6 +35,8 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject lateinit var authRepository: AuthRepository
+    @Inject lateinit var calendarSyncManager: CalendarSyncManager
+    @Inject lateinit var calendarSyncStore: CalendarSyncStore
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
     private val adapter = GroupAdapter { group ->
@@ -52,9 +56,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val calendarPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            calendarSyncManager.enableSync()
+        } else {
+            calendarSyncStore.setEnabled(false)
+        }
+    }
+
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { _ -> }
+    ) { _ ->
+        requestCalendarPermissions()
+    }
 
     private val notificationsActivityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -166,7 +183,24 @@ class MainActivity : AppCompatActivity() {
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
             }
         }
+        // Notification permission already granted or not needed — ask calendar next
+        requestCalendarPermissions()
+    }
+
+    private fun requestCalendarPermissions() {
+        if (!calendarSyncStore.isEnabled()) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Permissions already granted — ensure account+calendar exist
+            calendarSyncManager.enableSync()
+            return
+        }
+        calendarPermissionLauncher.launch(
+            arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR)
+        )
     }
 }

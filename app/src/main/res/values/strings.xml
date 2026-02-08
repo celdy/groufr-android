@@ -15,6 +15,10 @@
     <string name="profile_developer_value" translatable="false">Celdy technology, s.r.o.</string>
     <string name="profile_developer_web">Web</string>
     <string name="profile_signout">Sign out</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_calendar_sync">Sync to calendar</string>
+    <string name="profile_calendar_permission_denied">Calendar permission is required to sync events</string>
+    <string name="profile_calendar_sync_error">Failed to create calendar. Check app permissions.</string>
     <string name="chat_system_user">System</string>
     <string name="chat_generic_user">User</string>
     <string name="chat_joined_group">%1$s joined the group</string>

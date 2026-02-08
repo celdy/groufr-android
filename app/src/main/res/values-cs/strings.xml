@@ -42,6 +42,10 @@
     <string name="profile_developer">Vývojář</string>
     <string name="profile_developer_web">Web</string>
     <string name="profile_signout">Odhlásit se</string>
+    <string name="profile_settings">Nastavení</string>
+    <string name="profile_calendar_sync">Synchronizace do kalendáře</string>
+    <string name="profile_calendar_permission_denied">Pro synchronizaci událostí je potřeba povolení ke kalendáři</string>
+    <string name="profile_calendar_sync_error">Nepodařilo se vytvořit kalendář. Zkontrolujte oprávnění aplikace.</string>
     <string name="groups_title">Skupiny</string>
     <string name="groups_empty">Zatím žádné skupiny</string>
     <string name="groups_error">Nebylo možné nahrát skupiny. Prosím zkus znovu.</string>
