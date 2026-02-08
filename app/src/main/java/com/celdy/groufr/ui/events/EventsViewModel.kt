@@ -121,35 +121,29 @@ class EventsViewModel @Inject constructor(
 
     /**
      * Sort events based on the time filter:
-     * - UPCOMING: ascending by startAt, NULLs at the end
-     * - PAST: descending by startAt then endAt, NULLs excluded
-     * - ALL: NULLs first, then descending by startAt then endAt
+     * - UPCOMING: ascending by startAt, then endAt; NULLs at the end
+     * - PAST: descending by startAt, then endAt
+     * - ALL: descending by startAt, then endAt; NULLs at the end
      */
     private fun sortEvents(events: List<EventDto>, timeFilter: TimeFilter): List<EventDto> {
         return when (timeFilter) {
             TimeFilter.UPCOMING -> {
-                // Ascending by startAt, NULLs at the end
-                events.sortedWith(compareBy(nullsLast()) { it.startAt })
+                events.sortedWith(
+                    compareBy<EventDto, String?>(nullsLast()) { it.startAt }
+                        .thenBy(nullsLast()) { it.endAt }
+                )
             }
             TimeFilter.PAST -> {
-                // Descending by startAt, then endAt; exclude NULLs
-                events
-                    .filter { !it.startAt.isNullOrBlank() }
-                    .sortedWith(
-                        compareByDescending<EventDto> { it.startAt }
-                            .thenByDescending { it.endAt }
-                    )
+                events.sortedWith(
+                    compareByDescending<EventDto> { it.startAt }
+                        .thenByDescending { it.endAt }
+                )
             }
             TimeFilter.ALL -> {
-                // NULLs first, then descending by startAt, endAt
-                val nullStartEvents = events.filter { it.startAt.isNullOrBlank() }
-                val nonNullStartEvents = events
-                    .filter { !it.startAt.isNullOrBlank() }
-                    .sortedWith(
-                        compareByDescending<EventDto> { it.startAt }
-                            .thenByDescending { it.endAt }
-                    )
-                nullStartEvents + nonNullStartEvents
+                events.sortedWith(
+                    compareByDescending<EventDto, String?>(nullsLast()) { it.startAt }
+                        .thenByDescending(nullsLast()) { it.endAt }
+                )
             }
         }
     }
