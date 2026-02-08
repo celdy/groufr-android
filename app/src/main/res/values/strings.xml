@@ -191,4 +191,26 @@
     <string name="invitation_accepted">You joined the group</string>
     <string name="invitation_declined">Invitation declined</string>
     <string name="invitation_error">Failed to process invitation</string>
+
+    <string name="group_info_title">Group detail</string>
+    <string name="group_info_tab_info">Info</string>
+    <string name="group_info_tab_members">Members</string>
+    <string name="group_info_created">Created</string>
+    <string name="group_info_description">Description</string>
+    <string name="group_info_no_description">No description</string>
+    <string name="group_info_member_count">Members</string>
+    <string name="group_info_leave">Leave group</string>
+    <string name="group_info_leave_confirm_title">Leave group?</string>
+    <string name="group_info_leave_confirm_message">You will be removed from all future events and your votes will be removed from open polls.</string>
+    <string name="group_info_leave_sole_owner">You are the only owner. Transfer ownership before leaving.</string>
+    <string name="group_info_delete">Delete group</string>
+    <string name="group_info_delete_confirm_title">Delete group?</string>
+    <string name="group_info_delete_confirm_message">This cannot be undone. Type the group name to confirm:</string>
+    <string name="group_info_delete_button">Delete</string>
+    <string name="group_info_role_owner">Owner</string>
+    <string name="group_info_role_admin">Admin</string>
+    <string name="group_info_role_member">Member</string>
+    <string name="group_info_error">Unable to load group info.</string>
+    <string name="group_info_leave_success">You have left the group.</string>
+    <string name="group_info_delete_success">Group has been deleted.</string>
 </resources>

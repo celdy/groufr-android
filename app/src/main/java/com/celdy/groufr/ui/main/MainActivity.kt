@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, GroupDetailActivity::class.java).apply {
             putExtra(GroupDetailActivity.EXTRA_GROUP_ID, group.id)
             putExtra(GroupDetailActivity.EXTRA_GROUP_NAME, group.name)
+            putExtra(GroupDetailActivity.EXTRA_GROUP_SLUG, group.slug)
         }
         startActivity(intent)
     }

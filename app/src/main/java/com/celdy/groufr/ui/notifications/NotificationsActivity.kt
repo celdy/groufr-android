@@ -156,6 +156,7 @@ class NotificationsActivity : AppCompatActivity() {
                     val intent = Intent(this, GroupDetailActivity::class.java)
                         .putExtra(GroupDetailActivity.EXTRA_GROUP_ID, groupId)
                         .putExtra(GroupDetailActivity.EXTRA_GROUP_NAME, groupName)
+                        .putExtra(GroupDetailActivity.EXTRA_GROUP_SLUG, "")
                     startActivity(intent)
                     finish()
                 }

@@ -24,6 +24,7 @@ import com.celdy.groufr.ui.common.ReportDialogFragment
 import com.celdy.groufr.ui.common.ReactionDialogFragment
 import com.celdy.groufr.ui.common.ReactorListDialogFragment
 import com.celdy.groufr.ui.eventcreate.EventCreateActivity
+import com.celdy.groufr.ui.groupinfo.GroupInfoActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
 import com.celdy.groufr.ui.polldetail.PollDetailActivity
@@ -40,7 +41,15 @@ class GroupDetailActivity : AppCompatActivity() {
     private lateinit var adapter: MessageAdapter
     private var groupId: Long = -1L
     private var groupName: String = ""
+    private var groupSlug: String = ""
     private var menuRef: Menu? = null
+    private val groupInfoLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            finish()
+        }
+    }
     private val createEventLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -57,6 +66,7 @@ class GroupDetailActivity : AppCompatActivity() {
 
         groupId = intent.getLongExtra(EXTRA_GROUP_ID, -1L)
         groupName = intent.getStringExtra(EXTRA_GROUP_NAME).orEmpty()
+        groupSlug = intent.getStringExtra(EXTRA_GROUP_SLUG).orEmpty()
 
         binding.groupToolbar.title = groupName
         setSupportActionBar(binding.groupToolbar)
@@ -252,6 +262,16 @@ class GroupDetailActivity : AppCompatActivity() {
                 }
                 true
             }
+            com.celdy.groufr.R.id.action_group_info -> {
+                if (groupId > 0) {
+                    val intent = Intent(this, GroupInfoActivity::class.java)
+                        .putExtra(GroupInfoActivity.EXTRA_GROUP_ID, groupId)
+                        .putExtra(GroupInfoActivity.EXTRA_GROUP_NAME, groupName)
+                        .putExtra(GroupInfoActivity.EXTRA_GROUP_SLUG, groupSlug)
+                    groupInfoLauncher.launch(intent)
+                }
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -293,5 +313,6 @@ class GroupDetailActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_GROUP_ID = "extra_group_id"
         const val EXTRA_GROUP_NAME = "extra_group_name"
+        const val EXTRA_GROUP_SLUG = "extra_group_slug"
     }
 }

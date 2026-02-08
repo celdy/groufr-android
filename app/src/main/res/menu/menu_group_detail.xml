@@ -11,4 +11,9 @@
         android:title="@string/events_title"
         app:actionLayout="@layout/menu_badge_event"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_group_info"
+        android:icon="@drawable/ic_group_info"
+        android:title="@string/group_info_title"
+        app:showAsAction="always" />
 </menu>

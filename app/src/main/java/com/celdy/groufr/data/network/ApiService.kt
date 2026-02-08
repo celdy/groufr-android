@@ -3,6 +3,9 @@ package com.celdy.groufr.data.network
 import com.celdy.groufr.data.auth.LoginRequest
 import com.celdy.groufr.data.auth.RefreshRequest
 import com.celdy.groufr.data.auth.TokenResponse
+import com.celdy.groufr.data.groups.GroupActionResponse
+import com.celdy.groufr.data.groups.GroupDetailDto
+import com.celdy.groufr.data.groups.GroupMembersResponse
 import com.celdy.groufr.data.messages.MessagesResponse
 import com.celdy.groufr.data.messages.SendMessageRequest
 import com.celdy.groufr.data.messages.MessageDto
@@ -202,6 +205,26 @@ interface ApiService {
         @Path("contentType") contentType: String,
         @Path("contentId") contentId: Long
     ): ReactionSummary
+
+    @GET("/api/v1/groups/{slug}")
+    suspend fun getGroupDetail(
+        @Path("slug") slug: String
+    ): GroupDetailDto
+
+    @GET("/api/v1/groups/{groupId}/members")
+    suspend fun getGroupMembers(
+        @Path("groupId") groupId: Long
+    ): GroupMembersResponse
+
+    @POST("/api/v1/groups/{groupId}/leave")
+    suspend fun leaveGroup(
+        @Path("groupId") groupId: Long
+    ): GroupActionResponse
+
+    @DELETE("/api/v1/groups/{groupId}")
+    suspend fun deleteGroup(
+        @Path("groupId") groupId: Long
+    ): GroupActionResponse
 
     @POST("/api/v1/invitations/{token}/accept")
     suspend fun acceptInvitation(

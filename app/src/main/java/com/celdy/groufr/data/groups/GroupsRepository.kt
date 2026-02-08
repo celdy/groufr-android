@@ -25,4 +25,20 @@ class GroupsRepository @Inject constructor(
             }
         }
     }
+
+    suspend fun getGroupDetail(slug: String): GroupDetailDto {
+        return apiService.getGroupDetail(slug)
+    }
+
+    suspend fun getGroupMembers(groupId: Long): GroupMembersResponse {
+        return apiService.getGroupMembers(groupId)
+    }
+
+    suspend fun leaveGroup(groupId: Long): GroupActionResponse {
+        return apiService.leaveGroup(groupId)
+    }
+
+    suspend fun deleteGroup(groupId: Long): GroupActionResponse {
+        return apiService.deleteGroup(groupId)
+    }
 }

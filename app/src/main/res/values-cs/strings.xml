@@ -165,4 +165,26 @@
     <string name="reaction_list_empty">Zatím žádné reakce.</string>
     <string name="reaction_list_close">Zavřít</string>
     <string name="reaction_list_you_suffix">(ty)</string>
+
+    <string name="group_info_title">Detail skupiny</string>
+    <string name="group_info_tab_info">Info</string>
+    <string name="group_info_tab_members">Členové</string>
+    <string name="group_info_created">Vytvořeno</string>
+    <string name="group_info_description">Popis</string>
+    <string name="group_info_no_description">Bez popisu</string>
+    <string name="group_info_member_count">Členové</string>
+    <string name="group_info_leave">Opustit skupinu</string>
+    <string name="group_info_leave_confirm_title">Opustit skupinu?</string>
+    <string name="group_info_leave_confirm_message">Budeš odstraněn/a ze všech budoucích událostí a tvé hlasy budou odstraněny z otevřených hlasování.</string>
+    <string name="group_info_leave_sole_owner">Jsi jediný vlastník. Před odchodem převeď vlastnictví.</string>
+    <string name="group_info_delete">Smazat skupinu</string>
+    <string name="group_info_delete_confirm_title">Smazat skupinu?</string>
+    <string name="group_info_delete_confirm_message">Tuto akci nelze vrátit. Pro potvrzení napiš název skupiny:</string>
+    <string name="group_info_delete_button">Smazat</string>
+    <string name="group_info_role_owner">Vlastník</string>
+    <string name="group_info_role_admin">Administrátor</string>
+    <string name="group_info_role_member">Člen</string>
+    <string name="group_info_error">Nepodařilo se načíst informace o skupině.</string>
+    <string name="group_info_leave_success">Opustil/a jsi skupinu.</string>
+    <string name="group_info_delete_success">Skupina byla smazána.</string>
 </resources>
