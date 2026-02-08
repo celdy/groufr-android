@@ -36,6 +36,12 @@
     <string name="menu_content_description">Menu</string>
     <string name="profile_title">Profil</string>
     <string name="profile_logout">Odhlásit se</string>
+    <string name="profile_application">Aplikace</string>
+    <string name="profile_version">Verze</string>
+    <string name="profile_website">Webová stránka</string>
+    <string name="profile_developer">Vývojář</string>
+    <string name="profile_developer_web">Web</string>
+    <string name="profile_signout">Odhlásit se</string>
     <string name="groups_title">Skupiny</string>
     <string name="groups_empty">Zatím žádné skupiny</string>
     <string name="groups_error">Nebylo možné nahrát skupiny. Prosím zkus znovu.</string>

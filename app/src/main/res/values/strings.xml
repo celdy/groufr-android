@@ -8,6 +8,13 @@
     <string name="menu_content_description">Menu</string>
     <string name="profile_title">Profile</string>
     <string name="profile_logout">Log out</string>
+    <string name="profile_application">Application</string>
+    <string name="profile_version">Version</string>
+    <string name="profile_website">Website</string>
+    <string name="profile_developer">Developer</string>
+    <string name="profile_developer_value" translatable="false">Celdy technology, s.r.o.</string>
+    <string name="profile_developer_web">Web</string>
+    <string name="profile_signout">Sign out</string>
     <string name="chat_system_user">System</string>
     <string name="chat_generic_user">User</string>
     <string name="chat_joined_group">%1$s joined the group</string>
