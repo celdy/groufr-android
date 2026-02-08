@@ -58,6 +58,38 @@ interface EventDao {
 
     @Upsert
     suspend fun upsert(event: EventEntity)
+
+    @Query("DELETE FROM events")
+    suspend fun clear()
+
+    @Query("DELETE FROM events WHERE id NOT IN (:ids)")
+    suspend fun deleteNotIn(ids: List<Long>)
+
+    @Query("DELETE FROM events WHERE groupId = :groupId AND id NOT IN (:ids)")
+    suspend fun deleteByGroupNotIn(groupId: Long, ids: List<Long>)
+
+    @Query("DELETE FROM events WHERE groupId = :groupId")
+    suspend fun deleteByGroup(groupId: Long)
+
+    @Transaction
+    suspend fun replaceAll(events: List<EventEntity>) {
+        if (events.isEmpty()) {
+            clear()
+            return
+        }
+        upsertAll(events)
+        deleteNotIn(events.map { it.id })
+    }
+
+    @Transaction
+    suspend fun replaceAllByGroup(groupId: Long, events: List<EventEntity>) {
+        if (events.isEmpty()) {
+            deleteByGroup(groupId)
+            return
+        }
+        upsertAll(events)
+        deleteByGroupNotIn(groupId, events.map { it.id })
+    }
 }
 
 @Dao

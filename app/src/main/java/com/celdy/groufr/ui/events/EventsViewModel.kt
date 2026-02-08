@@ -34,6 +34,9 @@ class EventsViewModel @Inject constructor(
     private val _state = MutableLiveData<EventsState>(EventsState.Loading)
     val state: LiveData<EventsState> = _state
 
+    private val _refreshing = MutableLiveData(false)
+    val refreshing: LiveData<Boolean> = _refreshing
+
     private val _timeFilter = MutableLiveData(TimeFilter.UPCOMING)
     val timeFilter: LiveData<TimeFilter> = _timeFilter
 
@@ -77,8 +80,16 @@ class EventsViewModel @Inject constructor(
         }
     }
 
-    private fun reload() {
-        _state.value = EventsState.Loading
+    fun refresh() {
+        reload(isRefresh = true)
+    }
+
+    private fun reload(isRefresh: Boolean = false) {
+        if (isRefresh) {
+            _refreshing.value = true
+        } else {
+            _state.value = EventsState.Loading
+        }
         viewModelScope.launch {
             try {
                 val time = _timeFilter.value ?: TimeFilter.UPCOMING
@@ -99,7 +110,11 @@ class EventsViewModel @Inject constructor(
                 val sortedEvents = sortEvents(events, time)
                 _state.value = EventsState.Content(sortedEvents)
             } catch (exception: Exception) {
-                _state.value = EventsState.Error
+                if (!isRefresh) {
+                    _state.value = EventsState.Error
+                }
+            } finally {
+                _refreshing.value = false
             }
         }
     }

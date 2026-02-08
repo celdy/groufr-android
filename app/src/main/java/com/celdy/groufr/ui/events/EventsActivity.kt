@@ -54,6 +54,7 @@ class EventsActivity : AppCompatActivity() {
 
         binding.eventsList.layoutManager = LinearLayoutManager(this)
         binding.eventsList.adapter = adapter
+        binding.eventsRefresh.setOnRefreshListener { viewModel.refresh() }
 
         setupFilters()
 
@@ -87,6 +88,10 @@ class EventsActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+
+        viewModel.refreshing.observe(this) { refreshing ->
+            binding.eventsRefresh.isRefreshing = refreshing
         }
 
         if (groupId > 0) {

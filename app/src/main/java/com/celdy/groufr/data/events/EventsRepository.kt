@@ -19,13 +19,23 @@ class EventsRepository @Inject constructor(
         participation: String? = null
     ): List<EventDto> {
         return try {
-            val events = apiService.getGroupEvents(
-                groupId = groupId,
-                filter = filter,
-                participation = participation
-            ).events
-            eventDao.upsertAll(events.map { it.toEntity() })
-            events
+            val allEvents = mutableListOf<EventDto>()
+            var offset = 0
+            val limit = 100
+            do {
+                val response = apiService.getGroupEvents(
+                    groupId = groupId,
+                    filter = filter,
+                    participation = participation,
+                    limit = limit,
+                    offset = offset
+                )
+                allEvents.addAll(response.events)
+                offset += limit
+                val total = response.meta?.total ?: response.events.size
+            } while (allEvents.size < total)
+            eventDao.replaceAllByGroup(groupId, allEvents.map { it.toEntity() })
+            allEvents
         } catch (exception: Exception) {
             val cached = eventDao.getByGroup(groupId)
             if (cached.isNotEmpty()) {
@@ -42,13 +52,23 @@ class EventsRepository @Inject constructor(
         state: String? = null
     ): List<EventDto> {
         return try {
-            val events = apiService.getAllEvents(
-                time = time,
-                participation = participation,
-                state = state
-            ).events
-            eventDao.upsertAll(events.map { it.toEntity() })
-            events
+            val allEvents = mutableListOf<EventDto>()
+            var offset = 0
+            val limit = 100
+            do {
+                val response = apiService.getAllEvents(
+                    time = time,
+                    participation = participation,
+                    state = state,
+                    limit = limit,
+                    offset = offset
+                )
+                allEvents.addAll(response.events)
+                offset += limit
+                val total = response.meta?.total ?: response.events.size
+            } while (allEvents.size < total)
+            eventDao.replaceAll(allEvents.map { it.toEntity() })
+            allEvents
         } catch (exception: Exception) {
             val cached = eventDao.getAll()
             if (cached.isNotEmpty()) {

@@ -81,16 +81,23 @@
 
     </HorizontalScrollView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/events_list"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/events_refresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/events_filters_scroll" />
+        app:layout_constraintTop_toBottomOf="@id/events_filters_scroll">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/events_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <TextView
         android:id="@+id/events_empty"
@@ -100,18 +107,18 @@
         android:text="@string/events_empty"
         android:textColor="@color/neutral_900"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/events_list"
-        app:layout_constraintEnd_toEndOf="@id/events_list"
-        app:layout_constraintStart_toStartOf="@id/events_list"
-        app:layout_constraintTop_toTopOf="@id/events_list" />
+        app:layout_constraintBottom_toBottomOf="@id/events_refresh"
+        app:layout_constraintEnd_toEndOf="@id/events_refresh"
+        app:layout_constraintStart_toStartOf="@id/events_refresh"
+        app:layout_constraintTop_toTopOf="@id/events_refresh" />
 
     <ProgressBar
         android:id="@+id/events_loading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/events_list"
-        app:layout_constraintEnd_toEndOf="@id/events_list"
-        app:layout_constraintStart_toStartOf="@id/events_list"
-        app:layout_constraintTop_toTopOf="@id/events_list" />
+        app:layout_constraintBottom_toBottomOf="@id/events_refresh"
+        app:layout_constraintEnd_toEndOf="@id/events_refresh"
+        app:layout_constraintStart_toStartOf="@id/events_refresh"
+        app:layout_constraintTop_toTopOf="@id/events_refresh" />
 </androidx.constraintlayout.widget.ConstraintLayout>
