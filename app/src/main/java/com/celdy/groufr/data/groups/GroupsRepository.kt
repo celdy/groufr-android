@@ -12,8 +12,7 @@ class GroupsRepository @Inject constructor(
 ) {
     suspend fun loadGroups(): List<GroupDto> {
         return try {
-            val response = apiService.sync()
-            val groups = response.updates?.groups.orEmpty()
+            val groups = apiService.getGroups().groups
             groupDao.replaceAll(groups.map { it.toEntity() })
             groupDao.getAll().map { it.toDto() }
         } catch (exception: Exception) {

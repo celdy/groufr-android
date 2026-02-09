@@ -41,3 +41,7 @@ data class GroupMemberUserDto(
 data class GroupActionResponse(
     val message: String?
 )
+
+data class GroupsListResponse(
+    val groups: List<GroupDto>
+)

@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                 finish()
             } else {
-                viewModel.loadUnreadCount()
+                viewModel.loadGroups()
             }
         }
     }

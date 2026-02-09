@@ -6,6 +6,7 @@ import com.celdy.groufr.data.auth.TokenResponse
 import com.celdy.groufr.data.groups.GroupActionResponse
 import com.celdy.groufr.data.groups.GroupDetailDto
 import com.celdy.groufr.data.groups.GroupMembersResponse
+import com.celdy.groufr.data.groups.GroupsListResponse
 import com.celdy.groufr.data.messages.MessagesResponse
 import com.celdy.groufr.data.messages.SendMessageRequest
 import com.celdy.groufr.data.messages.MessageDto
@@ -49,6 +50,9 @@ interface ApiService {
         @Query("since") since: String? = null,
         @Query("include") include: String? = null
     ): SyncResponse
+
+    @GET("/api/v1/groups")
+    suspend fun getGroups(): GroupsListResponse
 
     @GET("/api/v1/groups/{groupId}/messages")
     suspend fun getGroupMessages(
