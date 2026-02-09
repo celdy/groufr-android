@@ -46,7 +46,8 @@ data class MarkReadResponse(
 )
 
 data class NotificationMarkReadRequest(
-    val type: String,
+    val type: String? = null,
+    val scope: String? = null,
     @SerializedName("group_id")
     val groupId: Long? = null,
     @SerializedName("event_id")

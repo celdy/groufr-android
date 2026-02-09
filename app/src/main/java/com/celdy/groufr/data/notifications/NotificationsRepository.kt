@@ -43,12 +43,23 @@ class NotificationsRepository @Inject constructor(
         apiService.markAllNotificationsRead()
     }
 
-    suspend fun markEventMessagesRead(eventId: Long): Int {
+    suspend fun markGroupChatRead(groupId: Long): Int {
         val response = apiService.markNotificationsRead(
-            NotificationMarkReadRequest(
-                type = "event_messages",
-                eventId = eventId
-            )
+            NotificationMarkReadRequest(scope = "group_chat", groupId = groupId)
+        )
+        return response.markedCount
+    }
+
+    suspend fun markEventDetailRead(eventId: Long): Int {
+        val response = apiService.markNotificationsRead(
+            NotificationMarkReadRequest(scope = "event_detail", eventId = eventId)
+        )
+        return response.markedCount
+    }
+
+    suspend fun markPollDetailRead(pollId: Long): Int {
+        val response = apiService.markNotificationsRead(
+            NotificationMarkReadRequest(scope = "poll_detail", pollId = pollId)
         )
         return response.markedCount
     }

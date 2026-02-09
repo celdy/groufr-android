@@ -11,7 +11,9 @@ data class MessagesMeta(
     @SerializedName("has_more")
     val hasMore: Boolean,
     @SerializedName("oldest_id")
-    val oldestId: Long?
+    val oldestId: Long?,
+    @SerializedName("last_seen_message_id")
+    val lastSeenMessageId: Long? = null
 )
 
 data class MessageDto(

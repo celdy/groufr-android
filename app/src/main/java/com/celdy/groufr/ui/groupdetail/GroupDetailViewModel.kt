@@ -8,8 +8,8 @@ import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.data.messages.MessagesRepository
 import com.celdy.groufr.data.events.EventsRepository
 import com.celdy.groufr.data.polls.PollsRepository
+import com.celdy.groufr.data.notifications.NotificationsRepository
 import com.celdy.groufr.data.notifications.NotificationSyncManager
-import com.celdy.groufr.data.storage.ChatLastSeenStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,8 +19,8 @@ class GroupDetailViewModel @Inject constructor(
     private val messagesRepository: MessagesRepository,
     private val eventsRepository: EventsRepository,
     private val pollsRepository: PollsRepository,
-    private val notificationSyncManager: NotificationSyncManager,
-    private val chatLastSeenStore: ChatLastSeenStore
+    private val notificationsRepository: NotificationsRepository,
+    private val notificationSyncManager: NotificationSyncManager
 ) : ViewModel() {
     private val _state = MutableLiveData<GroupDetailState>(GroupDetailState.Loading)
     val state: LiveData<GroupDetailState> = _state
@@ -113,13 +113,15 @@ class GroupDetailViewModel @Inject constructor(
                 hasMore = response.meta?.hasMore ?: false
                 isLoadingMore = false
                 if (isRefresh && !dividerComputed) {
-                    val lastSeenId = chatLastSeenStore.getLastSeenMessageId("group", groupId)
-                    if (lastSeenId != 0L) {
+                    val lastSeenId = response.meta?.lastSeenMessageId
+                    if (lastSeenId != null) {
                         dividerBeforeMessageId = currentMessages.firstOrNull { it.id > lastSeenId }?.id
                     }
-                    val maxId = currentMessages.maxOfOrNull { it.id } ?: 0L
-                    chatLastSeenStore.setLastSeenMessageId("group", groupId, maxId)
                     dividerComputed = true
+                }
+                if (isRefresh) {
+                    notificationsRepository.markGroupChatRead(groupId)
+                    notificationSyncManager.onUserAction()
                 }
                 _state.value = GroupDetailState.Content(currentMessages, dividerBeforeMessageId, isLoadingMore = false)
             } catch (exception: Exception) {

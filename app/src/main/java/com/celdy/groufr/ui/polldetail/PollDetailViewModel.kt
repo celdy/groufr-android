@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.celdy.groufr.data.notifications.NotificationsRepository
 import com.celdy.groufr.data.notifications.NotificationSyncManager
 import com.celdy.groufr.data.polls.PollDto
 import com.celdy.groufr.data.polls.PollsRepository
@@ -14,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PollDetailViewModel @Inject constructor(
     private val pollsRepository: PollsRepository,
+    private val notificationsRepository: NotificationsRepository,
     private val notificationSyncManager: NotificationSyncManager
 ) : ViewModel() {
     private val _state = MutableLiveData<PollDetailState>(PollDetailState.Loading)
@@ -31,6 +33,8 @@ class PollDetailViewModel @Inject constructor(
                     _state.value = PollDetailState.Error
                 } else {
                     _state.value = PollDetailState.Content(poll)
+                    notificationsRepository.markPollDetailRead(pollId)
+                    notificationSyncManager.onUserAction()
                 }
             } catch (exception: Exception) {
                 _state.value = PollDetailState.Error

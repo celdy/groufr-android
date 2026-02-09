@@ -10,7 +10,6 @@ import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.data.messages.MessagesRepository
 import com.celdy.groufr.data.notifications.NotificationsRepository
 import com.celdy.groufr.data.notifications.NotificationSyncManager
-import com.celdy.groufr.data.storage.ChatLastSeenStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,8 +19,7 @@ class EventDetailViewModel @Inject constructor(
     private val eventsRepository: EventsRepository,
     private val messagesRepository: MessagesRepository,
     private val notificationsRepository: NotificationsRepository,
-    private val notificationSyncManager: NotificationSyncManager,
-    private val chatLastSeenStore: ChatLastSeenStore
+    private val notificationSyncManager: NotificationSyncManager
 ) : ViewModel() {
     private val _state = MutableLiveData<EventDetailState>(EventDetailState.Loading)
     val state: LiveData<EventDetailState> = _state
@@ -171,17 +169,15 @@ class EventDetailViewModel @Inject constructor(
                 hasMore = response.meta?.hasMore ?: false
                 isLoadingMore = false
                 if (isRefresh && !dividerComputed) {
-                    val lastSeenId = chatLastSeenStore.getLastSeenMessageId("event", eventId)
-                    if (lastSeenId != 0L) {
+                    val lastSeenId = response.meta?.lastSeenMessageId
+                    if (lastSeenId != null) {
                         dividerBeforeMessageId = currentMessages.firstOrNull { it.id > lastSeenId }?.id
                     }
-                    val maxId = currentMessages.maxOfOrNull { it.id } ?: 0L
-                    chatLastSeenStore.setLastSeenMessageId("event", eventId, maxId)
                     dividerComputed = true
                 }
                 _chatState.value = EventChatState.Content(currentMessages, dividerBeforeMessageId, isLoadingMore = false)
                 if (isRefresh) {
-                    notificationsRepository.markEventMessagesRead(eventId)
+                    notificationsRepository.markEventDetailRead(eventId)
                     notificationSyncManager.onUserAction()
                 }
             } catch (exception: Exception) {
