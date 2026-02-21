@@ -195,6 +195,7 @@
     <string name="invitation_accepted">You joined the group</string>
     <string name="invitation_declined">Invitation declined</string>
     <string name="invitation_error">Failed to process invitation</string>
+    <string name="invitation_email_mismatch">This invitation was sent to a different email address</string>
 
     <string name="group_info_title">Group detail</string>
     <string name="group_info_tab_info">Info</string>

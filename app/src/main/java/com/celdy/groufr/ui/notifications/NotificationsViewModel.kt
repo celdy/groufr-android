@@ -8,6 +8,8 @@ import com.celdy.groufr.data.notifications.NotificationDto
 import com.celdy.groufr.data.notifications.NotificationsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -64,30 +66,49 @@ class NotificationsViewModel @Inject constructor(
         }
     }
 
-    fun acceptInvitation(token: String, notificationId: Long) {
+    fun acceptInvitation(invitationId: Long, notificationId: Long) {
         viewModelScope.launch {
             try {
-                repository.acceptInvitation(token)
+                repository.acceptInvitation(invitationId)
                 repository.markRead(notificationId)
                 _invitationResult.value = InvitationResult.Accepted
                 loadNotifications(unreadOnly)
+            } catch (exception: HttpException) {
+                _invitationResult.value = parseInvitationError(exception)
             } catch (exception: Exception) {
                 _invitationResult.value = InvitationResult.Error
             }
         }
     }
 
-    fun declineInvitation(token: String, notificationId: Long) {
+    fun declineInvitation(invitationId: Long, notificationId: Long) {
         viewModelScope.launch {
             try {
-                repository.declineInvitation(token)
+                repository.declineInvitation(invitationId)
                 repository.markRead(notificationId)
                 _invitationResult.value = InvitationResult.Declined
                 loadNotifications(unreadOnly)
+            } catch (exception: HttpException) {
+                _invitationResult.value = parseInvitationError(exception)
             } catch (exception: Exception) {
                 _invitationResult.value = InvitationResult.Error
             }
         }
+    }
+
+    private fun parseInvitationError(exception: HttpException): InvitationResult {
+        if (exception.code() == 403) {
+            try {
+                val body = exception.response()?.errorBody()?.string()
+                if (body != null) {
+                    val json = JSONObject(body)
+                    if (json.optString("error") == "email_mismatch") {
+                        return InvitationResult.EmailMismatch
+                    }
+                }
+            } catch (_: Exception) { }
+        }
+        return InvitationResult.Error
     }
 
     fun clearInvitationResult() {
@@ -104,5 +125,6 @@ sealed class NotificationsState {
 sealed class InvitationResult {
     data object Accepted : InvitationResult()
     data object Declined : InvitationResult()
+    data object EmailMismatch : InvitationResult()
     data object Error : InvitationResult()
 }

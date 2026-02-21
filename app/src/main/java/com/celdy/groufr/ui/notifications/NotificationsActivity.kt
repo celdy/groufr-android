@@ -16,7 +16,6 @@ import com.celdy.groufr.R
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.data.notifications.NotificationDto
 import com.celdy.groufr.data.notifications.eventIdFromPayload
-import com.celdy.groufr.data.notifications.invitationTokenFromPayload
 import com.celdy.groufr.data.notifications.invitedGroupNameFromPayload
 import com.celdy.groufr.databinding.ActivityNotificationsBinding
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
@@ -99,6 +98,10 @@ class NotificationsActivity : AppCompatActivity() {
                     Toast.makeText(this, R.string.invitation_declined, Toast.LENGTH_SHORT).show()
                     viewModel.clearInvitationResult()
                 }
+                InvitationResult.EmailMismatch -> {
+                    Toast.makeText(this, R.string.invitation_email_mismatch, Toast.LENGTH_SHORT).show()
+                    viewModel.clearInvitationResult()
+                }
                 InvitationResult.Error -> {
                     Toast.makeText(this, R.string.invitation_error, Toast.LENGTH_SHORT).show()
                     viewModel.clearInvitationResult()
@@ -165,8 +168,8 @@ class NotificationsActivity : AppCompatActivity() {
     }
 
     private fun showInvitationDialog(notification: NotificationDto) {
-        val token = notification.invitationTokenFromPayload()
-        if (token.isNullOrBlank()) {
+        val invitationId = notification.entityId
+        if (invitationId == null || invitationId <= 0) {
             Toast.makeText(this, R.string.invitation_error, Toast.LENGTH_SHORT).show()
             return
         }
@@ -178,11 +181,11 @@ class NotificationsActivity : AppCompatActivity() {
             .setTitle(R.string.invitation_dialog_title)
             .setMessage(getString(R.string.invitation_dialog_message, actor, invitedGroupName))
             .setPositiveButton(R.string.invitation_accept) { dialog, _ ->
-                viewModel.acceptInvitation(token, notification.id)
+                viewModel.acceptInvitation(invitationId, notification.id)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.invitation_decline) { dialog, _ ->
-                viewModel.declineInvitation(token, notification.id)
+                viewModel.declineInvitation(invitationId, notification.id)
                 dialog.dismiss()
             }
             .show()

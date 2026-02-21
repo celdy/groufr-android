@@ -230,14 +230,14 @@ interface ApiService {
         @Path("groupId") groupId: Long
     ): GroupActionResponse
 
-    @POST("/api/v1/invitations/{token}/accept")
+    @POST("/api/v1/invitations/{id}/accept")
     suspend fun acceptInvitation(
-        @Path("token") token: String
+        @Path("id") id: Long
     ): InvitationAcceptResponse
 
-    @POST("/api/v1/invitations/{token}/decline")
+    @POST("/api/v1/invitations/{id}/decline")
     suspend fun declineInvitation(
-        @Path("token") token: String
+        @Path("id") id: Long
     ): InvitationDeclineResponse
 }
 
