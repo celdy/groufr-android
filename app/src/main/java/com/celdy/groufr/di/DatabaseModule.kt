@@ -3,10 +3,12 @@ package com.celdy.groufr.di
 import android.content.Context
 import androidx.room.Room
 import com.celdy.groufr.data.local.EventDao
+import com.celdy.groufr.data.local.ExpenseDao
 import com.celdy.groufr.data.local.GroufrDatabase
 import com.celdy.groufr.data.local.GroupDao
 import com.celdy.groufr.data.local.MessageDao
 import com.celdy.groufr.data.local.PollDao
+import com.celdy.groufr.data.local.SettlementDao
 import com.celdy.groufr.data.local.UserDao
 import dagger.Module
 import dagger.Provides
@@ -42,4 +44,10 @@ object DatabaseModule {
 
     @Provides
     fun provideMessageDao(database: GroufrDatabase): MessageDao = database.messageDao()
+
+    @Provides
+    fun provideExpenseDao(database: GroufrDatabase): ExpenseDao = database.expenseDao()
+
+    @Provides
+    fun provideSettlementDao(database: GroufrDatabase): SettlementDao = database.settlementDao()
 }

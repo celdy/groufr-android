@@ -2,6 +2,7 @@ package com.celdy.groufr.data.local
 
 import androidx.room.TypeConverter
 import com.celdy.groufr.data.events.EventParticipantDto
+import com.celdy.groufr.data.expenses.ExpenseShareDto
 import com.celdy.groufr.data.messages.MessageEventRef
 import com.celdy.groufr.data.messages.MessagePollRef
 import com.celdy.groufr.data.polls.PollOptionDto
@@ -58,6 +59,15 @@ class Converters {
     @TypeConverter
     fun fromParticipantsListJson(value: String): List<EventParticipantDto> {
         val type = object : TypeToken<List<EventParticipantDto>>() {}.type
+        return gson.fromJson(value, type)
+    }
+
+    @TypeConverter
+    fun toExpenseSharesJson(value: List<ExpenseShareDto>): String = gson.toJson(value)
+
+    @TypeConverter
+    fun fromExpenseSharesJson(value: String): List<ExpenseShareDto> {
+        val type = object : TypeToken<List<ExpenseShareDto>>() {}.type
         return gson.fromJson(value, type)
     }
 }

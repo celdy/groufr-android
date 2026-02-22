@@ -85,6 +85,14 @@
             android:name=".ui.groupinfo.GroupInfoActivity"
             android:exported="false"
             android:theme="@style/Theme.GroufrNative" />
+        <activity
+            android:name=".ui.expensecreate.ExpenseCreateActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroufrNative" />
+        <activity
+            android:name=".ui.groupexpenses.GroupExpensesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GroufrNative" />
 
         <service
             android:name=".data.calendar.StubAuthenticatorService"

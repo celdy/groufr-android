@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.celdy.groufr.data.events.EventDetailDto
 import com.celdy.groufr.data.events.EventsRepository
+import com.celdy.groufr.data.expenses.EventExpensesResponse
+import com.celdy.groufr.data.expenses.ExpensesRepository
 import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.data.messages.MessagesRepository
 import com.celdy.groufr.data.notifications.NotificationsRepository
@@ -19,7 +21,8 @@ class EventDetailViewModel @Inject constructor(
     private val eventsRepository: EventsRepository,
     private val messagesRepository: MessagesRepository,
     private val notificationsRepository: NotificationsRepository,
-    private val notificationSyncManager: NotificationSyncManager
+    private val notificationSyncManager: NotificationSyncManager,
+    private val expensesRepository: ExpensesRepository
 ) : ViewModel() {
     private val _state = MutableLiveData<EventDetailState>(EventDetailState.Loading)
     val state: LiveData<EventDetailState> = _state
@@ -35,6 +38,12 @@ class EventDetailViewModel @Inject constructor(
 
     private val _chatRefreshing = MutableLiveData(false)
     val chatRefreshing: LiveData<Boolean> = _chatRefreshing
+
+    private val _expensesState = MutableLiveData<EventExpensesState>(EventExpensesState.Loading)
+    val expensesState: LiveData<EventExpensesState> = _expensesState
+
+    private val _expenseActionState = MutableLiveData<ActionState>(ActionState.Idle)
+    val expenseActionState: LiveData<ActionState> = _expenseActionState
 
     private var currentEventId: Long? = null
     private var currentMessages: List<MessageDto> = emptyList()
@@ -147,6 +156,83 @@ class EventDetailViewModel @Inject constructor(
         }
     }
 
+    fun loadExpenses(eventId: Long) {
+        _expensesState.value = EventExpensesState.Loading
+        viewModelScope.launch {
+            try {
+                val response = expensesRepository.loadEventExpenses(eventId)
+                _expensesState.value = EventExpensesState.Content(response)
+            } catch (exception: Exception) {
+                _expensesState.value = EventExpensesState.Error
+            }
+        }
+    }
+
+    fun confirmExpense(eventId: Long, expenseId: Long) {
+        _expenseActionState.value = ActionState.Sending
+        viewModelScope.launch {
+            try {
+                expensesRepository.confirmExpense(expenseId)
+                _expenseActionState.value = ActionState.Sent
+                loadExpenses(eventId)
+            } catch (exception: Exception) {
+                _expenseActionState.value = ActionState.Error("Failed to confirm expense.")
+            }
+        }
+    }
+
+    fun confirmAllExpenses(eventId: Long) {
+        _expenseActionState.value = ActionState.Sending
+        viewModelScope.launch {
+            try {
+                val response = expensesRepository.confirmAllExpenses(eventId)
+                _expenseActionState.value = ActionState.Sent
+                loadExpenses(eventId)
+            } catch (exception: Exception) {
+                _expenseActionState.value = ActionState.Error("Failed to confirm expenses.")
+            }
+        }
+    }
+
+    fun disputeExpense(eventId: Long, expenseId: Long, reason: String) {
+        _expenseActionState.value = ActionState.Sending
+        viewModelScope.launch {
+            try {
+                expensesRepository.disputeExpense(expenseId, reason)
+                _expenseActionState.value = ActionState.Sent
+                loadExpenses(eventId)
+            } catch (exception: Exception) {
+                _expenseActionState.value = ActionState.Error("Failed to dispute expense.")
+            }
+        }
+    }
+
+    fun deleteExpense(eventId: Long, expenseId: Long) {
+        _expenseActionState.value = ActionState.Sending
+        viewModelScope.launch {
+            try {
+                expensesRepository.deleteExpense(expenseId)
+                _expenseActionState.value = ActionState.Sent
+                loadExpenses(eventId)
+            } catch (exception: Exception) {
+                _expenseActionState.value = ActionState.Error("Failed to delete expense.")
+            }
+        }
+    }
+
+    fun settleExpense(eventId: Long, expenseId: Long) {
+        _expenseActionState.value = ActionState.Sending
+        viewModelScope.launch {
+            try {
+                expensesRepository.settleExpense(expenseId)
+                _expenseActionState.value = ActionState.Sent
+                loadExpenses(eventId)
+            } catch (exception: Exception) {
+                _expenseActionState.value = ActionState.Error("Failed to settle expense.")
+            }
+        }
+    }
+
     private fun fetchChatMessages(
         eventId: Long,
         beforeId: Long?,
@@ -234,4 +320,10 @@ sealed class EventChatSendState {
     data object Sending : EventChatSendState()
     data object Sent : EventChatSendState()
     data class Error(val message: String) : EventChatSendState()
+}
+
+sealed class EventExpensesState {
+    data object Loading : EventExpensesState()
+    data class Content(val data: EventExpensesResponse) : EventExpensesState()
+    data object Error : EventExpensesState()
 }

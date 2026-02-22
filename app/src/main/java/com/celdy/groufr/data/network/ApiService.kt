@@ -30,6 +30,20 @@ import com.celdy.groufr.data.reactions.ReactionRequest
 import com.celdy.groufr.data.reactions.ReactionSummary
 import com.celdy.groufr.data.reports.CreateReportRequest
 import com.celdy.groufr.data.reports.ReportResponse
+import com.celdy.groufr.data.expenses.ConfirmAllResponse
+import com.celdy.groufr.data.expenses.CreateExpenseRequest
+import com.celdy.groufr.data.expenses.DisputeExpenseRequest
+import com.celdy.groufr.data.expenses.EventExpensesResponse
+import com.celdy.groufr.data.expenses.ExpenseActionResponse
+import com.celdy.groufr.data.expenses.ExpenseDetailDto
+import com.celdy.groufr.data.expenses.GroupBalancesResponse
+import com.celdy.groufr.data.expenses.SettleResponse
+import com.celdy.groufr.data.expenses.UpdateExpenseRequest
+import com.celdy.groufr.data.expenses.UserBalancesResponse
+import com.celdy.groufr.data.settlements.CreateSettlementRequest
+import com.celdy.groufr.data.settlements.RejectSettlementRequest
+import com.celdy.groufr.data.settlements.SettlementDto
+import com.celdy.groufr.data.settlements.SettlementsResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -239,6 +253,105 @@ interface ApiService {
     suspend fun declineInvitation(
         @Path("id") id: Long
     ): InvitationDeclineResponse
+
+    // Expenses
+
+    @GET("/api/v1/events/{eventId}/expenses")
+    suspend fun getEventExpenses(
+        @Path("eventId") eventId: Long,
+        @Query("status") status: String? = null,
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): EventExpensesResponse
+
+    @GET("/api/v1/expenses/{id}")
+    suspend fun getExpenseDetail(
+        @Path("id") expenseId: Long
+    ): ExpenseDetailDto
+
+    @POST("/api/v1/events/{eventId}/expenses")
+    suspend fun createExpense(
+        @Path("eventId") eventId: Long,
+        @Body request: CreateExpenseRequest
+    ): ExpenseDetailDto
+
+    @PUT("/api/v1/expenses/{id}")
+    suspend fun updateExpense(
+        @Path("id") expenseId: Long,
+        @Body request: UpdateExpenseRequest
+    ): ExpenseDetailDto
+
+    @DELETE("/api/v1/expenses/{id}")
+    suspend fun deleteExpense(
+        @Path("id") expenseId: Long
+    )
+
+    @POST("/api/v1/expenses/{id}/confirm")
+    suspend fun confirmExpense(
+        @Path("id") expenseId: Long
+    ): ExpenseActionResponse
+
+    @POST("/api/v1/events/{eventId}/expenses/confirm-all")
+    suspend fun confirmAllExpenses(
+        @Path("eventId") eventId: Long
+    ): ConfirmAllResponse
+
+    @POST("/api/v1/expenses/{id}/dispute")
+    suspend fun disputeExpense(
+        @Path("id") expenseId: Long,
+        @Body request: DisputeExpenseRequest
+    ): ExpenseActionResponse
+
+    @POST("/api/v1/expenses/{id}/settle")
+    suspend fun settleExpense(
+        @Path("id") expenseId: Long
+    ): SettleResponse
+
+    // Balances
+
+    @GET("/api/v1/groups/{groupId}/balances")
+    suspend fun getGroupBalances(
+        @Path("groupId") groupId: Long
+    ): GroupBalancesResponse
+
+    @GET("/api/v1/user/balances")
+    suspend fun getUserBalances(): UserBalancesResponse
+
+    // Settlements
+
+    @POST("/api/v1/groups/{groupId}/settlements")
+    suspend fun createSettlement(
+        @Path("groupId") groupId: Long,
+        @Body request: CreateSettlementRequest
+    ): SettlementDto
+
+    @GET("/api/v1/groups/{groupId}/settlements")
+    suspend fun getGroupSettlements(
+        @Path("groupId") groupId: Long,
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): SettlementsResponse
+
+    @GET("/api/v1/settlements/{id}")
+    suspend fun getSettlementDetail(
+        @Path("id") settlementId: Long
+    ): SettlementDto
+
+    @POST("/api/v1/settlements/{id}/confirm")
+    suspend fun confirmSettlement(
+        @Path("id") settlementId: Long
+    ): SettlementDto
+
+    @POST("/api/v1/settlements/{id}/reject")
+    suspend fun rejectSettlement(
+        @Path("id") settlementId: Long,
+        @Body request: RejectSettlementRequest
+    ): SettlementDto
+
+    @POST("/api/v1/settlements/{id}/cancel")
+    suspend fun cancelSettlement(
+        @Path("id") settlementId: Long
+    ): SettlementDto
 }
 
 data class InvitationAcceptResponse(

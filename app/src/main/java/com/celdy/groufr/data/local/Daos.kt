@@ -128,3 +128,55 @@ interface MessageDao {
     @Upsert
     suspend fun upsert(message: MessageEntity)
 }
+
+@Dao
+interface ExpenseDao {
+    @Query("SELECT * FROM expenses WHERE eventId = :eventId ORDER BY createdAt DESC")
+    suspend fun getByEvent(eventId: Long): List<ExpenseEntity>
+
+    @Query("SELECT * FROM expenses WHERE id = :expenseId LIMIT 1")
+    suspend fun getById(expenseId: Long): ExpenseEntity?
+
+    @Upsert
+    suspend fun upsert(expense: ExpenseEntity)
+
+    @Upsert
+    suspend fun upsertAll(expenses: List<ExpenseEntity>)
+
+    @Query("DELETE FROM expenses WHERE id = :expenseId")
+    suspend fun deleteById(expenseId: Long)
+
+    @Query("DELETE FROM expenses WHERE eventId = :eventId AND id NOT IN (:ids)")
+    suspend fun deleteByEventNotIn(eventId: Long, ids: List<Long>)
+
+    @Query("DELETE FROM expenses WHERE eventId = :eventId")
+    suspend fun deleteByEvent(eventId: Long)
+
+    @Transaction
+    suspend fun replaceAllByEvent(eventId: Long, expenses: List<ExpenseEntity>) {
+        if (expenses.isEmpty()) {
+            deleteByEvent(eventId)
+            return
+        }
+        upsertAll(expenses)
+        deleteByEventNotIn(eventId, expenses.map { it.id })
+    }
+}
+
+@Dao
+interface SettlementDao {
+    @Query("SELECT * FROM settlements WHERE groupId = :groupId ORDER BY createdAt DESC")
+    suspend fun getByGroup(groupId: Long): List<SettlementEntity>
+
+    @Query("SELECT * FROM settlements WHERE id = :settlementId LIMIT 1")
+    suspend fun getById(settlementId: Long): SettlementEntity?
+
+    @Upsert
+    suspend fun upsert(settlement: SettlementEntity)
+
+    @Upsert
+    suspend fun upsertAll(settlements: List<SettlementEntity>)
+
+    @Query("DELETE FROM settlements WHERE id = :settlementId")
+    suspend fun deleteById(settlementId: Long)
+}

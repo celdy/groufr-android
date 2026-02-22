@@ -10,9 +10,11 @@ import androidx.room.TypeConverters
         UserEntity::class,
         EventEntity::class,
         PollEntity::class,
-        MessageEntity::class
+        MessageEntity::class,
+        ExpenseEntity::class,
+        SettlementEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -22,4 +24,6 @@ abstract class GroufrDatabase : RoomDatabase() {
     abstract fun eventDao(): EventDao
     abstract fun pollDao(): PollDao
     abstract fun messageDao(): MessageDao
+    abstract fun expenseDao(): ExpenseDao
+    abstract fun settlementDao(): SettlementDao
 }

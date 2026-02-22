@@ -58,4 +58,17 @@
     <color name="event_state_closed_text">#0E0E0E</color>
     <color name="event_state_cancelled_bg">#FEE2E2</color>
     <color name="event_state_cancelled_text">#991B1B</color>
+
+    <color name="expense_status_pending_bg">#FEF9C6</color>
+    <color name="expense_status_pending_text">#894D0E</color>
+    <color name="expense_status_active_bg">#DCFCE7</color>
+    <color name="expense_status_active_text">#166534</color>
+    <color name="expense_status_disputed_bg">#FEE2E2</color>
+    <color name="expense_status_disputed_text">#991B1B</color>
+    <color name="expense_status_settled_bg">#EAEAEA</color>
+    <color name="expense_status_settled_text">#0E0E0E</color>
+
+    <color name="balance_positive">#166534</color>
+    <color name="balance_negative">#991B1B</color>
+    <color name="balance_zero">#6b7280</color>
 </resources>

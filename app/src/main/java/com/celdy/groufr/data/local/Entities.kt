@@ -3,6 +3,7 @@ package com.celdy.groufr.data.local
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.celdy.groufr.data.events.EventParticipantDto
+import com.celdy.groufr.data.expenses.ExpenseShareDto
 import com.celdy.groufr.data.messages.MessageEventRef
 import com.celdy.groufr.data.messages.MessagePollRef
 import com.celdy.groufr.data.polls.PollOptionDto
@@ -77,4 +78,38 @@ data class MessageEntity(
     val refUserId: Long?,
     val refEvent: MessageEventRef?,
     val refPoll: MessagePollRef?
+)
+
+@Entity(tableName = "expenses")
+data class ExpenseEntity(
+    @PrimaryKey val id: Long,
+    val eventId: Long,
+    val payerId: Long,
+    val payerName: String,
+    val createdById: Long?,
+    val createdByName: String?,
+    val label: String,
+    val amountCents: Long,
+    val currency: String,
+    val splitType: String,
+    val status: String,
+    val shares: List<ExpenseShareDto>,
+    val createdAt: String
+)
+
+@Entity(tableName = "settlements")
+data class SettlementEntity(
+    @PrimaryKey val id: Long,
+    val groupId: Long,
+    val payerId: Long,
+    val payerName: String,
+    val recipientId: Long,
+    val recipientName: String,
+    val amountCents: Long,
+    val currency: String,
+    val note: String?,
+    val status: String,
+    val createdAt: String,
+    val confirmedAt: String?,
+    val rejectedAt: String?
 )

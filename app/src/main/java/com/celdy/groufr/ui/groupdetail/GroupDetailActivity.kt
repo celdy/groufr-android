@@ -24,6 +24,7 @@ import com.celdy.groufr.ui.common.ReportDialogFragment
 import com.celdy.groufr.ui.common.ReactionDialogFragment
 import com.celdy.groufr.ui.common.ReactorListDialogFragment
 import com.celdy.groufr.ui.eventcreate.EventCreateActivity
+import com.celdy.groufr.ui.groupexpenses.GroupExpensesActivity
 import com.celdy.groufr.ui.groupinfo.GroupInfoActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
@@ -258,6 +259,15 @@ class GroupDetailActivity : AppCompatActivity() {
                     val intent = Intent(this, com.celdy.groufr.ui.events.EventsActivity::class.java)
                         .putExtra(EXTRA_GROUP_ID, groupId)
                         .putExtra(EXTRA_GROUP_NAME, groupName)
+                    startActivity(intent)
+                }
+                true
+            }
+            com.celdy.groufr.R.id.action_expenses -> {
+                if (groupId > 0) {
+                    val intent = Intent(this, GroupExpensesActivity::class.java)
+                        .putExtra(GroupExpensesActivity.EXTRA_GROUP_ID, groupId)
+                        .putExtra(GroupExpensesActivity.EXTRA_GROUP_NAME, groupName)
                     startActivity(intent)
                 }
                 true

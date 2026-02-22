@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,9 +19,11 @@ import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.data.events.EventDetailDto
+import com.celdy.groufr.data.expenses.EventExpensesResponse
 import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityEventDetailBinding
 import com.celdy.groufr.ui.common.ChatDateFormatter
+import com.celdy.groufr.ui.common.CurrencyFormatter
 import com.celdy.groufr.ui.common.MarkdownRenderer
 import com.celdy.groufr.ui.common.ReportDialogFragment
 import com.celdy.groufr.data.reports.ReportContentType
@@ -27,6 +31,7 @@ import com.celdy.groufr.data.reactions.ReactionContentType
 import com.celdy.groufr.ui.common.ReactionDialogFragment
 import com.celdy.groufr.ui.common.ReactorListDialogFragment
 import com.celdy.groufr.ui.eventedit.EventEditActivity
+import com.celdy.groufr.ui.expensecreate.ExpenseCreateActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.OffsetDateTime
@@ -54,6 +59,16 @@ class EventDetailActivity : AppCompatActivity() {
     private var shouldRefreshOnResume = false
     private var contentPaddingBottom = 0
     private var systemBarsBottom = 0
+    private var expensesLoaded = false
+    private lateinit var expenseAdapter: ExpenseAdapter
+    private lateinit var suggestedSettlementAdapter: SuggestedSettlementAdapter
+    private val expenseCreateLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && eventId > 0) {
+            viewModel.loadExpenses(eventId)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,6 +113,39 @@ class EventDetailActivity : AppCompatActivity() {
         binding.eventParticipants.layoutManager = LinearLayoutManager(this)
         binding.eventParticipants.adapter = adapter
         contentPaddingBottom = binding.eventDetailContent.paddingBottom
+
+        val currentUserId = tokenStore.getUserId()
+        expenseAdapter = ExpenseAdapter(
+            currentUserId = currentUserId,
+            onConfirm = { viewModel.confirmExpense(eventId, it.id) },
+            onDispute = { showDisputeDialog(it.id) },
+            onEdit = { expense ->
+                val intent = Intent(this, ExpenseCreateActivity::class.java)
+                    .putExtra(ExpenseCreateActivity.EXTRA_EVENT_ID, eventId)
+                    .putExtra(ExpenseCreateActivity.EXTRA_EXPENSE_ID, expense.id)
+                expenseCreateLauncher.launch(intent)
+            },
+            onDelete = { showDeleteExpenseDialog(it.id) },
+            onSettle = { viewModel.settleExpense(eventId, it.id) },
+            onClick = { }
+        )
+        binding.expenseList.layoutManager = LinearLayoutManager(this)
+        binding.expenseList.adapter = expenseAdapter
+
+        suggestedSettlementAdapter = SuggestedSettlementAdapter("CZK")
+        binding.expenseSettlementsList.layoutManager = LinearLayoutManager(this)
+        binding.expenseSettlementsList.adapter = suggestedSettlementAdapter
+
+        binding.expenseConfirmAllBtn.setOnClickListener {
+            viewModel.confirmAllExpenses(eventId)
+        }
+
+        binding.expenseFabAdd.setOnClickListener {
+            val intent = Intent(this, ExpenseCreateActivity::class.java)
+                .putExtra(ExpenseCreateActivity.EXTRA_EVENT_ID, eventId)
+            expenseCreateLauncher.launch(intent)
+        }
+
         updateSectionVisibility()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
@@ -225,6 +273,36 @@ class EventDetailActivity : AppCompatActivity() {
             binding.eventMessagesRefresh.isRefreshing = refreshing
         }
 
+        viewModel.expensesState.observe(this) { state ->
+            when (state) {
+                EventExpensesState.Loading -> {
+                    binding.expenseLoading.isVisible = true
+                    binding.expenseEmpty.isVisible = false
+                    binding.expenseList.isVisible = false
+                }
+                is EventExpensesState.Content -> {
+                    binding.expenseLoading.isVisible = false
+                    bindExpensesContent(state.data)
+                }
+                EventExpensesState.Error -> {
+                    binding.expenseLoading.isVisible = false
+                    binding.expenseEmpty.isVisible = true
+                    binding.expenseEmpty.text = getString(com.celdy.groufr.R.string.expense_error)
+                    binding.expenseList.isVisible = false
+                }
+            }
+        }
+
+        viewModel.expenseActionState.observe(this) { state ->
+            when (state) {
+                ActionState.Idle, ActionState.Sending -> Unit
+                ActionState.Sent -> Unit
+                is ActionState.Error -> {
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         supportFragmentManager.setFragmentResultListener(
             ReactionDialogFragment.RESULT_KEY, this
         ) { _, bundle ->
@@ -299,6 +377,10 @@ class EventDetailActivity : AppCompatActivity() {
                 setActiveSection(EventSection.PARTICIPANTS)
                 true
             }
+            com.celdy.groufr.R.id.action_event_expenses -> {
+                setActiveSection(EventSection.EXPENSES)
+                true
+            }
             com.celdy.groufr.R.id.action_event_edit -> {
                 val intent = Intent(this, EventEditActivity::class.java)
                     .putExtra(EventEditActivity.EXTRA_EVENT_ID, eventId)
@@ -329,16 +411,21 @@ class EventDetailActivity : AppCompatActivity() {
         binding.eventInfoContainer.isVisible = activeSection == EventSection.INFO
         binding.eventChatContainer.isVisible = activeSection == EventSection.CHAT
         binding.eventParticipantsContainer.isVisible = activeSection == EventSection.PARTICIPANTS
+        binding.eventExpensesContainer.isVisible = activeSection == EventSection.EXPENSES
         updateSectionPadding()
         if (activeSection == EventSection.CHAT && !chatLoaded && eventId > 0) {
             chatLoaded = true
             chatFirstLoad = true
             viewModel.loadChat(eventId)
         }
+        if (activeSection == EventSection.EXPENSES && !expensesLoaded && eventId > 0) {
+            expensesLoaded = true
+            viewModel.loadExpenses(eventId)
+        }
     }
 
     private fun updateSectionPadding() {
-        val bottomPadding = if (activeSection == EventSection.CHAT) 0 else contentPaddingBottom + systemBarsBottom
+        val bottomPadding = if (activeSection == EventSection.CHAT || activeSection == EventSection.EXPENSES) 0 else contentPaddingBottom + systemBarsBottom
         binding.eventDetailContent.updatePadding(bottom = bottomPadding)
     }
 
@@ -347,6 +434,8 @@ class EventDetailActivity : AppCompatActivity() {
         menu.findItem(com.celdy.groufr.R.id.action_event_chat)?.isVisible = activeSection != EventSection.CHAT
         menu.findItem(com.celdy.groufr.R.id.action_event_participants)?.isVisible =
             activeSection != EventSection.PARTICIPANTS
+        menu.findItem(com.celdy.groufr.R.id.action_event_expenses)?.isVisible =
+            activeSection != EventSection.EXPENSES
         val canEdit = currentEvent?.let { canEditEvent(it) } ?: false
         menu.findItem(com.celdy.groufr.R.id.action_event_edit)?.isVisible = canEdit
     }
@@ -561,6 +650,99 @@ class EventDetailActivity : AppCompatActivity() {
         return list.sortedWith(compareBy({ order[it.status] ?: 99 }, { it.user.name.lowercase() }))
     }
 
+    private fun bindExpensesContent(data: EventExpensesResponse) {
+        val userId = tokenStore.getUserId()
+        val myBalance = data.balances.find { it.user.id == userId }
+        if (myBalance != null) {
+            val currency = myBalance.currency
+            when {
+                myBalance.balanceCents > 0 -> {
+                    binding.expenseBalanceValue.text = getString(
+                        com.celdy.groufr.R.string.expense_balance_owed_to_you,
+                        CurrencyFormatter.format(myBalance.balanceCents, currency)
+                    )
+                    binding.expenseBalanceValue.setTextColor(
+                        ContextCompat.getColor(this, com.celdy.groufr.R.color.balance_positive)
+                    )
+                }
+                myBalance.balanceCents < 0 -> {
+                    binding.expenseBalanceValue.text = getString(
+                        com.celdy.groufr.R.string.expense_balance_you_owe,
+                        CurrencyFormatter.format(-myBalance.balanceCents, currency)
+                    )
+                    binding.expenseBalanceValue.setTextColor(
+                        ContextCompat.getColor(this, com.celdy.groufr.R.color.balance_negative)
+                    )
+                }
+                else -> {
+                    binding.expenseBalanceValue.text = getString(com.celdy.groufr.R.string.expense_balance_settled)
+                    binding.expenseBalanceValue.setTextColor(
+                        ContextCompat.getColor(this, com.celdy.groufr.R.color.balance_zero)
+                    )
+                }
+            }
+        } else {
+            binding.expenseBalanceValue.text = getString(com.celdy.groufr.R.string.expense_balance_settled)
+            binding.expenseBalanceValue.setTextColor(
+                ContextCompat.getColor(this, com.celdy.groufr.R.color.balance_zero)
+            )
+        }
+
+        val currency = data.currency ?: "CZK"
+        binding.expenseTotalValue.text = getString(
+            com.celdy.groufr.R.string.expense_total,
+            CurrencyFormatter.format(data.totalCents, currency)
+        )
+
+        // Suggested settlements
+        val hasSettlements = data.settlements.isNotEmpty()
+        binding.expenseSettlementsLabel.isVisible = hasSettlements
+        binding.expenseSettlementsList.isVisible = hasSettlements
+        if (hasSettlements) {
+            suggestedSettlementAdapter = SuggestedSettlementAdapter(currency)
+            binding.expenseSettlementsList.adapter = suggestedSettlementAdapter
+            suggestedSettlementAdapter.submitList(data.settlements)
+        }
+
+        // Confirm all button
+        val hasPending = data.expenses.any { expense ->
+            expense.shares.any { it.user.id == userId && it.confirmationStatus == "pending" }
+        }
+        binding.expenseConfirmAllBtn.isVisible = hasPending
+
+        // Expenses list
+        expenseAdapter.submitList(data.expenses)
+        binding.expenseList.isVisible = data.expenses.isNotEmpty()
+        binding.expenseEmpty.isVisible = data.expenses.isEmpty()
+    }
+
+    private fun showDisputeDialog(expenseId: Long) {
+        val input = EditText(this)
+        input.hint = getString(com.celdy.groufr.R.string.expense_dispute_reason_hint)
+        AlertDialog.Builder(this)
+            .setTitle(com.celdy.groufr.R.string.expense_dispute_dialog_title)
+            .setView(input)
+            .setPositiveButton(com.celdy.groufr.R.string.expense_action_dispute) { _, _ ->
+                val reason = input.text.toString().trim()
+                if (reason.isNotBlank()) {
+                    viewModel.disputeExpense(eventId, expenseId, reason)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showDeleteExpenseDialog(expenseId: Long) {
+        AlertDialog.Builder(this)
+            .setTitle(com.celdy.groufr.R.string.expense_delete_confirm_title)
+            .setMessage(com.celdy.groufr.R.string.expense_delete_confirm_message)
+            .setPositiveButton(com.celdy.groufr.R.string.expense_action_delete) { _, _ ->
+                viewModel.deleteExpense(eventId, expenseId)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     companion object {
         const val EXTRA_GROUP_ID = "extra_group_id"
         const val EXTRA_GROUP_NAME = "extra_group_name"
@@ -584,5 +766,6 @@ class EventDetailActivity : AppCompatActivity() {
 private enum class EventSection {
     INFO,
     CHAT,
-    PARTICIPANTS
+    PARTICIPANTS,
+    EXPENSES
 }

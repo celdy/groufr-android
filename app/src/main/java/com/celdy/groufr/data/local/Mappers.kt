@@ -4,11 +4,15 @@ import com.celdy.groufr.data.events.EventDetailDto
 import com.celdy.groufr.data.events.EventDto
 import com.celdy.groufr.data.events.EventGroupRef
 import com.celdy.groufr.data.events.EventUserDto
+import com.celdy.groufr.data.expenses.ExpenseDto
+import com.celdy.groufr.data.expenses.ExpenseDetailDto
+import com.celdy.groufr.data.expenses.ExpenseUserRef
 import com.celdy.groufr.data.groups.GroupDto
 import com.celdy.groufr.data.messages.MessageDto
 import com.celdy.groufr.data.messages.MessageUserRef
 import com.celdy.groufr.data.notifications.NotificationActorDto
 import com.celdy.groufr.data.polls.PollDto
+import com.celdy.groufr.data.settlements.SettlementDto
 
 fun GroupDto.toEntity(): GroupEntity = GroupEntity(
     id = id,
@@ -204,3 +208,85 @@ fun MessageEntity.toDto(userMap: Map<Long, UserEntity>): MessageDto {
         refPoll = refPoll
     )
 }
+
+fun ExpenseDto.toEntity(): ExpenseEntity = ExpenseEntity(
+    id = id,
+    eventId = eventId,
+    payerId = payer.id,
+    payerName = payer.name,
+    createdById = createdBy?.id,
+    createdByName = createdBy?.name,
+    label = label,
+    amountCents = amountCents,
+    currency = currency,
+    splitType = splitType,
+    status = status,
+    shares = shares,
+    createdAt = createdAt
+)
+
+fun ExpenseDetailDto.toEntity(): ExpenseEntity = ExpenseEntity(
+    id = id,
+    eventId = eventId,
+    payerId = payer.id,
+    payerName = payer.name,
+    createdById = createdBy?.id,
+    createdByName = createdBy?.name,
+    label = label,
+    amountCents = amountCents,
+    currency = currency,
+    splitType = splitType,
+    status = status,
+    shares = shares.map { share ->
+        com.celdy.groufr.data.expenses.ExpenseShareDto(
+            user = share.user,
+            shareCents = share.shareCents,
+            confirmationStatus = share.confirmationStatus
+        )
+    },
+    createdAt = createdAt
+)
+
+fun ExpenseEntity.toDto(): ExpenseDto = ExpenseDto(
+    id = id,
+    eventId = eventId,
+    payer = ExpenseUserRef(id = payerId, name = payerName),
+    createdBy = createdById?.let { ExpenseUserRef(id = it, name = createdByName.orEmpty()) },
+    label = label,
+    amountCents = amountCents,
+    currency = currency,
+    splitType = splitType,
+    status = status,
+    shares = shares,
+    createdAt = createdAt
+)
+
+fun SettlementDto.toEntity(): SettlementEntity = SettlementEntity(
+    id = id,
+    groupId = groupId,
+    payerId = payer.id,
+    payerName = payer.name,
+    recipientId = recipient.id,
+    recipientName = recipient.name,
+    amountCents = amountCents,
+    currency = currency,
+    note = note,
+    status = status,
+    createdAt = createdAt,
+    confirmedAt = confirmedAt,
+    rejectedAt = rejectedAt
+)
+
+fun SettlementEntity.toDto(): SettlementDto = SettlementDto(
+    id = id,
+    groupId = groupId,
+    payer = ExpenseUserRef(id = payerId, name = payerName),
+    recipient = ExpenseUserRef(id = recipientId, name = recipientName),
+    amountCents = amountCents,
+    currency = currency,
+    note = note,
+    status = status,
+    createdAt = createdAt,
+    confirmedAt = confirmedAt,
+    rejectedAt = rejectedAt
+)
