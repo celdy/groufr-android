@@ -5,13 +5,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.celdy.groufr.data.auth.AuthRepository
+import com.celdy.groufr.data.device.PushTokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val pushTokenManager: PushTokenManager
 ) : ViewModel() {
     private val _state = MutableLiveData<LoginState>(LoginState.Idle)
     val state: LiveData<LoginState> = _state
@@ -25,6 +27,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 authRepository.login(email.trim(), password)
+                pushTokenManager.registerTokenIfNeeded()
                 _state.value = LoginState.Success
             } catch (exception: Exception) {
                 _state.value = LoginState.Error("Login failed. Check your credentials.")

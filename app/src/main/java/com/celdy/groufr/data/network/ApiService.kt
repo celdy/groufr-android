@@ -1,5 +1,7 @@
 package com.celdy.groufr.data.network
 
+import com.celdy.groufr.data.device.RegisterPushTokenRequest
+import com.celdy.groufr.data.device.RegisterPushTokenResponse
 import com.celdy.groufr.data.auth.LoginRequest
 import com.celdy.groufr.data.auth.RefreshRequest
 import com.celdy.groufr.data.auth.TokenResponse
@@ -352,6 +354,16 @@ interface ApiService {
     suspend fun cancelSettlement(
         @Path("id") settlementId: Long
     ): SettlementDto
+
+    // Push token
+
+    @PUT("/api/v1/device/push-token")
+    suspend fun registerPushToken(
+        @Body request: RegisterPushTokenRequest
+    ): RegisterPushTokenResponse
+
+    @DELETE("/api/v1/device/push-token")
+    suspend fun deletePushToken()
 }
 
 data class InvitationAcceptResponse(

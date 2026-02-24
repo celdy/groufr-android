@@ -19,6 +19,7 @@ import com.celdy.groufr.R
 import com.celdy.groufr.data.auth.AuthRepository
 import com.celdy.groufr.data.calendar.CalendarSyncManager
 import com.celdy.groufr.data.calendar.CalendarSyncStore
+import com.celdy.groufr.data.device.PushTokenManager
 import com.celdy.groufr.data.local.UserDao
 import com.celdy.groufr.data.storage.TokenStore
 import com.celdy.groufr.databinding.ActivityProfileBinding
@@ -33,6 +34,7 @@ class ProfileActivity : AppCompatActivity() {
     @Inject lateinit var tokenStore: TokenStore
     @Inject lateinit var userDao: UserDao
     @Inject lateinit var calendarSyncManager: CalendarSyncManager
+    @Inject lateinit var pushTokenManager: PushTokenManager
     @Inject lateinit var calendarSyncStore: CalendarSyncStore
     private lateinit var binding: ActivityProfileBinding
 
@@ -90,10 +92,13 @@ class ProfileActivity : AppCompatActivity() {
         binding.profileCalendarSwitch.setOnCheckedChangeListener(calendarSwitchListener)
 
         binding.profileSignoutCard.setOnClickListener {
-            calendarSyncManager.disableSync()
-            authRepository.clearTokens()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            lifecycleScope.launch {
+                pushTokenManager.unregisterToken()
+                calendarSyncManager.disableSync()
+                authRepository.clearTokens()
+                startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
+                finish()
+            }
         }
     }
 

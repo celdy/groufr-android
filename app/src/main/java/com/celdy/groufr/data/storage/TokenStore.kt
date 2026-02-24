@@ -70,6 +70,16 @@ class TokenStore @Inject constructor(
 
     fun isLoggedIn(): Boolean = hasValidAccessToken() || hasRefreshToken()
 
+    fun getFcmToken(): String? = prefs.getString(KEY_FCM_TOKEN, null)
+
+    fun setFcmToken(token: String) {
+        prefs.edit().putString(KEY_FCM_TOKEN, token).apply()
+    }
+
+    fun clearFcmToken() {
+        prefs.edit().remove(KEY_FCM_TOKEN).apply()
+    }
+
     fun getOrCreateDeviceId(): String {
         val existing = prefs.getString(KEY_DEVICE_ID, null)
         if (!existing.isNullOrBlank()) {
@@ -100,6 +110,7 @@ class TokenStore @Inject constructor(
         private const val KEY_DEVICE_ID = "device_id"
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_USER_ID = "user_id"
+        private const val KEY_FCM_TOKEN = "fcm_token"
 
         /** Refresh tokens 60 seconds before expiration */
         private const val REFRESH_THRESHOLD_SECONDS = 60L

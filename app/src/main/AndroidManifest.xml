@@ -116,6 +116,14 @@
                 android:resource="@xml/sync_adapter" />
         </service>
 
+        <service
+            android:name=".data.notifications.GroufrMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <receiver
             android:name=".data.notifications.NotificationAlarmReceiver"
             android:exported="false" />
