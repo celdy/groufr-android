@@ -55,9 +55,9 @@ class NotificationsAdapter(
             val showEvent = shouldShowEvent(notification, eventTitle)
             binding.notificationEvent.isVisible = showEvent
             binding.notificationEvent.text = eventTitle
-            val showSubtitle = (notification.eventType == "new_message" || notification.eventType == "reaction_message") && preview.isNotBlank()
-            binding.notificationSubtitle.isVisible = showSubtitle
-            binding.notificationSubtitle.text = preview
+            val subtitleText = extractSubtitle(notification, preview)
+            binding.notificationSubtitle.isVisible = subtitleText.isNotBlank()
+            binding.notificationSubtitle.text = subtitleText
 
             // For invitation notifications, show the invited group name from payload
             val displayGroupName = if (notification.eventType == "invitation_received") {
@@ -80,15 +80,33 @@ class NotificationsAdapter(
                 "user_joined" -> R.string.notification_title_user_joined
                 "participant_status_changed" -> R.string.notification_title_participant_status_changed
                 "invitation_received" -> R.string.notification_title_invitation_received
+                "event_invitation_received" -> R.string.notification_title_event_invitation_received
+                "event_poll_created" -> R.string.notification_title_event_poll_created
+                "event_poll_closed" -> R.string.notification_title_event_poll_closed
                 "reaction_message" -> R.string.notification_title_reaction_message
                 "reaction_event" -> R.string.notification_title_reaction_event
                 "reaction_poll" -> R.string.notification_title_reaction_poll
-                else -> R.string.notification_title_generic
+                "expense_created" -> R.string.notification_title_expense_created
+                "expense_updated" -> R.string.notification_title_expense_updated
+                "expense_confirmed" -> R.string.notification_title_expense_confirmed
+                "expense_disputed" -> R.string.notification_title_expense_disputed
+                "settlement_payment_created" -> R.string.notification_title_settlement_payment_created
+                "settlement_payment_confirmed" -> R.string.notification_title_settlement_payment_confirmed
+                "settlement_payment_rejected" -> R.string.notification_title_settlement_payment_rejected
+                else -> null
+            }
+
+            // Actor-less notification types
+            if (resId == null) {
+                return when (eventType) {
+                    "expense_due_reminder" -> context.getString(R.string.notification_title_expense_due_reminder)
+                    "expense_overdue" -> context.getString(R.string.notification_title_expense_overdue)
+                    "expense_mediation_needed" -> context.getString(R.string.notification_title_expense_mediation_needed)
+                    else -> notification.text ?: context.getString(R.string.notification_title_generic, actor, eventType)
+                }
             }
 
             return when {
-                resId == R.string.notification_title_generic ->
-                    context.getString(resId, actor, eventType)
                 eventType.startsWith("reaction_") ->
                     context.getString(resId, actor, extractReactionEmojis(notification))
                 else ->
@@ -116,11 +134,18 @@ class NotificationsAdapter(
 
         private fun resolveIcon(eventType: String): Int {
             return when (eventType) {
-                "event_created", "event_updated", "participant_status_changed" -> R.drawable.ico_event
+                "event_created", "event_updated", "participant_status_changed",
+                "event_invitation_received" -> R.drawable.ico_event
                 "new_message" -> R.drawable.ico_message
-                "poll_created", "poll_closed" -> R.drawable.ico_poll
+                "poll_created", "poll_closed",
+                "event_poll_created", "event_poll_closed" -> R.drawable.ico_poll
                 "user_joined", "invitation_received" -> R.drawable.ico_user
                 "reaction_message", "reaction_event", "reaction_poll" -> R.drawable.ico_reaction
+                "expense_created", "expense_updated", "expense_confirmed",
+                "expense_disputed", "expense_due_reminder", "expense_overdue",
+                "expense_mediation_needed",
+                "settlement_payment_created", "settlement_payment_confirmed",
+                "settlement_payment_rejected" -> R.drawable.ico_event
                 else -> R.drawable.ico_message
             }
         }
@@ -136,11 +161,56 @@ class NotificationsAdapter(
                 "event_updated",
                 "participant_status_changed",
                 "event_invitation_received",
+                "event_poll_created",
+                "event_poll_closed",
                 "reaction_event",
-                "reaction_poll" -> true
+                "reaction_poll",
+                "expense_created",
+                "expense_updated",
+                "expense_confirmed",
+                "expense_disputed",
+                "expense_due_reminder",
+                "expense_overdue",
+                "expense_mediation_needed" -> true
                 "new_message" -> (notification.eventIdFromPayload() ?: -1L) > 0
                 else -> false
             }
+        }
+
+        private fun extractSubtitle(notification: NotificationDto, preview: String): String {
+            return when (notification.eventType) {
+                "new_message", "reaction_message" -> preview
+                "expense_created", "expense_updated", "expense_due_reminder",
+                "expense_overdue", "expense_mediation_needed" -> {
+                    val payload = notification.payload ?: return ""
+                    val label = (payload["label"] as? String).orEmpty()
+                    val amountStr = formatAmount(payload)
+                    if (label.isNotBlank() && amountStr.isNotBlank()) "$label — $amountStr"
+                    else label.ifBlank { amountStr }
+                }
+                "expense_confirmed", "expense_disputed" -> {
+                    val payload = notification.payload ?: return ""
+                    (payload["label"] as? String).orEmpty()
+                }
+                "settlement_payment_created", "settlement_payment_confirmed",
+                "settlement_payment_rejected" -> {
+                    val payload = notification.payload ?: return ""
+                    formatAmount(payload)
+                }
+                else -> ""
+            }
+        }
+
+        private fun formatAmount(payload: Map<String, Any>): String {
+            val amountCents = payload["amount_cents"] ?: return ""
+            val currency = (payload["currency"] as? String).orEmpty()
+            val amount = when (amountCents) {
+                is Number -> amountCents.toLong()
+                is String -> amountCents.toLongOrNull() ?: return ""
+                else -> return ""
+            }
+            val formatted = "${amount / 100}.${"%02d".format(amount % 100)}"
+            return if (currency.isNotBlank()) "$formatted $currency" else formatted
         }
 
         private fun extractEventTitle(notification: NotificationDto): String {
@@ -154,6 +224,13 @@ class NotificationsAdapter(
                     ?: payload["title"]
                     ?: return ""
                 return preview as? String ?: preview.toString()
+            }
+            if (notification.eventType == "event_poll_created" || notification.eventType == "event_poll_closed") {
+                val question = payload["question"]
+                    ?: payload["poll_question"]
+                    ?: payload["pollQuestion"]
+                    ?: return ""
+                return question as? String ?: question.toString()
             }
             val title = payload["event_title"]
                 ?: payload["eventTitle"]

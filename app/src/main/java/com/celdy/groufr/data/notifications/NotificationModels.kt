@@ -29,6 +29,7 @@ data class NotificationDto(
     @SerializedName("entity_id")
     val entityId: Long?,
     val payload: Map<String, Any>?,
+    val text: String? = null,
     @SerializedName("is_read")
     val isRead: Boolean,
     @SerializedName("created_at")
