@@ -99,6 +99,16 @@
     <string name="notification_title_reaction_message">%1$s reagoval/a %2$s na zprávu</string>
     <string name="notification_title_reaction_event">%1$s reagoval/a %2$s na událost</string>
     <string name="notification_title_reaction_poll">%1$s reagoval/a %2$s na hlasování</string>
+    <string name="notification_title_expense_created">%1$s přidal/a výdaj</string>
+    <string name="notification_title_expense_updated">%1$s aktualizoval/a výdaj</string>
+    <string name="notification_title_expense_confirmed">%1$s potvrdil/a výdaj</string>
+    <string name="notification_title_expense_disputed">%1$s zpochybnil/a výdaj</string>
+    <string name="notification_title_expense_due_reminder">Výdaj brzy splatný</string>
+    <string name="notification_title_expense_overdue">Výdaj je po splatnosti</string>
+    <string name="notification_title_expense_mediation_needed">Výdaj vyžaduje mediaci</string>
+    <string name="notification_title_settlement_payment_created">%1$s vám poslal/a platbu</string>
+    <string name="notification_title_settlement_payment_confirmed">%1$s potvrdil/a vaši platbu</string>
+    <string name="notification_title_settlement_payment_rejected">%1$s odmítl/a vaši platbu</string>
     <string name="event_status_dialog_title">Změň stav události</string>
     <string name="event_status_offered">Návrh</string>
     <string name="event_status_preparing">Potvrzeno</string>

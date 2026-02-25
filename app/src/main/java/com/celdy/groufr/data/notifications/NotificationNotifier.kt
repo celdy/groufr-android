@@ -229,6 +229,16 @@ class NotificationNotifier @Inject constructor(
                 }
                 context.getString(resId, actor, emoji)
             }
+            "expense_created" -> context.getString(R.string.notification_title_expense_created, actor)
+            "expense_updated" -> context.getString(R.string.notification_title_expense_updated, actor)
+            "expense_confirmed" -> context.getString(R.string.notification_title_expense_confirmed, actor)
+            "expense_disputed" -> context.getString(R.string.notification_title_expense_disputed, actor)
+            "expense_due_reminder" -> context.getString(R.string.notification_title_expense_due_reminder)
+            "expense_overdue" -> context.getString(R.string.notification_title_expense_overdue)
+            "expense_mediation_needed" -> context.getString(R.string.notification_title_expense_mediation_needed)
+            "settlement_payment_created" -> context.getString(R.string.notification_title_settlement_payment_created, actor)
+            "settlement_payment_confirmed" -> context.getString(R.string.notification_title_settlement_payment_confirmed, actor)
+            "settlement_payment_rejected" -> context.getString(R.string.notification_title_settlement_payment_rejected, actor)
             else -> context.getString(R.string.notification_title_generic, actor, eventType)
         }
     }
@@ -256,6 +266,25 @@ class NotificationNotifier @Inject constructor(
                 val preview = extractStringPayload(payload, "preview")
                 if (preview.isNotBlank()) return preview
             }
+            "expense_created", "expense_updated", "expense_confirmed",
+            "expense_disputed", "expense_due_reminder", "expense_overdue",
+            "expense_mediation_needed" -> {
+                val label = extractStringPayload(payload, "label")
+                if (label.isNotBlank()) return label
+            }
+            "settlement_payment_created", "settlement_payment_confirmed",
+            "settlement_payment_rejected" -> {
+                val amountCents = payload?.get("amount_cents")
+                val currency = extractStringPayload(payload, "currency")
+                if (amountCents != null && currency.isNotBlank()) {
+                    val amount = when (amountCents) {
+                        is Number -> amountCents.toLong()
+                        is String -> amountCents.toLongOrNull() ?: 0L
+                        else -> 0L
+                    }
+                    return "${amount / 100}.${"%02d".format(amount % 100)} $currency"
+                }
+            }
         }
         return notification.groupName ?: context.getString(R.string.notification_system_title)
     }
@@ -282,6 +311,11 @@ class NotificationNotifier @Inject constructor(
             "event_poll_created", "event_poll_closed" -> R.drawable.ico_poll
             "user_joined", "invitation_received" -> R.drawable.ico_user
             "reaction_message", "reaction_event", "reaction_poll" -> R.drawable.ico_reaction
+            "expense_created", "expense_updated", "expense_confirmed",
+            "expense_disputed", "expense_due_reminder", "expense_overdue",
+            "expense_mediation_needed",
+            "settlement_payment_created", "settlement_payment_confirmed",
+            "settlement_payment_rejected" -> R.drawable.ico_event
             else -> R.drawable.ico_message
         }
     }
@@ -296,7 +330,14 @@ class NotificationNotifier @Inject constructor(
             "event_invitation_received",
             "event_updated",
             "participant_status_changed",
-            "reaction_event"
+            "reaction_event",
+            "expense_created",
+            "expense_updated",
+            "expense_confirmed",
+            "expense_disputed",
+            "expense_due_reminder",
+            "expense_overdue",
+            "expense_mediation_needed"
         )
     }
 }
