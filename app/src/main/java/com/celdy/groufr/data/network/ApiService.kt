@@ -2,13 +2,27 @@ package com.celdy.groufr.data.network
 
 import com.celdy.groufr.data.device.RegisterPushTokenRequest
 import com.celdy.groufr.data.device.RegisterPushTokenResponse
+import com.celdy.groufr.data.auth.ChangePasswordRequest
+import com.celdy.groufr.data.auth.ForgotPasswordRequest
+import com.celdy.groufr.data.auth.ForgotPasswordResponse
 import com.celdy.groufr.data.auth.LoginRequest
+import com.celdy.groufr.data.auth.LogoutAllResponse
 import com.celdy.groufr.data.auth.RefreshRequest
+import com.celdy.groufr.data.auth.ResetPasswordRequest
+import com.celdy.groufr.data.auth.ResetPasswordResponse
+import com.celdy.groufr.data.auth.SuccessResponse
 import com.celdy.groufr.data.auth.TokenResponse
+import com.celdy.groufr.data.auth.UpdateProfileRequest
+import com.celdy.groufr.data.auth.UserProfileDto
+import com.celdy.groufr.data.events.EventParticipantsResponse
+import com.celdy.groufr.data.events.InviteGuestRequest
+import com.celdy.groufr.data.events.InviteGuestResponse
+import com.celdy.groufr.data.groups.DigestResponse
 import com.celdy.groufr.data.groups.GroupActionResponse
 import com.celdy.groufr.data.groups.GroupDetailDto
 import com.celdy.groufr.data.groups.GroupMembersResponse
 import com.celdy.groufr.data.groups.GroupsListResponse
+import com.celdy.groufr.data.groups.UpdateDigestRequest
 import com.celdy.groufr.data.messages.MessagesResponse
 import com.celdy.groufr.data.messages.SendMessageRequest
 import com.celdy.groufr.data.messages.MessageDto
@@ -23,10 +37,13 @@ import com.celdy.groufr.data.polls.PollDto
 import com.celdy.groufr.data.polls.PollsResponse
 import com.celdy.groufr.data.polls.VoteRequest
 import com.celdy.groufr.data.polls.CreatePollRequest
+import com.celdy.groufr.data.polls.UpdatePollStatusRequest
 import com.celdy.groufr.data.notifications.NotificationsResponse
 import com.celdy.groufr.data.notifications.MarkReadResponse
 import com.celdy.groufr.data.notifications.NotificationMarkReadRequest
 import com.celdy.groufr.data.notifications.NotificationCountResponse
+import com.celdy.groufr.data.notifications.NotificationPreferencesResponse
+import com.celdy.groufr.data.notifications.UpdateNotificationPreferenceRequest
 import com.celdy.groufr.data.reactions.ReactionDetail
 import com.celdy.groufr.data.reactions.ReactionRequest
 import com.celdy.groufr.data.reactions.ReactionSummary
@@ -46,6 +63,7 @@ import com.celdy.groufr.data.settlements.CreateSettlementRequest
 import com.celdy.groufr.data.settlements.RejectSettlementRequest
 import com.celdy.groufr.data.settlements.SettlementDto
 import com.celdy.groufr.data.settlements.SettlementsResponse
+import com.google.gson.annotations.SerializedName
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -60,6 +78,47 @@ interface ApiService {
 
     @POST("/api/v1/auth/refresh")
     suspend fun refresh(@Body request: RefreshRequest): TokenResponse
+
+    @POST("/api/v1/auth/logout")
+    suspend fun logout()
+
+    @POST("/api/v1/auth/logout-all")
+    suspend fun logoutAll(): LogoutAllResponse
+
+    @POST("/api/v1/auth/forgot-password")
+    suspend fun forgotPassword(
+        @Body request: ForgotPasswordRequest
+    ): ForgotPasswordResponse
+
+    @POST("/api/v1/auth/reset-password")
+    suspend fun resetPassword(
+        @Body request: ResetPasswordRequest
+    ): ResetPasswordResponse
+
+    // User profile
+
+    @GET("/api/v1/user/profile")
+    suspend fun getUserProfile(): UserProfileDto
+
+    @PUT("/api/v1/user/profile")
+    suspend fun updateUserProfile(
+        @Body request: UpdateProfileRequest
+    ): UserProfileDto
+
+    @PUT("/api/v1/user/password")
+    suspend fun changePassword(
+        @Body request: ChangePasswordRequest
+    ): SuccessResponse
+
+    // Notification preferences
+
+    @GET("/api/v1/user/notification-preferences")
+    suspend fun getNotificationPreferences(): NotificationPreferencesResponse
+
+    @PUT("/api/v1/user/notification-preferences")
+    suspend fun updateNotificationPreferences(
+        @Body request: UpdateNotificationPreferenceRequest
+    ): NotificationPreferencesResponse
 
     @GET("/api/v1/sync")
     suspend fun sync(
@@ -128,6 +187,26 @@ interface ApiService {
         @Body request: CreatePollRequest
     ): PollDto
 
+    @GET("/api/v1/events/{eventId}/polls")
+    suspend fun getEventPolls(
+        @Path("eventId") eventId: Long,
+        @Query("status") status: String = "all",
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): PollsResponse
+
+    @POST("/api/v1/events/{eventId}/polls")
+    suspend fun createEventPoll(
+        @Path("eventId") eventId: Long,
+        @Body request: CreatePollRequest
+    ): PollDto
+
+    @PUT("/api/v1/polls/{pollId}/status")
+    suspend fun updatePollStatus(
+        @Path("pollId") pollId: Long,
+        @Body request: UpdatePollStatusRequest
+    ): PollDto
+
     @GET("/api/v1/groups/{groupId}/events")
     suspend fun getGroupEvents(
         @Path("groupId") groupId: Long,
@@ -178,6 +257,17 @@ interface ApiService {
         @Body request: CreateEventRequest
     ): EventDto
 
+    @GET("/api/v1/events/{eventId}/participants")
+    suspend fun getEventParticipants(
+        @Path("eventId") eventId: Long
+    ): EventParticipantsResponse
+
+    @POST("/api/v1/events/{eventId}/invite-guest")
+    suspend fun inviteGuest(
+        @Path("eventId") eventId: Long,
+        @Body request: InviteGuestRequest
+    ): InviteGuestResponse
+
     @GET("/api/v1/notifications")
     suspend fun getNotifications(
         @Query("limit") limit: Int = 50,
@@ -207,6 +297,11 @@ interface ApiService {
     @POST("/api/v1/reports")
     suspend fun createReport(
         @Body request: CreateReportRequest
+    ): ReportResponse
+
+    @GET("/api/v1/reports/{id}")
+    suspend fun getReport(
+        @Path("id") reportId: Long
     ): ReportResponse
 
     @POST("/api/v1/reactions")
@@ -245,6 +340,27 @@ interface ApiService {
     suspend fun deleteGroup(
         @Path("groupId") groupId: Long
     ): GroupActionResponse
+
+    @GET("/api/v1/groups/{groupId}/digest")
+    suspend fun getGroupDigest(
+        @Path("groupId") groupId: Long
+    ): DigestResponse
+
+    @PUT("/api/v1/groups/{groupId}/digest")
+    suspend fun updateGroupDigest(
+        @Path("groupId") groupId: Long,
+        @Body request: UpdateDigestRequest
+    ): DigestResponse
+
+    // Invitations
+
+    @GET("/api/v1/invitations")
+    suspend fun getInvitations(): InvitationsListResponse
+
+    @GET("/api/v1/invitations/{token}")
+    suspend fun getInvitationDetail(
+        @Path("token") token: String
+    ): InvitationDetailDto
 
     @POST("/api/v1/invitations/{id}/accept")
     suspend fun acceptInvitation(
@@ -379,4 +495,36 @@ data class InvitationGroupInfo(
     val id: Long,
     val slug: String,
     val name: String
+)
+
+data class InvitationsListResponse(
+    val invitations: List<InvitationDto>
+)
+
+data class InvitationDto(
+    val id: Long,
+    val group: InvitationGroupInfo,
+    val inviter: InvitationInviterDto?,
+    @SerializedName("expires_at")
+    val expiresAt: String?,
+    @SerializedName("created_at")
+    val createdAt: String?
+)
+
+data class InvitationInviterDto(
+    val id: Long,
+    val name: String
+)
+
+data class InvitationDetailDto(
+    val id: Long,
+    val email: String?,
+    val status: String,
+    @SerializedName("is_valid")
+    val isValid: Boolean,
+    val group: InvitationGroupInfo,
+    @SerializedName("expires_at")
+    val expiresAt: String?,
+    @SerializedName("created_at")
+    val createdAt: String?
 )

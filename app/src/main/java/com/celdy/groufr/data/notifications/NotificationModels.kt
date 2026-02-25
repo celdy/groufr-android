@@ -54,6 +54,8 @@ data class NotificationMarkReadRequest(
     val eventId: Long? = null,
     @SerializedName("poll_id")
     val pollId: Long? = null,
+    @SerializedName("message_id")
+    val messageId: Long? = null,
     @SerializedName("invitation_id")
     val invitationId: Long? = null,
     @SerializedName("user_id")
@@ -63,6 +65,49 @@ data class NotificationMarkReadRequest(
 data class NotificationCountResponse(
     @SerializedName("unread_count")
     val unreadCount: Int,
+    @SerializedName("by_group")
+    val byGroup: Map<String, GroupNotificationCount>? = null,
     @SerializedName("by_event")
-    val byEvent: Map<String, Int>? = null
+    val byEvent: Map<String, Int>? = null,
+    val invitations: Int = 0,
+    val timestamp: String? = null
+)
+
+data class GroupNotificationCount(
+    val total: Int = 0,
+    val messages: Int = 0,
+    val events: Int = 0,
+    val polls: Int = 0,
+    val reactions: Int = 0,
+    val users: Int = 0
+)
+
+data class NotificationPreferencesResponse(
+    val global: Map<String, NotificationPreference>,
+    @SerializedName("by_group")
+    val byGroup: Map<String, Map<String, NotificationPreference>>? = null
+)
+
+data class NotificationPreference(
+    @SerializedName("email_enabled")
+    val emailEnabled: Boolean,
+    @SerializedName("push_enabled")
+    val pushEnabled: Boolean,
+    @SerializedName("in_app_enabled")
+    val inAppEnabled: Boolean,
+    val digest: String? = null
+)
+
+data class UpdateNotificationPreferenceRequest(
+    @SerializedName("event_type")
+    val eventType: String,
+    @SerializedName("group_id")
+    val groupId: Long? = null,
+    @SerializedName("email_enabled")
+    val emailEnabled: Boolean? = null,
+    @SerializedName("push_enabled")
+    val pushEnabled: Boolean? = null,
+    @SerializedName("in_app_enabled")
+    val inAppEnabled: Boolean? = null,
+    val digest: String? = null
 )

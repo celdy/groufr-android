@@ -70,3 +70,7 @@ data class CreatePollRequest(
     @SerializedName("deadline_at")
     val deadlineAt: String?
 )
+
+data class UpdatePollStatusRequest(
+    val status: String
+)

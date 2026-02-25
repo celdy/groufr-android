@@ -124,3 +124,31 @@ data class UpdateEventRequest(
     val maxParticipants: Int? = null,
     val state: String? = null
 )
+
+data class EventParticipantsResponse(
+    val participants: List<EventParticipantDetailDto>,
+    val counts: Map<String, Int>
+)
+
+data class EventParticipantDetailDto(
+    val user: EventUserDto,
+    val status: String,
+    val role: String,
+    @SerializedName("guest_name")
+    val guestName: String? = null,
+    @SerializedName("guest_email")
+    val guestEmail: String? = null,
+    @SerializedName("joined_at")
+    val joinedAt: String? = null
+)
+
+data class InviteGuestRequest(
+    val email: String,
+    val name: String
+)
+
+data class InviteGuestResponse(
+    val success: Boolean,
+    @SerializedName("invitation_id")
+    val invitationId: Long
+)

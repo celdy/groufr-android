@@ -9,8 +9,17 @@ data class GroupDetailDto(
     val description: String?,
     @SerializedName("your_role")
     val yourRole: String?,
+    @SerializedName("billing_status")
+    val billingStatus: String? = null,
+    @SerializedName("paid_until")
+    val paidUntil: String? = null,
+    val plan: GroupPlanDto? = null,
+    @SerializedName("digest_frequency")
+    val digestFrequency: String? = null,
     @SerializedName("member_count")
     val memberCount: Int,
+    @SerializedName("last_activity_at")
+    val lastActivityAt: String? = null,
     @SerializedName("created_at")
     val createdAt: String?,
     val owner: GroupOwnerDto?
@@ -44,4 +53,14 @@ data class GroupActionResponse(
 
 data class GroupsListResponse(
     val groups: List<GroupDto>
+)
+
+data class DigestResponse(
+    @SerializedName("digest_frequency")
+    val digestFrequency: String
+)
+
+data class UpdateDigestRequest(
+    @SerializedName("digest_frequency")
+    val digestFrequency: String
 )

@@ -52,6 +52,7 @@ data class SyncNotifications(
 data class SyncExpenses(
     val created: List<ExpenseDto>? = emptyList(),
     val updated: List<ExpenseDto>? = emptyList(),
+    val settled: List<Long>? = emptyList(),
     val deleted: List<Long>? = emptyList(),
     @SerializedName("has_more")
     val hasMore: Boolean = false
@@ -61,6 +62,8 @@ data class SyncSettlements(
     val created: List<SettlementDto>? = emptyList(),
     val updated: List<SettlementDto>? = emptyList(),
     val deleted: List<Long>? = emptyList(),
+    @SerializedName("pending_for_you")
+    val pendingForYou: Int = 0,
     @SerializedName("has_more")
     val hasMore: Boolean = false
 )
