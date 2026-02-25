@@ -51,7 +51,7 @@ class NotificationNotifier @Inject constructor(
 
     private fun buildSingleNotification(notification: NotificationDto): Notification {
         val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
-        val title = buildTitle(actor, notification.eventType)
+        val title = buildTitle(actor, notification.eventType, notification)
         val contentText = buildContentText(notification)
         val pendingIntent = buildPendingIntentFor(notification)
 
@@ -69,7 +69,7 @@ class NotificationNotifier @Inject constructor(
 
     private fun buildGroupedNotification(notification: NotificationDto): Notification {
         val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
-        val title = buildTitle(actor, notification.eventType)
+        val title = buildTitle(actor, notification.eventType, notification)
         val contentText = buildContentText(notification)
         val pendingIntent = buildPendingIntentFor(notification)
 
@@ -99,7 +99,7 @@ class NotificationNotifier @Inject constructor(
 
         notifications.take(MAX_INBOX_LINES).forEach { notification ->
             val actor = notification.actor?.name ?: context.getString(R.string.chat_system_user)
-            val line = buildTitle(actor, notification.eventType)
+            val line = buildTitle(actor, notification.eventType, notification)
             inboxStyle.addLine(line)
         }
 
@@ -143,6 +143,16 @@ class NotificationNotifier @Inject constructor(
                     putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventId)
                     putExtra(EventDetailActivity.EXTRA_GROUP_NAME, notification.groupName.orEmpty())
                     putExtra(EventDetailActivity.EXTRA_SHOW_CHAT, true)
+                }
+            }
+        }
+        if (notification.eventType in EVENT_DETAIL_TYPES) {
+            val eventId = notification.eventIdFromPayload() ?: notification.entityId
+            if (eventId != null && eventId > 0) {
+                return Intent(context, EventDetailActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra(EventDetailActivity.EXTRA_EVENT_ID, eventId)
+                    putExtra(EventDetailActivity.EXTRA_GROUP_NAME, notification.groupName.orEmpty())
                 }
             }
         }
@@ -197,50 +207,81 @@ class NotificationNotifier @Inject constructor(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun buildTitle(actor: String, eventType: String): String {
-        val resId = when (eventType) {
-            "event_created" -> R.string.notification_title_event_created
-            "event_updated" -> R.string.notification_title_event_updated
-            "new_message" -> R.string.notification_title_new_message
-            "poll_created" -> R.string.notification_title_poll_created
-            "poll_closed" -> R.string.notification_title_poll_closed
-            "user_joined" -> R.string.notification_title_user_joined
-            "participant_status_changed" -> R.string.notification_title_participant_status_changed
-            "invitation_received" -> R.string.notification_title_invitation_received
-            else -> R.string.notification_title_generic
-        }
-
-        return if (resId == R.string.notification_title_generic) {
-            context.getString(resId, actor, eventType)
-        } else {
-            context.getString(resId, actor)
+    private fun buildTitle(actor: String, eventType: String, notification: NotificationDto? = null): String {
+        return when (eventType) {
+            "event_created" -> context.getString(R.string.notification_title_event_created, actor)
+            "event_updated" -> context.getString(R.string.notification_title_event_updated, actor)
+            "new_message" -> context.getString(R.string.notification_title_new_message, actor)
+            "poll_created" -> context.getString(R.string.notification_title_poll_created, actor)
+            "poll_closed" -> context.getString(R.string.notification_title_poll_closed, actor)
+            "user_joined" -> context.getString(R.string.notification_title_user_joined, actor)
+            "participant_status_changed" -> context.getString(R.string.notification_title_participant_status_changed, actor)
+            "invitation_received" -> context.getString(R.string.notification_title_invitation_received, actor)
+            "event_invitation_received" -> context.getString(R.string.notification_title_event_invitation_received, actor)
+            "event_poll_created" -> context.getString(R.string.notification_title_event_poll_created, actor)
+            "event_poll_closed" -> context.getString(R.string.notification_title_event_poll_closed, actor)
+            "reaction_message", "reaction_event", "reaction_poll" -> {
+                val emoji = extractReactionEmoji(notification)
+                val resId = when (eventType) {
+                    "reaction_message" -> R.string.notification_title_reaction_message
+                    "reaction_event" -> R.string.notification_title_reaction_event
+                    else -> R.string.notification_title_reaction_poll
+                }
+                context.getString(resId, actor, emoji)
+            }
+            else -> context.getString(R.string.notification_title_generic, actor, eventType)
         }
     }
 
     private fun buildContentText(notification: NotificationDto): String {
-        if (notification.eventType == "new_message") {
-            val preview = extractPreview(notification)
-            if (preview.isNotBlank()) return preview
-        }
-        if (notification.eventType == "invitation_received") {
-            val invitedGroupName = notification.invitedGroupNameFromPayload()
-            if (!invitedGroupName.isNullOrBlank()) return invitedGroupName
+        val payload = notification.payload
+        when (notification.eventType) {
+            "new_message" -> {
+                val preview = extractStringPayload(payload, "preview")
+                if (preview.isNotBlank()) return preview
+            }
+            "invitation_received" -> {
+                val invitedGroupName = notification.invitedGroupNameFromPayload()
+                if (!invitedGroupName.isNullOrBlank()) return invitedGroupName
+            }
+            "event_invitation_received" -> {
+                val eventTitle = extractStringPayload(payload, "event_title")
+                if (eventTitle.isNotBlank()) return eventTitle
+            }
+            "event_poll_created", "event_poll_closed" -> {
+                val question = extractStringPayload(payload, "question")
+                if (question.isNotBlank()) return question
+            }
+            "reaction_message", "reaction_event", "reaction_poll" -> {
+                val preview = extractStringPayload(payload, "preview")
+                if (preview.isNotBlank()) return preview
+            }
         }
         return notification.groupName ?: context.getString(R.string.notification_system_title)
     }
 
-    private fun extractPreview(notification: NotificationDto): String {
-        val payload = notification.payload ?: return ""
-        val preview = payload["preview"] ?: return ""
-        return preview as? String ?: preview.toString()
+    private fun extractStringPayload(payload: Map<String, Any>?, key: String): String {
+        val value = payload?.get(key) ?: return ""
+        return value as? String ?: value.toString()
+    }
+
+    private fun extractReactionEmoji(notification: NotificationDto?): String {
+        val payload = notification?.payload ?: return ""
+        val reactions = payload["reactions"] as? List<*> ?: return ""
+        return reactions.filterIsInstance<Map<*, *>>()
+            .mapNotNull { it["emoji"] as? String }
+            .joinToString("")
     }
 
     private fun resolveIcon(eventType: String): Int {
         return when (eventType) {
-            "event_created", "event_updated", "participant_status_changed" -> R.drawable.ico_event
+            "event_created", "event_updated", "participant_status_changed",
+            "event_invitation_received" -> R.drawable.ico_event
             "new_message" -> R.drawable.ico_message
-            "poll_created", "poll_closed" -> R.drawable.ico_poll
+            "poll_created", "poll_closed",
+            "event_poll_created", "event_poll_closed" -> R.drawable.ico_poll
             "user_joined", "invitation_received" -> R.drawable.ico_user
+            "reaction_message", "reaction_event", "reaction_poll" -> R.drawable.ico_reaction
             else -> R.drawable.ico_message
         }
     }
@@ -251,5 +292,11 @@ class NotificationNotifier @Inject constructor(
         private const val SUMMARY_ID = 4200
         private const val GROUP_KEY = "com.celdy.groufr.NOTIFICATION_GROUP"
         private const val MAX_INBOX_LINES = 5
+        private val EVENT_DETAIL_TYPES = setOf(
+            "event_invitation_received",
+            "event_updated",
+            "participant_status_changed",
+            "reaction_event"
+        )
     }
 }
