@@ -10,7 +10,10 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.celdy.groufr.R
@@ -40,6 +43,14 @@ class GroupExpensesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityGroupExpensesBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.groupExpensesToolbar.updatePadding(top = systemBars.top)
+            binding.groupExpensesScroll.updatePadding(bottom = systemBars.bottom)
+            binding.root.updatePadding(left = systemBars.left, right = systemBars.right)
+            insets
+        }
 
         groupId = intent.getLongExtra(EXTRA_GROUP_ID, -1L)
         groupName = intent.getStringExtra(EXTRA_GROUP_NAME).orEmpty()
