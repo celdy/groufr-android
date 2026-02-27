@@ -143,6 +143,7 @@ class EventChatAdapter(
 
             binding.messageCard.setCardBackgroundColor(ContextCompat.getColor(context, bgColor))
             binding.messageBody.setTextColor(ContextCompat.getColor(context, textColor))
+            binding.messageBody.setLinkTextColor(ContextCompat.getColor(context, if (isOwn) R.color.white else R.color.primary_700))
             binding.messageAuthor.setTextColor(ContextCompat.getColor(context, textColor))
             binding.messageTimestamp.setTextColor(ContextCompat.getColor(context, textColor))
             binding.messageMenu.imageTintList = ContextCompat.getColorStateList(context, textColor)
