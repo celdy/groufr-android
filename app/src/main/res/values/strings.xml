@@ -328,4 +328,5 @@
     <string name="settings_sound_soft_triple">Soft Triple</string>
     <string name="settings_sound_bright_short">Bright Short</string>
     <string name="settings_sound_low_soft">Low Soft</string>
+    <string name="settings_sound_device">Device sound</string>
 </resources>

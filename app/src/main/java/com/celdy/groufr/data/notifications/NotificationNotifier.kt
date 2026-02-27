@@ -200,9 +200,11 @@ class NotificationNotifier @Inject constructor(
     }
 
     private fun playNotificationSound() {
-        val resId = SettingsStore.getResourceIdForKey(settingsStore.getNotificationSoundKey()) ?: return
+        val uri = settingsStore.getNotificationSoundUri() ?: return
         try {
-            MediaPlayer.create(context, resId)?.apply {
+            MediaPlayer().apply {
+                setDataSource(context, uri)
+                prepare()
                 setOnCompletionListener { it.release() }
                 start()
             }

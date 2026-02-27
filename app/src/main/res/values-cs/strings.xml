@@ -298,4 +298,5 @@
     <string name="settings_title">Nastavení</string>
     <string name="settings_notification_sound">Zvuk oznámení</string>
     <string name="settings_sound_none">Žádný</string>
+    <string name="settings_sound_device">Zvuk zařízení</string>
 </resources>

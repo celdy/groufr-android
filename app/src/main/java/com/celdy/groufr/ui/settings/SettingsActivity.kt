@@ -1,7 +1,10 @@
 package com.celdy.groufr.ui.settings
 
 import android.media.MediaPlayer
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,6 +21,18 @@ class SettingsActivity : AppCompatActivity() {
     @Inject lateinit var settingsStore: SettingsStore
     private lateinit var binding: ActivitySettingsBinding
     private var mediaPlayer: MediaPlayer? = null
+
+    private val ringtonePicker = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val uri: Uri? = result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+        if (uri != null) {
+            settingsStore.setNotificationSoundKey(SettingsStore.SOUND_DEVICE)
+            settingsStore.setCustomSoundUri(uri.toString())
+            updateSoundDisplay()
+            playPreviewUri(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +75,15 @@ class SettingsActivity : AppCompatActivity() {
             "notify_soft_triple" -> getString(R.string.settings_sound_soft_triple)
             "notify_bright_short" -> getString(R.string.settings_sound_bright_short)
             "notify_low_soft" -> getString(R.string.settings_sound_low_soft)
+            SettingsStore.SOUND_DEVICE -> {
+                val uri = settingsStore.getCustomSoundUri()
+                if (uri != null) {
+                    val ringtone = RingtoneManager.getRingtone(this, Uri.parse(uri))
+                    ringtone?.getTitle(this) ?: getString(R.string.settings_sound_device)
+                } else {
+                    getString(R.string.settings_sound_device)
+                }
+            }
             else -> key
         }
     }
@@ -74,12 +98,31 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle(R.string.settings_notification_sound)
             .setSingleChoiceItems(labels, checkedIndex) { dialog, which ->
                 val selectedKey = keys[which]
-                settingsStore.setNotificationSoundKey(selectedKey)
-                updateSoundDisplay()
-                playPreview(selectedKey)
-                dialog.dismiss()
+                if (selectedKey == SettingsStore.SOUND_DEVICE) {
+                    dialog.dismiss()
+                    launchRingtonePicker()
+                } else {
+                    settingsStore.setNotificationSoundKey(selectedKey)
+                    updateSoundDisplay()
+                    playPreview(selectedKey)
+                    dialog.dismiss()
+                }
             }
             .show()
+    }
+
+    private fun launchRingtonePicker() {
+        val currentUri = settingsStore.getCustomSoundUri()?.let { Uri.parse(it) }
+        val intent = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).let {
+            android.content.Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION)
+                putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, getString(R.string.settings_notification_sound))
+                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+                putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, currentUri)
+            }
+        }
+        ringtonePicker.launch(intent)
     }
 
     private fun playPreview(key: String) {
@@ -88,6 +131,20 @@ class SettingsActivity : AppCompatActivity() {
         mediaPlayer = MediaPlayer.create(this, resId)?.apply {
             setOnCompletionListener { it.release() }
             start()
+        }
+    }
+
+    private fun playPreviewUri(uri: Uri) {
+        releaseMediaPlayer()
+        try {
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(this@SettingsActivity, uri)
+                prepare()
+                setOnCompletionListener { it.release() }
+                start()
+            }
+        } catch (_: Exception) {
+            // Ignore playback errors
         }
     }
 

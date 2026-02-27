@@ -19,9 +19,20 @@ class SettingsStore @Inject constructor(
         prefs.edit().putString(KEY_NOTIFICATION_SOUND, key).apply()
     }
 
+    fun getCustomSoundUri(): String? =
+        prefs.getString(KEY_CUSTOM_SOUND_URI, null)
+
+    fun setCustomSoundUri(uri: String?) {
+        prefs.edit().putString(KEY_CUSTOM_SOUND_URI, uri).apply()
+    }
+
     fun getNotificationSoundUri(): Uri? {
         val key = getNotificationSoundKey()
         if (key == SOUND_NONE) return null
+        if (key == SOUND_DEVICE) {
+            val customUri = getCustomSoundUri() ?: return null
+            return Uri.parse(customUri)
+        }
         val resId = SOUND_RESOURCE_MAP[key] ?: return null
         return Uri.parse("android.resource://${context.packageName}/$resId")
     }
@@ -29,15 +40,18 @@ class SettingsStore @Inject constructor(
     companion object {
         private const val PREFS_NAME = "groufr_settings"
         private const val KEY_NOTIFICATION_SOUND = "notification_sound"
+        private const val KEY_CUSTOM_SOUND_URI = "custom_sound_uri"
         const val DEFAULT_SOUND = "notify_soft_double"
         const val SOUND_NONE = "none"
+        const val SOUND_DEVICE = "device"
 
         val SOUND_KEYS = listOf(
             SOUND_NONE,
             "notify_soft_double",
             "notify_soft_triple",
             "notify_bright_short",
-            "notify_low_soft"
+            "notify_low_soft",
+            SOUND_DEVICE
         )
 
         private val SOUND_RESOURCE_MAP = mapOf(
