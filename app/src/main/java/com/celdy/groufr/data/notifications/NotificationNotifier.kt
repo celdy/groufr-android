@@ -8,11 +8,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.celdy.groufr.R
+import com.celdy.groufr.data.storage.SettingsStore
 import com.celdy.groufr.ui.eventdetail.EventDetailActivity
 import com.celdy.groufr.ui.notifications.NotificationsActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,7 +23,8 @@ import javax.inject.Singleton
 
 @Singleton
 class NotificationNotifier @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val settingsStore: SettingsStore
 ) {
     fun showNotificationsFor(notifications: List<NotificationDto>) {
         if (!canPostNotifications()) return
@@ -34,15 +37,16 @@ class NotificationNotifier @Inject constructor(
             val notification = notifications.first()
             val built = buildSingleNotification(notification)
             safeNotify(manager, NOTIFICATION_ID, built)
-            return
+        } else {
+            notifications.forEach { notification ->
+                val built = buildGroupedNotification(notification)
+                safeNotify(manager, notification.id.toInt(), built)
+            }
+            val summaryNotification = buildSummaryNotification(notifications)
+            safeNotify(manager, SUMMARY_ID, summaryNotification)
         }
 
-        notifications.forEach { notification ->
-            val built = buildGroupedNotification(notification)
-            safeNotify(manager, notification.id.toInt(), built)
-        }
-        val summaryNotification = buildSummaryNotification(notifications)
-        safeNotify(manager, SUMMARY_ID, summaryNotification)
+        playNotificationSound()
     }
 
     fun showNotificationFor(notification: NotificationDto) {
@@ -64,6 +68,7 @@ class NotificationNotifier @Inject constructor(
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setSilent(true)
             .build()
     }
 
@@ -82,6 +87,7 @@ class NotificationNotifier @Inject constructor(
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setSilent(true)
             .setGroup(GROUP_KEY)
             .build()
     }
@@ -175,15 +181,34 @@ class NotificationNotifier @Inject constructor(
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         val existing = manager.getNotificationChannel(CHANNEL_ID)
-        if (existing != null) return
+        if (existing != null) {
+            if (existing.sound != null) {
+                manager.deleteNotificationChannel(CHANNEL_ID)
+            } else {
+                return
+            }
+        }
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.notification_channel_name),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
             description = context.getString(R.string.notification_channel_description)
+            setSound(null, null)
         }
         manager.createNotificationChannel(channel)
+    }
+
+    private fun playNotificationSound() {
+        val resId = SettingsStore.getResourceIdForKey(settingsStore.getNotificationSoundKey()) ?: return
+        try {
+            MediaPlayer.create(context, resId)?.apply {
+                setOnCompletionListener { it.release() }
+                start()
+            }
+        } catch (_: Exception) {
+            // Ignore playback errors
+        }
     }
 
     private fun safeNotify(

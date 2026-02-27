@@ -25,6 +25,7 @@ import com.celdy.groufr.ui.groupdetail.GroupDetailActivity
 import com.celdy.groufr.ui.notifications.NotificationsActivity
 import com.celdy.groufr.ui.login.LoginActivity
 import com.celdy.groufr.ui.profile.ProfileActivity
+import com.celdy.groufr.ui.settings.SettingsActivity
 import com.google.android.material.badge.BadgeDrawable
 import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.badge.ExperimentalBadgeUtils
@@ -101,6 +102,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.action_settings -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+                R.id.action_app_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
                 else -> false

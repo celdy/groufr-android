@@ -320,4 +320,12 @@
     <string name="settlement_your_pending">Your pending payments</string>
     <string name="settlement_history">Payment history</string>
     <string name="settlement_dialog_title">Record payment</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_notification_sound">Notification sound</string>
+    <string name="settings_sound_none">None</string>
+    <string name="settings_sound_soft_double">Soft Double</string>
+    <string name="settings_sound_soft_triple">Soft Triple</string>
+    <string name="settings_sound_bright_short">Bright Short</string>
+    <string name="settings_sound_low_soft">Low Soft</string>
 </resources>

@@ -18,4 +18,9 @@
         android:id="@+id/action_settings"
         android:title="@string/profile_title"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_app_settings"
+        android:title="@string/settings_title"
+        app:showAsAction="never" />
 </menu>

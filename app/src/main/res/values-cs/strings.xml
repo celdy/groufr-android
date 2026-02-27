@@ -294,4 +294,8 @@
     <string name="settlement_your_pending">Tvé čekající platby</string>
     <string name="settlement_history">Historie plateb</string>
     <string name="settlement_dialog_title">Zaznamenat platbu</string>
+
+    <string name="settings_title">Nastavení</string>
+    <string name="settings_notification_sound">Zvuk oznámení</string>
+    <string name="settings_sound_none">Žádný</string>
 </resources>
