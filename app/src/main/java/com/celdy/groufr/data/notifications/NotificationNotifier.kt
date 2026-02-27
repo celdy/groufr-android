@@ -8,7 +8,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -180,18 +181,16 @@ class NotificationNotifier @Inject constructor(
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
+
+        // Delete legacy channel that had default sound
+        manager.deleteNotificationChannel(LEGACY_CHANNEL_ID)
+
         val existing = manager.getNotificationChannel(CHANNEL_ID)
-        if (existing != null) {
-            if (existing.sound != null) {
-                manager.deleteNotificationChannel(CHANNEL_ID)
-            } else {
-                return
-            }
-        }
+        if (existing != null) return
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.notification_channel_name),
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
             description = context.getString(R.string.notification_channel_description)
             setSound(null, null)
@@ -202,12 +201,12 @@ class NotificationNotifier @Inject constructor(
     private fun playNotificationSound() {
         val uri = settingsStore.getNotificationSoundUri() ?: return
         try {
-            MediaPlayer().apply {
-                setDataSource(context, uri)
-                prepare()
-                setOnCompletionListener { it.release() }
-                start()
-            }
+            val ringtone = RingtoneManager.getRingtone(context, uri) ?: return
+            ringtone.audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            ringtone.play()
         } catch (_: Exception) {
             // Ignore playback errors
         }
@@ -348,7 +347,8 @@ class NotificationNotifier @Inject constructor(
     }
 
     companion object {
-        const val CHANNEL_ID = "groufr_notifications"
+        const val CHANNEL_ID = "groufr_notifications_v2"
+        private const val LEGACY_CHANNEL_ID = "groufr_notifications"
         private const val NOTIFICATION_ID = 4201
         private const val SUMMARY_ID = 4200
         private const val GROUP_KEY = "com.celdy.groufr.NOTIFICATION_GROUP"
