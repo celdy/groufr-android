@@ -35,7 +35,9 @@ data class TokenResponse(
 data class UserDto(
     val id: Long,
     val name: String,
-    val email: String
+    val email: String,
+    val locale: String? = null,
+    val timezone: String? = null
 )
 
 data class RefreshRequest(

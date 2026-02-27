@@ -7,6 +7,7 @@ data class GroupDetailDto(
     val slug: String,
     val name: String,
     val description: String?,
+    val locale: String? = null,
     @SerializedName("your_role")
     val yourRole: String?,
     @SerializedName("billing_status")
@@ -18,6 +19,8 @@ data class GroupDetailDto(
     val digestFrequency: String? = null,
     @SerializedName("member_count")
     val memberCount: Int,
+    @SerializedName("chat_id")
+    val chatId: Long? = null,
     @SerializedName("last_activity_at")
     val lastActivityAt: String? = null,
     @SerializedName("created_at")

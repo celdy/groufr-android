@@ -68,6 +68,8 @@ data class EventDetailDto(
     val participants: Map<String, Int>,
     @SerializedName("participants_list")
     val participantsList: List<EventParticipantDto>,
+    @SerializedName("chat_id")
+    val chatId: Long? = null,
     @SerializedName("created_at")
     val createdAt: String,
     @SerializedName("updated_at")
